@@ -59,48 +59,7 @@ Mello automatically triggers `arduino-cli` to compile the generated C++ into a m
 
 ---
 
-## 🛠️ 4. Prerequisites & Installation
-
-> **Note:** You need to download `arduino-cli` and place it in the root folder to compile the generated Arduino C code.
-
-To achieve seamless compilation, Mello relies on the official Arduino Command Line Interface.
-
-**Step-by-Step Setup:**
-
-1. **Download arduino-cli:**
-   - Navigate to the [Arduino CLI GitHub Releases](https://github.com/arduino/arduino-cli) or official documentation.
-   - Download the executable for your operating system.
-
-2. **Placement:**
-   - Extract the downloaded file.
-   - You **MUST** place `arduino-cli.exe` (or the Unix equivalent) inside a `bin` directory at the root of the Mello project folder so the transpiler can locate it:
-
-     ```text
-     Mello/
-     ├── bin/
-     │   └── arduino-cli.exe    <--- CRITICAL: PLACE HERE
-     ├── build/
-     │   └── ...
-     ├── include/
-     │   ├── ast.hpp
-     │   ├── lexer.hpp
-     │   ├── parser.hpp
-     │   └── token.hpp
-     ├── src/
-     │   ├── lexer.cpp
-     │   ├── parser.cpp
-     │   └── main.cpp
-     ├── main.mello
-     ├── CMakeLists.txt
-     └── README.md
-     ```
-
-3. **Build the Compiler:**
-   Compile the Mello transpiler using a C++17 compatible compiler (like GCC, Clang, or MSVC).
-
----
-
-## 📖 5. Language Syntax & Reference
+## 📖 4. Language Syntax & Reference
 
 Mello is designed to be intuitive and highly readable.
 
@@ -191,7 +150,7 @@ loop:
 
 ---
 
-## 💻 Code Example
+## 💻 5. Code Example
 
 ### Mello Code Example (`main.mello`)
 A practical example showcasing multi-tasking and event handling in a Smart Room Controller.
@@ -227,7 +186,7 @@ loop:
 
 ---
 
-## 📊 7. Performance Benchmarks
+## 📊 6. Performance Benchmarks
 
 Mello has been rigorously tested against standard alternatives:
 
@@ -236,7 +195,7 @@ Mello has been rigorously tested against standard alternatives:
 
 ---
 
-## 🏆 8. STEAM Evaluation Criteria
+## 🏆 7. STEAM Evaluation Criteria
 
 This project is explicitly designed to meet high-level engineering evaluation standards:
 
@@ -246,7 +205,7 @@ This project is explicitly designed to meet high-level engineering evaluation st
 
 ---
 
-## 🗺️ 9. Roadmap & Future Work
+## 🗺️ 8. Roadmap & Future Work
 
 As part of ongoing research and development, the following features are planned for upcoming compiler versions:
 
