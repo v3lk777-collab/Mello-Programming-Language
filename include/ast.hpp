@@ -32,8 +32,8 @@ inline std::set<std::string> reassignedVariables;
 
 inline std::string currentParsingUserFunc = "";
 inline std::vector<std::string> currentFuncParamNames;
-inline std::map<std::string, std::vector<bool>> userFuncOutputParams;
 inline std::map<std::string, std::vector<bool>> userFuncInputParams;
+inline std::map<std::string, std::vector<bool>> userFuncOutputParams;
 
 class ASTNode {
 public:
@@ -66,6 +66,7 @@ public:
     std::string raw_value;
     std::unique_ptr<ASTNode> value;
 
+public:
     VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type) 
         : name(name), value(std::move(value)), raw_value(raw), val_type(val_type) {}
 
@@ -230,6 +231,7 @@ public:
                                 if (userFuncOutputParams[funcName][i]) {
                                     std::string argPin = arguments[i]->toCpp();
                                     auto pit = std::find(currentFuncParamNames.begin(), currentFuncParamNames.end(), argPin);
+
                                     if (pit != currentFuncParamNames.end()) {
                                         size_t pidx = std::distance(currentFuncParamNames.begin(), pit);
                                         userFuncOutputParams[currentParsingUserFunc][pidx] = true;

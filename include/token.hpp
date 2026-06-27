@@ -41,6 +41,9 @@ struct Token {
     TokenType type;
     std::string value;
 
-    Token() : type(TokenType::EndOfFile), value("") {}
-    Token(TokenType t, const std::string& v) : type(t), value(v) {}
+    Token()
+        : type(TokenType::EndOfFile), value("") {}
+
+    Token(TokenType type, const std::string& value)
+        : type(type), value(value) {}
 };

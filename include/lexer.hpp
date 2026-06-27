@@ -21,10 +21,10 @@ inline const std::unordered_set<std::string> keywordsList = {
 
 class Lexer {
 private:
-    std::string source;
-    size_t position;
-    size_t length;
     char current;
+    size_t length;
+    size_t position;
+    std::string source;
     
     bool isStartOfLine;
     std::vector<int> indent_stack;
