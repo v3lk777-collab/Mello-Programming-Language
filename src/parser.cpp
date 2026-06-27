@@ -1,18 +1,10 @@
 // Mello Programming Language
-// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// This source code is private and protected by intellectual property laws.
+// Unauthorized use, modification, or distribution for any competitive 
+// academic or commercial purpose is strictly prohibited without 
+// explicit written permission from the author.
 
 #include "parser.hpp"
 #include "lexer.hpp"
@@ -40,6 +32,7 @@ void Parser::advance() {
 bool Parser::match(TokenType type) {
     if (current.type == type) {
         advance();
+
         return true;
     }
     
@@ -174,14 +167,19 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
     if (current.type == TokenType::STRING) {
         Token t = current;
         t.value = "\"" + t.value + "\"";
+
         advance();
+
         return std::make_unique<LiteralNode>(t);
     }
 
     if (current.type == TokenType::LPAREN) {
         advance();
+
         auto expr = parseExpression();
+
         consume(TokenType::RPAREN, "Expected ')' in expression");
+
         return std::make_unique<GroupNode>(std::move(expr));
     }
 
@@ -498,12 +496,9 @@ std::unique_ptr<ASTNode> Parser::parseWhileStatement() {
 
 std::unique_ptr<ASTNode> Parser::parseRepeatStatement() {
     advance();
-    consume(TokenType::LPAREN, "Expected '(' before parameters");
 
     std::string count = current.value;
     advance();
-    
-    consume(TokenType::RPAREN, "Expected ')' after parameters");
 
     consume(TokenType::COLON, "Expected ':' after repeat count");
     match(TokenType::NEWLINE);
@@ -517,13 +512,11 @@ std::unique_ptr<ASTNode> Parser::parseRepeatStatement() {
 
 std::unique_ptr<ASTNode> Parser::parseOnPressStatement() {
     advance();
-    
-    consume(TokenType::LPAREN, "Expected '(' after 'on_press'");
+
     std::string pin = current.value;
 
     advance();
 
-    consume(TokenType::RPAREN, "Expected ')' after pin");
     consume(TokenType::COLON, "Expected ':' after 'on_press' signature");
 
     match(TokenType::NEWLINE);

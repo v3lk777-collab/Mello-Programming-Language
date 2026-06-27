@@ -1,0 +1,6 @@
+loop:
+    on_press 10:
+        turn_on(11)
+    
+    repeat 5:
+        turn_on(9)

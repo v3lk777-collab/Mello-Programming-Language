@@ -215,10 +215,14 @@ As part of ongoing research and development, the following features are planned 
 
 ---
 
-## 📜 License
+## 📜 Intellectual Property & Usage Policy
 
-This project is open-source and licensed under the **GNU General Public License v3.0 (GPLv3)**. Feel free to contribute and build upon it!
+**© 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.**
 
-**Author & Lead Engineer:**
-**Mohammed Tamer Mohammed Ahmed El-Azab**
-*Dedicated to pushing the boundaries of embedded systems and compiler design.*
+Mello Programming Language is an original work developed for scientific research and educational purposes. 
+
+- **Usage:** You are free to view, study, and learn from this codebase.
+- **Restrictions:** Unauthorized use of this source code in any academic competition (e.g., ISEF, science fairs), research submission, or commercial product is **strictly prohibited** without prior written consent from the author.
+- **Attribution:** If you find this project useful for learning, please attribute the work to the original author (Mohammed Tamer).
+
+*If you are interested in collaborating or seeking permission for specific use, please contact me directly.*
