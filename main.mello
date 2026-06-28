@@ -1,6 +1,7 @@
+pin = 13
+
 loop:
-    on_press 10:
-        turn_on(11)
-    
-    repeat 5:
-        turn_on(9)
+    turn_on(pin)
+    wait(1s)
+    turn_off(pin)
+    wait(1s)
