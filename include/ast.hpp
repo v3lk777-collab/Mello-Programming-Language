@@ -223,7 +223,7 @@ public:
                     size_t idx = std::distance(currentFuncParamNames.begin(), it);
                     if (funcName == "read") {
                         userFuncInputParams[currentParsingUserFunc][idx] = true;
-                    } else if (funcName == "turn_on" || funcName == "turn_off" || (funcName == "write" && arguments.size() >= 2)) {
+                    } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || (funcName == "write" && arguments.size() >= 2)) {
                         userFuncOutputParams[currentParsingUserFunc][idx] = true;
                     } else {
                         if (userFuncOutputParams.count(funcName)) {
@@ -243,7 +243,7 @@ public:
                 }
             } else if (funcName == "read") {
                 inputPins.insert(pinName);
-            } else if (funcName == "turn_on" || funcName == "turn_off" || (funcName == "write" && arguments.size() >= 2)) {
+            } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || (funcName == "write" && arguments.size() >= 2)) {
                 outputPins.insert(pinName);
             } else {
                 if (userFuncOutputParams.count(funcName)) {
@@ -281,6 +281,11 @@ public:
             return "digitalWrite(" + pin + ", LOW);";
         }
 
+        if (funcName == "toggle" && argsStr.size() >= 1) {
+            std::string pin = argsStr[0];
+            return "digitalWrite(" + pin + ", " + "!digitalRead(" + pin + "));";
+        }
+
         if (funcName == "write" && argsStr.size() >= 2) {
             std::string pin = argsStr[0];
             std::string value = argsStr[1];
@@ -312,11 +317,14 @@ public:
                     
                     try {
                         long long num = std::stoll(numPart);
+
                         switch(timeVal.back()) {
                             case 's':
                                 return std::to_string(num * 1000);
+                            
                             case 'm':
                                 return std::to_string(num * 60000);
+                            
                             case 'h':
                                 return std::to_string(num * 3600000);
                         }

@@ -1,7 +1,5 @@
 pin = 13
 
 loop:
-    turn_on(pin)
-    wait(1s)
-    turn_off(pin)
+    toggle(pin)
     wait(1s)
