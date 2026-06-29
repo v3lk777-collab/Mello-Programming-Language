@@ -202,6 +202,26 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 body.push_back(parseAssignment(name));
             } else if (current.type == TokenType::LPAREN) {
                 body.push_back(parseFunctionCall(name));
+            } else if (current.type == TokenType::PLUS_EQUAL) {
+                advance();
+                std::string val = current.value;
+                advance();
+                reassignedVariables.insert(name);
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "+=", val));
+            } else if (current.type == TokenType::MINUS_EQUAL) {
+                advance();
+                std::string val = current.value;
+                advance();
+                reassignedVariables.insert(name);
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "-=", val));
+            } else if (current.type == TokenType::PLUS_PLUS) {
+                advance();
+                reassignedVariables.insert(name);
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "++", ""));
+            } else if (current.type == TokenType::MINUS_MINUS) {
+                advance();
+                reassignedVariables.insert(name);
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "--", ""));
             } else if (current.type == TokenType::DOT) {
                 advance();
                 

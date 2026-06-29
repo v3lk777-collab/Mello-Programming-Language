@@ -5,15 +5,15 @@
 ---
 
 ## 📑 Table of Contents
-1. [The Vision & Problem Statement](#-1-the-vision--problem-statement)
-2. [Core Engineering Features](#-2-core-engineering-features)
-3. [Under the Hood: Compiler Architecture](#-3-under-the-hood-compiler-architecture)
-4. [Prerequisites & Installation](#-4-prerequisites--installation)
-5. [Language Syntax & Reference](#-5-language-syntax--reference)
-6. [Code Example](#-code-example)
-7. [Performance Benchmarks](#-7-performance-benchmarks)
-8. [STEAM Evaluation Criteria](#-8-steam-evaluation-criteria)
-9. [Roadmap & Future Work](#-9-roadmap--future-work)
+1.  [The Vision & Problem Statement](#-1-the-vision--problem-statement)
+2.  [Core Engineering Features](#-2-core-engineering-features)
+3.  [Under the Hood: Compiler Architecture](#-3-under-the-hood-compiler-architecture)
+4.  [Prerequisites & Installation](#-4-prerequisites--installation)
+5.  [Language Syntax & Reference](#-5-language-syntax--reference)
+6.  [Code Example](#-code-example)
+7.  [Performance Benchmarks](#-7-performance-benchmarks)
+8.  [STEAM Evaluation Criteria](#-8-steam-evaluation-criteria)
+9.  [Roadmap & Future Work](#-9-roadmap--future-work)
 10. [License](#-license)
 
 ---
@@ -87,10 +87,29 @@ loop:
 Interacting with pins is simplified to natural language commands.
 
 ```python
-turn_on(13)      # Automatically sets pin 13 to OUTPUT and writes HIGH
-turn_off(13)     # Writes LOW to pin 13
+pin = 13
+sensorPin = A0
 
-value = read(A0) # Automatically reads analog/digital value
+loop:
+    turn_on(pin)                # Automatically sets pin 13 to OUTPUT and writes HIGH
+    wait(1s)                    # Wait for 1 secound
+    turn_off(pin)               # Writes LOW to pin 13
+    wait(1s)                    # Wait for 1 secound
+
+    value = read(sensorPin)     # Automatically reads analog/digital value
+```
+
+Or you can use ```toggle``` build-in function to blink the LED
+
+```python
+pin = 13
+sensorPin = A0
+
+loop:
+    toggle(pin)                 # Automatically sets pin 13 to OUTPUT and writes HIGH then writes LOW
+    wait(1s)                    # Wait for 1 secound
+
+    value = read(sensorPin)     # Automatically reads analog/digital value
 ```
 
 ### Advanced Event-Driven Structures
@@ -99,17 +118,21 @@ Mello shines in handling hardware events without blocking the CPU execution thre
 **The `every` loop (Non-blocking timer):**
 
 ```python
+pin = 13
+
 loop:
-    every(1000):
-        turn_on(13)
+    every 1000:
+        turn_on(pin)
         println("1 second passed, and the CPU wasn't blocked!")
 ```
 
 **The `on_press` event (Auto-debounced button):**
 
 ```python
+buttonPin = 2
+
 loop:
-    on_press(2):
+    on_press buttonPin:
         println("Button on Pin 2 was pressed safely without bouncing.")
 ```
 
@@ -117,31 +140,31 @@ loop:
 Standard logical operators and loops are fully supported.
 
 ```python
+LED_PIN = 13
+
 loop:
-   if sensor_value > 50:
-       turn_on(LED_PIN)
-   elif sensor_value == 50:
-       print("Stable")
-   else:
-       turn_off(LED_PIN)
+    if sensor_value > 50:
+        turn_on(LED_PIN)
+    elif sensor_value == 50:
+        print("Stable")
+    else:
+        turn_off(LED_PIN)
    
-   repeat(5):
+    repeat 5:
        println("This runs exactly five times")
    
-   while is_active == 1:
-       wait(100) # Standard blocking delay if absolutely needed
+    while is_active == 1:
+       wait(100)               # Standard blocking delay if absolutely needed
 ```
 
 ### Custom Functions
 Define reusable blocks of code easily with the `func` keyword.
 
 ```python
-pin = 8
+pin = 13
 
 func blink_fast(pin_num):
-    turn_on(pin_num)
-    wait(100)
-    turn_off(pin_num)
+    toogle(pin_num)
     wait(100)
 
 loop:
@@ -152,35 +175,36 @@ loop:
 
 ## 💻 5. Code Example
 
-### Mello Code Example (`main.mello`)
+### Mello Code Example
 A practical example showcasing multi-tasking and event handling in a Smart Room Controller.
 
 ```python
 # Mello Smart Room Example
-btn_pin = 2
-light_pin = 13
-temp_sensor = A0
-system_active = 1
+buttonPin = 2
+lightPin = 13
+tempSensor = A0
+systemActive = 1
 
 start:
     println("Smart Room OS Booting...")
 
 loop:
     # Read temperature every 5 seconds without blocking the button
-    every(5000):
-        temp = read(temp_sensor)
+    every 5000:
+        temp = read(tempSensor)
         print("Current Temp: ")
         println(temp)
 
     # Listen for button press to toggle system
-    on_press(btn_pin):
-        if system_active == 1:
-            system_active = 0
-            turn_off(light_pin)
+    on_press buttonPin:
+        if systemActive == 1:
+            systemActive = 0
+
+            turn_off(lightPin)
             println("System Deactivated")
         else:
-            system_active = 1
-            turn_on(light_pin)
+            systemActive = 1
+            turn_on(lightPin)
             println("System Activated")
 ```
 

@@ -143,13 +143,35 @@ std::vector<Token> Lexer::tokenize() {
                 advance();
             }
         } else if (current == '+') {
-            std::string symbol(1, current);
-            tokens.push_back({TokenType::PLUS, symbol});
-            advance();
+            if (peek() == '+') {
+                advance();
+                advance();
+
+                tokens.push_back({TokenType::PLUS_PLUS, "++"});
+            } else if (peek() == '=') {
+                advance();
+                advance();
+
+                tokens.push_back({TokenType::PLUS_EQUAL, "+="});
+            } else {
+                tokens.push_back({TokenType::PLUS, "+"});
+                advance();
+            }
         } else if (current == '-') {
-            std::string symbol(1, current);
-            tokens.push_back({TokenType::MINUS, symbol});
-            advance();
+            if (peek() == '-') {
+                advance();
+                advance();
+
+                tokens.push_back({TokenType::MINUS_MINUS, "--"});
+            } else if (peek() == '=') {
+                advance();
+                advance();
+                
+                tokens.push_back({TokenType::MINUS_EQUAL, "-="});
+            } else {
+                tokens.push_back({TokenType::MINUS, "-"});
+                advance();
+            }
         } else if (current == '*') {
             std::string symbol(1, current);
             tokens.push_back({TokenType::MUL, symbol});

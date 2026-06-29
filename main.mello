@@ -1,5 +1,9 @@
-pin = 13
+x = 50
+counter = 10
 
-loop:
-    toggle(pin)
-    wait(1s)
+
+start:
+    counter++
+    counter--
+    x += 10
+    x -= 20

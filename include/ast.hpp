@@ -253,6 +253,7 @@ public:
                         }
                     }
                 }
+
                 if (userFuncInputParams.count(funcName)) {
                     for (size_t i = 0; i < arguments.size() && i < userFuncInputParams[funcName].size(); ++i) {
                         if (userFuncInputParams[funcName][i]) {
@@ -264,6 +265,7 @@ public:
         }
     }
 
+public:
     std::string toCpp() override {
         std::vector<std::string> argsStr;
 
@@ -283,7 +285,11 @@ public:
 
         if (funcName == "toggle" && argsStr.size() >= 1) {
             std::string pin = argsStr[0];
-            return "digitalWrite(" + pin + ", " + "!digitalRead(" + pin + "));";
+            std::string stateVar = "_toggle_state_" + pin;
+
+            return "static int " + stateVar + " = LOW;\n"
+                + stateVar + " = (" + stateVar + " == LOW) ? HIGH : LOW;\n"
+                + "digitalWrite(" + pin + ", " + stateVar + ");";
         }
 
         if (funcName == "write" && argsStr.size() >= 2) {
@@ -417,6 +423,29 @@ public:
     }
 };
 
+class CompoundAssignNode : public ASTNode {
+private:
+    std::string name;
+    std::string op;
+    std::string value;
+
+public:
+    CompoundAssignNode(std::string name, std::string op, std::string value)
+        : name(name), op(op), value(value) {}
+
+    std::string toCpp() override {
+        if (op == "++") {
+            return name + "++;";
+        }
+
+        if (op == "--") {
+            return name + "--;";
+        }
+
+        return name + " " + op + " " + value + ";";
+    }
+};
+
 class LiteralNode : public ExpressionNode {
 public:
     Token token;
@@ -480,11 +509,17 @@ public:
     
     std::string toCpp() override {
         std::string result = "void " + funcName + "(";
+
         for (size_t i = 0; i < params.size(); i++) {
             result += "int " + params[i] + (i < params.size() - 1 ? ", " : "");
         }
+
         result += ") {\n";
-        for (const auto& node : body) result += "" + node->toCpp() + "\n";
+
+        for (const auto& node : body) {
+            result += "" + node->toCpp() + "\n";
+        }
+
         result += "}\n";
         return result;
     }
