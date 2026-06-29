@@ -1,4 +1,4 @@
-# Mello Programming Language 🍉
+## Mello Programming Language 🍉
 
 **A High-Performance, Indentation-Based Programming Language and Transpiler for Streamlining Embedded Systems and IoT Development.**
 
