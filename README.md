@@ -141,8 +141,11 @@ Standard logical operators and loops are fully supported.
 
 ```python
 LED_PIN = 13
+sensorPin = A0
 
 loop:
+    sensor_value = read(sensorPin)
+
     if sensor_value > 50:
         turn_on(LED_PIN)
     elif sensor_value == 50:

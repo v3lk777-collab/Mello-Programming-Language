@@ -482,12 +482,9 @@ std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
 
 std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     advance();
-    consume(TokenType::LPAREN, "Expected '(' before parameters");
 
     std::string interval = current.value; 
     advance(); 
-
-    consume(TokenType::RPAREN, "Expected ')' after parameters");
 
     consume(TokenType::COLON, "Expected ':' after every interval");
     match(TokenType::NEWLINE);

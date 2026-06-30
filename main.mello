@@ -1,9 +1,4 @@
-x = 50
-counter = 10
+pin = 13
 
-
-start:
-    counter++
-    counter--
-    x += 10
-    x -= 20
+loop:
+    wait(1s)
