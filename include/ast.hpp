@@ -199,7 +199,7 @@ public:
         }
 
         for (const auto& node : body) {
-            result += "    " + node->toCpp() + "\n";
+            result += node->toCpp() + "\n";
         }
 
         result += "}";
@@ -522,11 +522,14 @@ public:
     std::string toCpp() override {
         std::string timerName = "_every_timer_" + std::to_string(id);
         std::string code = "static unsigned long " + timerName + " = 0;\n";
+
         code += "if (millis() - " + timerName + " >= " + interval + ") {\n";
         code += "" + timerName + " = millis();\n";
+
         for (const auto& node : body) {
             code += "" + node->toCpp() + "\n";
         }
+
         code += "}";
         return code;
     }
@@ -560,6 +563,7 @@ private:
 public:
     RepeatNode(std::string count, std::vector<std::unique_ptr<ASTNode>> body)
         : count(count), body(std::move(body)) {
+
         static int counter = 0;
         id = counter++;
     }
@@ -580,6 +584,8 @@ public:
 class GroupNode : public ExpressionNode {
 public:
     std::unique_ptr<ASTNode> expr;
+
+public:
     GroupNode(std::unique_ptr<ASTNode> e)
         : expr(std::move(e)) {}
 
@@ -597,6 +603,7 @@ private:
 public:
     OnPressNode(std::string pin, std::vector<std::unique_ptr<ASTNode>> body)
         : pin(pin), body(std::move(body)) {
+
         static int counter = 0;
         id = counter++;
         inputPins.insert(pin);
