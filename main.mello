@@ -1,4 +1,7 @@
+# Blink LED code
+
 pin = 13
 
 loop:
+    toggle(13)
     wait(1s)
