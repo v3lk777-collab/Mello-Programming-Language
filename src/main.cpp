@@ -8,6 +8,7 @@
 
 #include "lexer.hpp"
 #include "parser.hpp"
+#include <thread>
 #include <vector>
 #include <cstdio>
 #include <string>
@@ -26,6 +27,14 @@
     const std::string ARDUINO_CLI_PATH = "../bin/linux/arduino-cli";
     const std::string CLANG_FORMAT_PATH = "../bin/linux/clang-format";
 #endif
+
+std::string getComputerCoreNumber() {
+    unsigned int coreCount = std::thread::hardware_concurrency();
+    if (coreCount == 0)
+        coreCount = 4; 
+
+    return std::to_string(coreCount);
+}
 
 std::filesystem::path getTempSketchDir() {
     return std::filesystem::temp_directory_path() / "output";
@@ -54,8 +63,9 @@ bool installLibraries() {
 
 bool compileCode() {
     std::cout << "Starting code compilation..." << std::endl;
-    std::string copileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:uno \"" + getTempSketchDir().string() + "\"";
-    int compileStatus = system(copileCommand.c_str());
+    
+    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + getTempSketchDir().string() + "\"";
+    int compileStatus = system(compileCommand.c_str());
     
     if (compileStatus == 0) {
         std::cout << "Compilation successful!" << std::endl;
@@ -102,7 +112,7 @@ bool uploadCode() {
     std::cout << "Found Arduino on port: " << detectedPort << std::endl;
     std::cout << "Uploading code to the board..." << std::endl;
 
-    std::string uploadCommand = ARDUINO_CLI_PATH + " upload -p " + detectedPort + " --fqbn arduino:avr:uno \"" + getTempSketchDir().string() + "\"";
+    std::string uploadCommand = ARDUINO_CLI_PATH + " upload -p " + detectedPort + " --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " \"" + getTempSketchDir().string() + "\"";
     int uploadStatus = system(uploadCommand.c_str());
     
     if (uploadStatus == 0) {
@@ -115,6 +125,9 @@ bool uploadCode() {
 }
 
 int main(int argc, char* argv[]) {
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(NULL);
+
     std::string fileName;
 
     if (argc > 1) {
