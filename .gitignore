@@ -2,5 +2,10 @@
 build/
 
 # Ignore VS Code settings folder
-.vscode/*
+.vscode/
 .vscode/settings.json
+
+# Allow useful shared settings
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
