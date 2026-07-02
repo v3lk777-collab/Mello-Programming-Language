@@ -3,3 +3,4 @@ build/
 
 # Ignore VS Code settings folder
 .vscode/*
+.vscode/settings.json
