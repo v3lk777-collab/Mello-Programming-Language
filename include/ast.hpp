@@ -26,10 +26,26 @@ private:
     bool isNumeric(const std::string& str) {
         if (str.empty())
             return false;
-
-        for (char c : str) {
-            if (!std::isdigit(c))
+        
+        bool hasDecimal = false;
+        size_t start = 0;
+        
+        if (str[0] == '-') {
+            if (str.size() == 1)
                 return false;
+
+            start = 1;
+        }
+
+        for (size_t i = start; i < str.size(); ++i) {
+            if (str[i] == '.') {
+                if (hasDecimal)
+                    return false;
+                
+                hasDecimal = true;
+            } else if (!std::isdigit(str[i])) {
+                return false;
+            }
         }
 
         return true;
@@ -46,27 +62,29 @@ public:
         : name(name), value(std::move(value)), raw_value(raw), val_type(val_type) {}
 
     std::string toCpp() override {
-        std::string type = "int";
+        std::string type = "";
         std::string final_value = value->toCpp();
 
-        while (!final_value.empty() && (final_value.back() == ';' || final_value.back() == '\n' || final_value.back() == ' ')) {
+        while (!final_value.empty() && (final_value.back() == ';' || final_value.back() == '\n' || final_value.back() == ' '))
             final_value.pop_back();
-        }
+
+        if (declaredVariables.count(name))
+            return name + " = " + final_value + ";";
 
         auto containsStringVariable = [&](const std::string& expr) {
             for (const auto& stringVariable : stringVariables) {
-                if (expr.find(stringVariable) != std::string::npos) {
+                if (expr.find(stringVariable) != std::string::npos)
                     return true;
-                }
             }
 
             return false;
         };
 
         auto containsFloatVariable = [&](const std::string& expr) {
-            for (const auto& floatVariable : floatVariables)
+            for (const auto& floatVariable : floatVariables) {
                 if (expr.find(floatVariable) != std::string::npos)
                     return true;
+            }
 
             return false;
         };
@@ -97,7 +115,7 @@ public:
             stringVariables.insert(name);
         } else if (final_value == "true" || final_value == "false") {
             type = "bool";
-        } else if (final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) {
+        } else if ((final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumber(final_value)) {
             type = "float";
             floatVariables.insert(name);
         } else if (final_value.length() == 1 && !isdigit(final_value[0])) {
@@ -105,24 +123,16 @@ public:
             final_value = "'" + final_value + "'";
         } else if (isNumeric(final_value)) {
             type = "int";
-            intgerVariables.insert(name);
+            integerVariables.insert(name);
         } else {
             if (containsFloatVariable(final_value)) {
                 type = "float";
                 floatVariables.insert(name);
             } else {
                 type = "int";
-                intgerVariables.insert(name);
+                integerVariables.insert(name);
             }
         }
-
-        while (!final_value.empty() && (final_value.back() == '\n' || final_value.back() == ';' || final_value.back() == ' ')) {
-            final_value.pop_back();
-        }
-
-        if (declaredVariables.count(name)) {
-            return name + " = " + final_value + ";";
-        } 
         
         declaredVariables.insert(name);
 
@@ -242,9 +252,8 @@ public:
     std::string toCpp() override {
         std::vector<std::string> argsStr;
 
-        for (const auto& arg : arguments) {
+        for (const auto& arg : arguments)
             argsStr.push_back(arg->toCpp());
-        }
 
         if (funcName == "turn_on" && argsStr.size() >= 1) {
             std::string pin = argsStr[0];

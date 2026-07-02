@@ -20,8 +20,8 @@ inline std::set<std::string> inputPins;
 inline std::set<std::string> outputPins;
 
 inline std::set<std::string> floatVariables;
-inline std::set<std::string> intgerVariables;
 inline std::set<std::string> stringVariables;
+inline std::set<std::string> integerVariables;
 
 inline std::set<std::string> funcParams;
 inline std::set<std::string> parsedVariables;

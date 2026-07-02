@@ -1,7 +1,7 @@
 i = 0
 pin = 13
 
-loop:
+start:
     for i < 10:
         turn_on(pin)
         i++
