@@ -1,11 +1,8 @@
 # Build files
 build/
 
-# Ignore VS Code settings folder
-.vscode/
-.vscode/settings.json
-
-# Allow useful shared settings
+# Ignore everything in .vscode, then whitelist what we want
+.vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
 !.vscode/extensions.json
