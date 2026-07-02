@@ -6,6 +6,7 @@
 // academic or commercial purpose is strictly prohibited without 
 // explicit written permission from the author.
 
+
 #include "lexer.hpp"
 #include <iostream>
 
