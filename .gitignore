@@ -1,5 +1,3 @@
-# Build files
+# Build files and VS Code settings
 build/
-
-# VS Code files
 .vscode/
