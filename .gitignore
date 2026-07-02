@@ -1,6 +1,9 @@
 # Build files
 build/
 
+# To Do file
+todo.txt
+
 # Allow useful shared settings
 !.vscode/launch.json
 !.vscode/tasks.json
