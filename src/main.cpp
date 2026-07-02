@@ -16,9 +16,8 @@ int main(int argc, char* argv[]) {
 
     std::string fileName;
 
-    if (argc > 1) {
+    if (argc > 1)
         fileName = argv[1];
-    }
 
     if (fileName.empty()) {
         std::cout << "Enter the Mello file name: ";
@@ -45,6 +44,7 @@ int main(int argc, char* argv[]) {
     std::filesystem::path inoFilePath = sketchDir / "output.ino";
 
     std::ofstream outputFile(inoFilePath.string());
+
     if (!outputFile.is_open()) {
         std::cerr << "Error: Could not open output file." << std::endl;
         return 1;
@@ -87,31 +87,25 @@ int main(int argc, char* argv[]) {
         } else {
             std::string code = node->toCpp();
             
-            if (code.find("void setup()") != std::string::npos) {
+            if (code.find("void setup()") != std::string::npos)
                 hasSetup = true;
-            }
 
-            if ((code.find("Serial.print") != std::string::npos) || (code.find("Serial.println") != std::string::npos) || (code.find("Serial.available") != std::string::npos) || (code.find("Serial.read") != std::string::npos)) {
+            if ((code.find("Serial.print") != std::string::npos) || (code.find("Serial.println") != std::string::npos) || (code.find("Serial.available") != std::string::npos) || (code.find("Serial.read") != std::string::npos))
                 hasSerialCommand = true;
-            }
 
-            if (code.find("Serial.begin") != std::string::npos) {
+            if (code.find("Serial.begin") != std::string::npos)
                 hasSerial = true;
-            }
 
-            if (code.find("void loop()") != std::string::npos) {
+            if (code.find("void loop()") != std::string::npos)
                 hasLoop = true;
-            }
             
             functionsCode += code + "\n";
         }
     }
 
-    if (!includedLibraries.empty()) {
-        for (const auto& lib : includedLibraries) {
+    if (!includedLibraries.empty())
+        for (const auto& lib : includedLibraries)
             includesCode += "#include <" + lib + ".h>\n";
-        }
-    }
 
     outputFile << author << "\n";
     outputFile << includesCode << "\n";
@@ -156,7 +150,7 @@ int main(int argc, char* argv[]) {
     if (std::filesystem::exists(CLANG_FORMAT_PATH)) {
         std::string formatCommand = CLANG_FORMAT_PATH + " --style=Google -i \"" + inoFilePath.string() + "\"";
         std::system(formatCommand.c_str());
-    } else {
+    } else
         std::cerr << "Warning: clang-format not found locally, skipping formatting." << std::endl;
     }
 
@@ -167,9 +161,8 @@ int main(int argc, char* argv[]) {
     std::ifstream sketchCodeFile(inoFilePath.string());
 
     if (sketchCodeFile.is_open()) {
-        while (getline(sketchCodeFile, sketchCode)) {
+        while (getline(sketchCodeFile, sketchCode))
             std::cout << sketchCode << std::endl;
-        }
     } else {
         std::cerr << "Warning: Cann't open the sketch code file." << std::endl;
     }
@@ -182,9 +175,8 @@ int main(int argc, char* argv[]) {
 
     bool compiledSuccessfully = compileCode();
 
-    if (compiledSuccessfully && argc >= 3 && std::string(argv[2]) == "--upload") {
+    if (compiledSuccessfully && argc >= 3 && std::string(argv[2]) == "--upload")
         uploadCode();
-    }
 
     std::filesystem::remove_all(sketchDir);
 
