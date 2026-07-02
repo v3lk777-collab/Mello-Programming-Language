@@ -115,7 +115,7 @@ public:
             stringVariables.insert(name);
         } else if (final_value == "true" || final_value == "false") {
             type = "bool";
-        } else if ((final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumber(final_value)) {
+        } else if ((final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumeric(final_value)) {
             type = "float";
             floatVariables.insert(name);
         } else if (final_value.length() == 1 && !isdigit(final_value[0])) {
