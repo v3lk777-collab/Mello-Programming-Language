@@ -1,2 +1,5 @@
 # Build files
 build/
+
+# VS Code files
+.vscode/
