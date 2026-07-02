@@ -1,3 +1,11 @@
+// Mello Programming Language
+// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
+//
+// This source code is private and protected by intellectual property laws.
+// Unauthorized use, modification, or distribution for any competitive 
+// academic or commercial purpose is strictly prohibited without 
+// explicit written permission from the author.
+
 #include "lexer.hpp"
 #include <iostream>
 
@@ -266,6 +274,6 @@ std::vector<Token> Lexer::tokenize() {
     }
 
     tokens.push_back({TokenType::EndOfFile, ""});
-    
+
     return tokens;
 }
