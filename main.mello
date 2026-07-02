@@ -4,4 +4,3 @@ pin = 13
 start:
     for i < 10:
         turn_on(pin)
-        i++
