@@ -7,11 +7,32 @@
 // explicit written permission from the author.
 
 #pragma once
-#include <iostream>
+#include <set>
+#include <map>
 #include <string>
-#include <algorithm>
 #include <vector>
-#include <cstdlib>
+#include <memory>
+#include <iostream>
+#include <algorithm>
+#include <stdexcept>
+
+inline std::set<std::string> inputPins;
+inline std::set<std::string> outputPins;
+
+inline std::set<std::string> floatVariables;
+inline std::set<std::string> intgerVariables;
+inline std::set<std::string> stringVariables;
+
+inline std::set<std::string> funcParams;
+inline std::set<std::string> parsedVariables;
+inline std::set<std::string> includedLibraries;
+inline std::set<std::string> declaredVariables;
+inline std::set<std::string> reassignedVariables;
+
+inline std::string currentParsingUserFunc = "";
+inline std::vector<std::string> currentFuncParamNames;
+inline std::map<std::string, std::vector<bool>> userFuncInputParams;
+inline std::map<std::string, std::vector<bool>> userFuncOutputParams;
 
 inline auto parseTime = [] (std::string timeVal) -> std::string {
     timeVal.erase(std::remove(timeVal.begin(), timeVal.end(), ' '), timeVal.end());

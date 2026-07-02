@@ -483,8 +483,17 @@ std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
 std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     advance();
 
-    std::string interval = current.value; 
-    advance(); 
+    if (current.type != TokenType::NUMBER && current.type != TokenType::SYMBOL) {
+        throw std::runtime_error("Expected a number or identifier for interval");
+    }
+
+    std::string interval = current.value;
+    advance();
+
+    if (current.type == TokenType::TIME_UNIT) {
+        interval += current.value;
+        advance();
+    }
 
     consume(TokenType::COLON, "Expected ':' after every interval");
     match(TokenType::NEWLINE);

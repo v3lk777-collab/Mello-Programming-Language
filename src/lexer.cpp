@@ -21,6 +21,7 @@ char Lexer::peek() {
 
 void Lexer::advance() {
     position++;
+
     if (position < length) {
         current = source[position];
     } else {
@@ -29,23 +30,20 @@ void Lexer::advance() {
 }
 
 void Lexer::skipWhitespace() {
-    while (current == ' ' || current == '\t' || current == '\r') {
+    while (current == ' ' || current == '\t' || current == '\r')
         advance();
-    }
 }
 
 void Lexer::skipComment() {
-    if (current == '#') {
-        while (current != '\n' && current != '\0') {
+    if (current == '#')
+        while (current != '\n' && current != '\0')
             advance();
-        }
-    }
 }
 
 bool Lexer::fileIsEmpty() {
-    if (current == '\0') {
+    if (current == '\0')
         return true;
-    }
+
     return false;
 }
 
@@ -62,12 +60,16 @@ std::vector<Token> Lexer::tokenize() {
                 } else {
                     current_indent += 1;
                 }
+
                 advance();
             }
 
             if (current == '\n' || current == '#') {
                 skipComment();
-                if (current == '\n') advance();
+
+                if (current == '\n')
+                    advance();
+                
                 continue;
             }
 
@@ -76,8 +78,7 @@ std::vector<Token> Lexer::tokenize() {
             if (current_indent > last_indent) {
                 indent_stack.push_back(current_indent);
                 tokens.push_back({TokenType::INDENT, std::to_string(current_indent)});
-            } 
-            else if (current_indent < last_indent) {
+            } else if (current_indent < last_indent) {
                 while (!indent_stack.empty() && indent_stack.back() > current_indent) {
                     indent_stack.pop_back();
                     tokens.push_back({TokenType::DEDENT, ""});
@@ -95,19 +96,27 @@ std::vector<Token> Lexer::tokenize() {
         skipWhitespace();
         skipComment();
 
-        if (fileIsEmpty()) {
+        if (fileIsEmpty())
             break;
-        }
 
         if (isdigit(current) || (current == '.' && isdigit(peek()))) {
             std::string number;
             bool hasDot = false;
 
             while (isdigit(current) || (current == '.' && !hasDot)) {
-                if (current == '.') hasDot = true;
+                if (current == '.')
+                    hasDot = true;
+                
                 number += current;
                 advance();
             }
+
+
+            if (current == 's' || current == 'm' || current == 'h') {
+                number += current;
+                advance();
+            }
+
             tokens.push_back({TokenType::NUMBER, number});
         } else if (current == '\n') {
             tokens.push_back({TokenType::NEWLINE, "\n"});
@@ -235,10 +244,12 @@ std::vector<Token> Lexer::tokenize() {
             }
         } else if (isalpha(current) || current == '_') {
             std::string identifier;
+
             while (isalnum(current) || current == '_') {
                 identifier += current;
                 advance();
             }
+
             if (keywordsList.find(identifier) != keywordsList.end()) {
                 tokens.push_back({TokenType::KEYWORD, identifier});
             } else {
@@ -255,5 +266,6 @@ std::vector<Token> Lexer::tokenize() {
     }
 
     tokens.push_back({TokenType::EndOfFile, ""});
+    
     return tokens;
 }

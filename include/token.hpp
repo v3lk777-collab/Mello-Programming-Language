@@ -38,7 +38,6 @@ enum class TokenType {
     INDENT,
     DEDENT,
     NEWLINE,
-    TIME_UNIT,
     EndOfFile
 };
 

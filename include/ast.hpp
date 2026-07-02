@@ -9,32 +9,6 @@
 #pragma once
 #include "lexer.hpp"
 #include "utils.hpp"
-#include <set>
-#include <map>
-#include <string>
-#include <vector>
-#include <memory>
-#include <iostream>
-#include <algorithm>
-#include <stdexcept>
-
-inline std::set<std::string> inputPins;
-inline std::set<std::string> outputPins;
-
-inline std::set<std::string> floatVariables;
-inline std::set<std::string> intgerVariables;
-inline std::set<std::string> stringVariables;
-
-inline std::set<std::string> funcParams;
-inline std::set<std::string> parsedVariables;
-inline std::set<std::string> includedLibraries;
-inline std::set<std::string> declaredVariables;
-inline std::set<std::string> reassignedVariables;
-
-inline std::string currentParsingUserFunc = "";
-inline std::vector<std::string> currentFuncParamNames;
-inline std::map<std::string, std::vector<bool>> userFuncInputParams;
-inline std::map<std::string, std::vector<bool>> userFuncOutputParams;
 
 class ASTNode {
 public:
@@ -520,6 +494,8 @@ public:
     }
 
     std::string toCpp() override {
+        interval = parseTime(interval);
+
         std::string timerName = "_every_timer_" + std::to_string(id);
         std::string code = "static unsigned long " + timerName + " = 0;\n";
 
