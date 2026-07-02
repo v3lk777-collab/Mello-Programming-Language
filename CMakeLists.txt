@@ -12,4 +12,7 @@ set(SOURCES
 
 add_executable(mello ${SOURCES})
 
-target_include_directories(mello PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(mello PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
+)
