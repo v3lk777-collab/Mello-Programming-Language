@@ -121,7 +121,7 @@ Mello shines in handling hardware events without blocking the CPU execution thre
 pin = 13
 
 loop:
-    every 1000:
+    every 1s:
         turn_on(pin)
         println("1 second passed, and the CPU wasn't blocked!")
 ```
