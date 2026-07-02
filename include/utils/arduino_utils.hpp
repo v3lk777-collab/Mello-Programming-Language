@@ -44,7 +44,7 @@ bool installLibraries() {
         return true; 
     }
 
-    std::cout << "Checking and installing required libraries..." << std::endl;
+    std::cout << "Checking and installing required libraries..." << "\n";
     
     for (const auto& lib : includedLibraries) {        
         std::string installLibrariesCommand = ARDUINO_CLI_PATH + " lib install \"" + lib + "\"";
@@ -52,31 +52,31 @@ bool installLibraries() {
         int status = system(installLibrariesCommand.c_str());
         
         if (status != 0) {
-            std::cerr << "Warning: Failed to install '" << lib << "'. It might be built-in or the name is incorrect." << std::endl;
+            std::cerr << "Warning: Failed to install '" << lib << "'. It might be built-in or the name is incorrect." << "\n";
         }
     }
     
-    std::cout << "Finished checking libraries." << std::endl;
+    std::cout << "Finished checking libraries." << "\n";
     return true;
 }
 
 bool compileCode() {
-    std::cout << "Starting code compilation..." << std::endl;
+    std::cout << "Starting code compilation..." << "\n";
     
     std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + getTempSketchDir().string() + "\"";
     int compileStatus = system(compileCommand.c_str());
     
     if (compileStatus == 0) {
-        std::cout << "Compilation successful!" << std::endl;
+        std::cout << "Compilation successful!" << "\n";
         return true;
     } else {
-        std::cerr << "Compilation failed!" << std::endl;
+        std::cerr << "Compilation failed!" << "\n";
         return false;
     }
 }
 
 bool uploadCode() {
-    std::cout << "Searching for connected Arduino boards..." << std::endl;
+    std::cout << "Searching for connected Arduino boards..." << "\n";
     std::filesystem::path portsFilePath = std::filesystem::temp_directory_path() / "ports.txt";
     std::string listCommand = ARDUINO_CLI_PATH + " board list --format json > \"" + portsFilePath.string() + "\"";
     system(listCommand.c_str());
@@ -104,29 +104,26 @@ bool uploadCode() {
     }
 
     if (detectedPort.empty()) {
-        std::cerr << "No board detected! Please connect your Arduino." << std::endl;
+        std::cerr << "No board detected! Please connect your Arduino." << "\n";
         return false;
     }
 
-    std::cout << "Found Arduino on port: " << detectedPort << std::endl;
-    std::cout << "Uploading code to the board..." << std::endl;
+    std::cout << "Found Arduino on port: " << detectedPort << "\n";
+    std::cout << "Uploading code to the board..." << "\n";
 
     std::string uploadCommand = ARDUINO_CLI_PATH + " upload -p " + detectedPort + " --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " \"" + getTempSketchDir().string() + "\"";
     int uploadStatus = system(uploadCommand.c_str());
     
     if (uploadStatus == 0) {
-        std::cout << "Upload successful!" << std::endl;
+        std::cout << "Upload successful!" << "\n";
         return true;
     } else {
-        std::cerr << "Upload failed! Check connection." << std::endl;
+        std::cerr << "Upload failed! Check connection." << "\n";
         return false;
     }
 }
 
 bool runMelloCompiler(int argc, char* argv[]) {
-    std::ios_base::sync_with_stdio(false);
-    std::cin.tie(NULL);
-
     std::string fileName;
 
     if (argc > 1)
@@ -139,8 +136,8 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     std::ifstream file(fileName);
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open file " << fileName << std::endl;
-        return 1;
+        std::cerr << "Error: Could not open file " << fileName << "\n";
+        return false;
     }
 
     std::string sourceCode((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -148,10 +145,20 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     Lexer lexer(sourceCode);
     std::vector<Token> tokens = lexer.tokenize();
-
-    Parser parser(tokens);
-    std::vector<std::unique_ptr<ASTNode>> program = parser.parse();
     
+    std::vector<std::unique_ptr<ASTNode>> program;
+
+    try {
+        Parser parser(tokens);
+        program = parser.parse();
+    } catch (const std::runtime_error& e) {
+        std::cerr << e.what() << "\n";
+        return false;
+    } catch (const std::exception& error) {
+        std::cerr << error.what() << "\n";
+        return false;
+    }
+
     std::filesystem::path sketchDir = getTempSketchDir();
     std::filesystem::create_directories(sketchDir);
     std::filesystem::path inoFilePath = sketchDir / "output.ino";
@@ -159,8 +166,8 @@ bool runMelloCompiler(int argc, char* argv[]) {
     std::ofstream outputFile(inoFilePath.string());
 
     if (!outputFile.is_open()) {
-        std::cerr << "Error: Could not open output file." << std::endl;
-        return 1;
+        std::cerr << "Error: Could not open output file." << "\n";
+        return false;
     }
 
     bool hasSetup = false;
@@ -187,7 +194,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
                 std::cerr << "\nSyntax Error: You cannot reassign the variable '" 
                           << varNode->name << "' outside of a function.\n"
                           << "Please move '" << varNode->name << " = ...' inside 'func start():' or 'func loop():'.\n" 
-                          << std::endl;
+                          << "\n";
                 
                 outputFile.close();
                 
@@ -256,7 +263,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     outputFile.close();
 
     if (!std::filesystem::exists(ARDUINO_CLI_PATH)) {
-        std::cerr << "Error: arduino-cli.exe not found at the specified path!" << std::endl;
+        std::cerr << "Error: arduino-cli.exe not found at the specified path!" << "\n";
         return false;
     }
 
@@ -264,7 +271,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
         std::string formatCommand = CLANG_FORMAT_PATH + " --style=Google -i \"" + inoFilePath.string() + "\"";
         std::system(formatCommand.c_str());
     } else {
-        std::cerr << "Warning: clang-format not found locally, skipping formatting." << std::endl;
+        std::cerr << "Warning: clang-format not found locally, skipping formatting." << "\n";
     }
 
     // Delete when u finish from here
@@ -275,9 +282,9 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     if (sketchCodeFile.is_open()) {
         while (getline(sketchCodeFile, sketchCode))
-            std::cout << sketchCode << std::endl;
+            std::cout << sketchCode << "\n";
     } else {
-        std::cerr << "Warning: Cann't open the sketch code file." << std::endl;
+        std::cerr << "Warning: Cann't open the sketch code file." << "\n";
     }
 
     sketchCodeFile.close();

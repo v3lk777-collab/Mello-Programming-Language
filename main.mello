@@ -1,6 +1,5 @@
-i = 0
 pin = 13
 
-start:
-    for i < 10:
-        turn_on(pin)
+loop:
+    toggle(pin)
+    wait(1s)

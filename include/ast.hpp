@@ -19,6 +19,7 @@ public:
 class ExpressionNode : public ASTNode {
 public:
     virtual ~ExpressionNode() = default;
+    virtual std::string getVariableName() { return ""; };
 };
 
 class VarAssignNode : public ASTNode {
@@ -338,6 +339,17 @@ public:
     }
 };
 
+class LiteralNode : public ExpressionNode {
+public:
+    Token token;
+    LiteralNode(Token t)
+        : token(t) {}
+
+    std::string toCpp() override {
+        return token.value;
+    }
+};
+
 class BinaryOpNode : public ExpressionNode {
 private:
     Token op;
@@ -347,6 +359,23 @@ private:
 public:
     BinaryOpNode(std::unique_ptr<ExpressionNode> left, Token op, std::unique_ptr<ExpressionNode> right)
         : left(std::move(left)), op(op), right(std::move(right)) {}
+
+public:
+    std::string getVariableName() override {
+        if (auto var = dynamic_cast<LiteralNode*>(left.get())) {
+            if (var->token.type == TokenType::SYMBOL) {
+                return var->token.value;
+            }
+        }
+        
+        if (auto var = dynamic_cast<LiteralNode*>(right.get())) {
+            if (var->token.type == TokenType::SYMBOL) {
+                return var->token.value;
+            }
+        }
+
+        return "";
+    }
 
     std::string toCpp() override {
         std::string opStr = op.value;
@@ -392,17 +421,6 @@ public:
         }
 
         return name + " " + op + " " + value + ";";
-    }
-};
-
-class LiteralNode : public ExpressionNode {
-public:
-    Token token;
-    LiteralNode(Token t)
-        : token(t) {}
-
-    std::string toCpp() override {
-        return token.value;
     }
 };
 
@@ -550,7 +568,16 @@ public:
         : condition(std::move(cond)), body(std::move(b)) {}
 
     std::string toCpp() override {
-        std::string result = "for (int _i = 0; " + condition->toCpp() + "; _i++) {\n";
+        std::string condStr = condition->toCpp();
+        std::string varName = condition->getVariableName();
+
+        std::string op = "++"; 
+        std::string startValue = "0";
+
+        if (condStr.find(">") != std::string::npos)
+            op = "--";
+
+        std::string result = "for (int " + varName + " = " + startValue + "; " + condStr + "; " + varName + op + ") {\n";
 
         for (const auto& node : body) {
             result += node->toCpp() + "\n";
@@ -560,7 +587,6 @@ public:
         return result;
     }
 };
-
 
 class RepeatNode : public ASTNode {
 private:
