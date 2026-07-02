@@ -244,6 +244,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 body.push_back(parseEveryStatement());
             } else if (inner_keyword == "while") {
                 body.push_back(parseWhileStatement());
+            } else if (inner_keyword == "for") {
+                body.push_back(parseForStatement());
             } else if (inner_keyword == "repeat") {
                 body.push_back(parseRepeatStatement());
             } else if (inner_keyword == "on_press") {
@@ -493,9 +495,7 @@ std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     match(TokenType::NEWLINE);
     
     consume(TokenType::INDENT, "Expected indentation after every");
-
     auto body = parseBlock();
-
     consume(TokenType::DEDENT, "Expected dedent at end of every block");
     
     return std::make_unique<EveryNode>(interval, std::move(body));
@@ -511,7 +511,22 @@ std::unique_ptr<ASTNode> Parser::parseWhileStatement() {
     consume(TokenType::INDENT, "Expected indentation after while");
     auto body = parseBlock();
     consume(TokenType::DEDENT, "Expected dedent at end of while block");
+
     return std::make_unique<WhileNode>(std::move(condition), std::move(body));
+}
+
+std::unique_ptr<ASTNode> Parser::parseForStatement() {
+    advance();
+
+    auto condition = parseExpression();
+
+    consume(TokenType::COLON, "Expected ':' after while condition");
+    match(TokenType::NEWLINE);
+    consume(TokenType::INDENT, "Expected indentation after while");
+    auto body = parseBlock();
+    consume(TokenType::DEDENT, "Expected dedent at end of while block");
+
+    return std::make_unique<ForNode>(std::move(condition), std::move(body));
 }
 
 std::unique_ptr<ASTNode> Parser::parseRepeatStatement() {
@@ -589,6 +604,10 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
 
             else if (keyword == "while") {
                 program.push_back(parseWhileStatement());
+            }
+
+            else if (keyword == "for") {
+                program.push_back(parseForStatement());
             }
 
             else if (keyword == "repeat") {

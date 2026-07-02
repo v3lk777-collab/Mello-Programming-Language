@@ -30,7 +30,7 @@
 std::string getComputerCoreNumber() {
     unsigned int coreCount = std::thread::hardware_concurrency();
     if (coreCount == 0)
-        coreCount = 4; 
+        coreCount = 4;
 
     return std::to_string(coreCount);
 }

@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
     if (std::filesystem::exists(CLANG_FORMAT_PATH)) {
         std::string formatCommand = CLANG_FORMAT_PATH + " --style=Google -i \"" + inoFilePath.string() + "\"";
         std::system(formatCommand.c_str());
-    } else
+    } else {
         std::cerr << "Warning: clang-format not found locally, skipping formatting." << std::endl;
     }
 

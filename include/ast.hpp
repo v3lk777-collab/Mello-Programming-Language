@@ -24,12 +24,12 @@ public:
 class VarAssignNode : public ASTNode {
 private:
     bool isNumeric(const std::string& str) {
-        if (str.empty()) {
+        if (str.empty())
             return false;
-        }
 
         for (char c : str) {
-            if (!std::isdigit(c)) return false;
+            if (!std::isdigit(c))
+                return false;
         }
 
         return true;
@@ -64,11 +64,9 @@ public:
         };
 
         auto containsFloatVariable = [&](const std::string& expr) {
-            for (const auto& floatVariable : floatVariables) {
-                if (expr.find(floatVariable) != std::string::npos) {
+            for (const auto& floatVariable : floatVariables)
+                if (expr.find(floatVariable) != std::string::npos)
                     return true;
-                }
-            }
 
             return false;
         };
@@ -417,7 +415,7 @@ public:
         std::string code = "if (" + condition->toCpp() + ") {\n";
         
         for (const auto& node : thenBody) {
-            code += "" + node->toCpp() + "\n";
+            code += node->toCpp() + "\n";
         }
 
         code += "}";
@@ -429,7 +427,7 @@ public:
                 code += "else {\n";
                 
                 for (const auto& node : elseBody) {
-                    code += "" + node->toCpp() + "\n";
+                    code += node->toCpp() + "\n";
                 }
                 
                 code += "}";
@@ -459,7 +457,7 @@ public:
         result += ") {\n";
 
         for (const auto& node : body) {
-            result += "" + node->toCpp() + "\n";
+            result += node->toCpp() + "\n";
         }
 
         result += "}\n";
@@ -489,6 +487,7 @@ private:
 public:
     EveryNode(std::string interval, std::vector<std::unique_ptr<ASTNode>> body)
         : interval(interval), body(std::move(body)) {
+
         static int counter = 0;
         id = counter++;
     }
@@ -500,10 +499,10 @@ public:
         std::string code = "static unsigned long " + timerName + " = 0;\n";
 
         code += "if (millis() - " + timerName + " >= " + interval + ") {\n";
-        code += "" + timerName + " = millis();\n";
+        code += timerName + " = millis();\n";
 
         for (const auto& node : body) {
-            code += "" + node->toCpp() + "\n";
+            code += node->toCpp() + "\n";
         }
 
         code += "}";
@@ -522,13 +521,37 @@ public:
 
     std::string toCpp() override {
         std::string result = "while (" + condition->toCpp() + ") {\n";
+
         for (const auto& node : body) {
-            result += "" + node->toCpp() + "\n";
+            result += node->toCpp() + "\n";
         }
+
         result += "}\n";
         return result;
     }
 };
+
+class ForNode : public ASTNode {
+private:
+    std::unique_ptr<ExpressionNode> condition;
+    std::vector<std::unique_ptr<ASTNode>> body;
+
+public:
+    ForNode(std::unique_ptr<ExpressionNode> cond, std::vector<std::unique_ptr<ASTNode>> b)
+        : condition(std::move(cond)), body(std::move(b)) {}
+
+    std::string toCpp() override {
+        std::string result = "for (int _i = 0; " + condition->toCpp() + "; _i++) {\n";
+
+        for (const auto& node : body) {
+            result += node->toCpp() + "\n";
+        }
+
+        result += "}\n";
+        return result;
+    }
+};
+
 
 class RepeatNode : public ASTNode {
 private:
@@ -549,7 +572,7 @@ public:
         std::string code = "for (int " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
         
         for (const auto& node : body) {
-            code += "" + node->toCpp() + "\n";
+            code += node->toCpp() + "\n";
         }
 
         code += "}";
@@ -589,17 +612,19 @@ public:
         std::string timerVar = "_btn_timer_" + std::to_string(id);
         std::string lastVar = "_btn_last_" + std::to_string(id);
         std::string currVar = "_btn_curr_" + std::to_string(id);
-        
         std::string code = "static unsigned long " + timerVar + " = 0;\n";
+
         code += "static bool " + lastVar + " = HIGH;\n";
         code += "bool " + currVar + " = digitalRead(" + pin + ");\n";
         code += "if (" + currVar + " == LOW && " + lastVar + " == HIGH && (millis() - " + timerVar + " > 200)) {\n";
-        code += "" + timerVar + " = millis();\n";
+        code += timerVar + " = millis();\n";
+
         for (const auto& node : body) {
-            code += "" + node->toCpp() + "\n";
+            code += node->toCpp() + "\n";
         }
+
         code += "}\n";
-        code += "" + lastVar + " = " + currVar + ";";
+        code += lastVar + " = " + currVar + ";";
         return code;
     }
 };

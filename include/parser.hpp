@@ -18,10 +18,12 @@ private:
     size_t position;
     Token current;
 
+private:
     void advance();
     bool match(TokenType type);
     void consume(TokenType type, const std::string& errorMessage);
 
+private:
     std::vector<std::unique_ptr<ASTNode>> parseBlock();
     std::unique_ptr<ExpressionNode> parseExpression();
     std::unique_ptr<ExpressionNode> parseLogicalOr();
@@ -41,6 +43,7 @@ private:
     std::unique_ptr<ASTNode> parseReturnStatement();
     std::unique_ptr<ASTNode> parseEveryStatement();
     std::unique_ptr<ASTNode> parseWhileStatement();
+    std::unique_ptr<ASTNode> parseForStatement();
     std::unique_ptr<ASTNode> parseRepeatStatement();
     std::unique_ptr<ASTNode> parseOnPressStatement();
 
