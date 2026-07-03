@@ -11,8 +11,9 @@
 #include "arduino_utils.hpp"
 
 int main(int argc, char* argv[]) {
-    if (!runMelloCompiler(argc, argv))
+    if (!runMelloCompiler(argc, argv)) {
         return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
