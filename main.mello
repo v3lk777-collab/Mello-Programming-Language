@@ -2,4 +2,4 @@ pin = 13
 
 loop:
     toggle(pin)
-    wait(1s)
+    wait(1s

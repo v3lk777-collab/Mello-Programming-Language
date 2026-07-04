@@ -30,13 +30,15 @@ char Lexer::peek() {
 }
 
 void Lexer::advance() {
-    position++;
+    do {
+        position++;
 
-    if (position < length) {
-        current = source[position];
-    } else {
-        current = '\0';
-    }
+        if (position < length) {
+            current = source[position];
+        } else {
+            current = '\0';
+        }
+    } while (current == '\r');
 }
 
 void Lexer::skipWhitespace() {
@@ -48,7 +50,6 @@ void Lexer::skipWhitespace() {
 void Lexer::skipComment() {
     if (current == '#') {
         while (current != '\n' && current != '\0') {
-            currentLine++;
             advance();
         }
     }
@@ -71,7 +72,6 @@ std::vector<Token> Lexer::tokenize() {
 
             while (current == ' ' || current == '\t') {
                 if (current == '\t') {
-                    currentLine++;
                     current_indent += 4;
                 } else {
                     current_indent += 1;
@@ -122,8 +122,9 @@ std::vector<Token> Lexer::tokenize() {
             bool hasDot = false;
 
             while (isdigit(current) || (current == '.' && !hasDot)) {
-                if (current == '.')
+                if (current == '.') {
                     hasDot = true;
+                }
                 
                 number += current;
                 advance();

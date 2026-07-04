@@ -207,25 +207,31 @@ bool runMelloCompiler(int argc, char* argv[]) {
         } else {
             std::string code = node->toCpp();
             
-            if (code.find("void setup()") != std::string::npos)
+            if (code.find("void setup()") != std::string::npos) {
                 hasSetup = true;
+            }
 
-            if ((code.find("Serial.print") != std::string::npos) || (code.find("Serial.println") != std::string::npos) || (code.find("Serial.available") != std::string::npos) || (code.find("Serial.read") != std::string::npos))
+            if ((code.find("Serial.print") != std::string::npos) || (code.find("Serial.println") != std::string::npos) || (code.find("Serial.available") != std::string::npos) || (code.find("Serial.read") != std::string::npos)) {
                 hasSerialCommand = true;
+            }
 
-            if (code.find("Serial.begin") != std::string::npos)
+            if (code.find("Serial.begin") != std::string::npos) {
                 hasSerial = true;
+            }
 
-            if (code.find("void loop()") != std::string::npos)
+            if (code.find("void loop()") != std::string::npos) {
                 hasLoop = true;
-            
+            }
+
             functionsCode += code + "\n";
         }
     }
 
-    if (!includedLibraries.empty())
-        for (const auto& lib : includedLibraries)
+    if (!includedLibraries.empty()) {
+        for (const auto& lib : includedLibraries) {
             includesCode += "#include <" + lib + ".h>\n";
+        }
+    }
 
     outputFile << author << "\n";
     outputFile << includesCode << "\n";

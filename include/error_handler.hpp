@@ -21,13 +21,16 @@ public:
 
         std::vector<std::string> lines;
         std::stringstream ss(source);
-        std::string line;
+        std::string lineStr;
 
-        while (std::getline(ss, line, '\n')) {
-            lines.push_back(line);
+        while (std::getline(ss, lineStr, '\n')) {
+            if (!lineStr.empty() && lineStr.back() == '\r') {
+                lineStr.pop_back();
+            }
+            lines.push_back(lineStr);
         }
 
-        std::cerr << "\033[1;31m[Mello Error]\033[0m Line " << line << ": " << message << "\n";
+        std::cerr << "\033[1;31m[Mello Error]\033[0m Line " << lineNumber << ": " << message << " '" << tokenValue << "'\n";
         
         if (lineNumber > 0 && lineNumber <= (int)lines.size()) {
             std::cerr << "  " << lineNumber << " | " << lines[lineNumber - 1] << "\n";
