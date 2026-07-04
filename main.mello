@@ -1,13 +1,5 @@
-start:
-    int myVar = 10
-    string name = "Mello"
+pin = 13
 
-    myVar = myVar + name
-
-    if myVar > 5:
-        print("Greater than 5")
-    
-    wait (1s)
-    
 loop:
-    print("Looping")
+    toggle(pin)
+    wait(1s)
