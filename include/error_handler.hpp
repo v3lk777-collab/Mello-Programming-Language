@@ -18,23 +18,27 @@ private:
 
 public:
     static void report(const std::string& message, const std::string& tokenValue, int lineNumber, const std::string& source) {
-
         std::vector<std::string> lines;
         std::stringstream ss(source);
-        std::string lineStr;
+        std::string currentLineContent;
 
-        while (std::getline(ss, lineStr, '\n')) {
-            if (!lineStr.empty() && lineStr.back() == '\r') {
-                lineStr.pop_back();
+        while (std::getline(ss, currentLineContent, '\n')) {
+            if (!currentLineContent.empty() && currentLineContent.back() == '\r') {
+                currentLineContent.pop_back();
             }
-            lines.push_back(lineStr);
+
+            lines.push_back(currentLineContent);
         }
 
-        std::cerr << "\033[1;31m[Mello Error]\033[0m Line " << lineNumber << ": " << message << " '" << tokenValue << "'\n";
+        std::cerr << "\033[1;31m[Mello Error]\033[0m Line " << lineNumber << ": " << message << (tokenValue.empty() ? "" : " '" + tokenValue + "'") << "\n";
         
         if (lineNumber > 0 && lineNumber <= (int)lines.size()) {
-            std::cerr << "  " << lineNumber << " | " << lines[lineNumber - 1] << "\n";
-            std::cerr << "    " << std::string(std::to_string(lineNumber).size() + 3, ' ') << "^" << "\n";
+            std::string lineContent = lines[lineNumber - 1];
+            
+            std::cerr << "  " << lineNumber << " | " << lineContent << "\n";
+            
+            std::string prefix = std::string(std::to_string(lineNumber).size() + 3, ' ');
+            std::cerr << "    " << prefix << "^" << "\n";
         }
 
         exit(EXIT_FAILURE);
