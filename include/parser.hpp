@@ -14,9 +14,10 @@
 
 class Parser {
 private:
-    std::vector<Token> tokens;
-    size_t position;
     Token current;
+    size_t position;
+    std::string source;
+    std::vector<Token> tokens;
 
 private:
     void advance();
@@ -48,6 +49,6 @@ private:
     std::unique_ptr<ASTNode> parseOnPressStatement();
 
 public:
-    Parser(const std::vector<Token>& tokens);
+    Parser(const std::vector<Token>& tokens, const std::string& source);
     std::vector<std::unique_ptr<ASTNode>> parse();
 };

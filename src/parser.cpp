@@ -8,10 +8,13 @@
 
 #include "parser.hpp"
 #include "lexer.hpp"
+#include "error_handler.hpp"
 #include <iostream>
 #include <stdexcept>
 
-Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens), position(0) {
+Parser::Parser(const std::vector<Token>& tokens, const std::string& source)
+    : tokens(tokens), source(source), position(0) {
+
     if (!tokens.empty()) {
         current = tokens[0];
     }
@@ -25,7 +28,7 @@ void Parser::advance() {
     if (position < tokens.size()) {
         current = tokens[position];
     } else {
-        current = Token(TokenType::EndOfFile, "");
+        current = Token(TokenType::EndOfFile, "", current.line);
     }
 }
 
@@ -39,11 +42,12 @@ bool Parser::match(TokenType type) {
     return false;
 }
 
+
 void Parser::consume(TokenType type, const std::string& errorMessage) {
     if (current.type == type) {
         advance();
     } else {
-        throw std::runtime_error("Syntax Error at token '" + current.value + "': " + errorMessage);
+        ErrorHandler::report(errorMessage, current.value, current.line, this->source);
     }
 }
 
@@ -183,7 +187,8 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
         return std::make_unique<GroupNode>(std::move(expr));
     }
 
-    throw std::runtime_error("Unexpected token in expression: " + current.value);
+    ErrorHandler::report("Unexpected token in expression:", current.value, current.line, this->source);
+    return nullptr;
 }
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
@@ -285,7 +290,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
             }
             advance();
         } else {
-            throw std::runtime_error("Unexpected token inside function call: " + current.value);
+            ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, this->source);
         }
     }
     
@@ -485,8 +490,9 @@ std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
 std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     advance();
 
-    if (current.type != TokenType::NUMBER && current.type != TokenType::SYMBOL)
-        throw std::runtime_error("Expected a number or identifier for interval");
+    if (current.type != TokenType::NUMBER && current.type != TokenType::SYMBOL) {
+        ErrorHandler::report("Expected a number or identifier for interval", current.value, current.line, this->source);
+    }
 
     std::string interval = current.value;
     advance();
@@ -627,7 +633,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
             std::string badToken = current.value;
 
             advance();
-            throw std::runtime_error("Unexpected token: " + badToken);
+            ErrorHandler::report("Unexpected token in expression", badToken, current.line, this->source);
         }
     }
 

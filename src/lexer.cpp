@@ -15,6 +15,7 @@ Lexer::Lexer(const std::string& source) {
     this->position = 0;
     this->length = source.length();
     this->current = (this->length > 0) ? source[0] : '\0';
+    this->currentLine = 1;
 
     this->indent_stack.push_back(0);
     this->isStartOfLine = true;
@@ -39,19 +40,24 @@ void Lexer::advance() {
 }
 
 void Lexer::skipWhitespace() {
-    while (current == ' ' || current == '\t' || current == '\r')
+    while (current == ' ' || current == '\t' || current == '\r') {
         advance();
+    }
 }
 
 void Lexer::skipComment() {
-    if (current == '#')
-        while (current != '\n' && current != '\0')
+    if (current == '#') {
+        while (current != '\n' && current != '\0') {
+            currentLine++;
             advance();
+        }
+    }
 }
 
 bool Lexer::fileIsEmpty() {
-    if (current == '\0')
+    if (current == '\0') {
         return true;
+    }
 
     return false;
 }
@@ -65,6 +71,7 @@ std::vector<Token> Lexer::tokenize() {
 
             while (current == ' ' || current == '\t') {
                 if (current == '\t') {
+                    currentLine++;
                     current_indent += 4;
                 } else {
                     current_indent += 1;
@@ -76,8 +83,10 @@ std::vector<Token> Lexer::tokenize() {
             if (current == '\n' || current == '#') {
                 skipComment();
 
-                if (current == '\n')
+                if (current == '\n') {
+                    currentLine++;
                     advance();
+                }
                 
                 continue;
             }
@@ -86,11 +95,11 @@ std::vector<Token> Lexer::tokenize() {
 
             if (current_indent > last_indent) {
                 indent_stack.push_back(current_indent);
-                tokens.push_back({TokenType::INDENT, std::to_string(current_indent)});
+                tokens.push_back({TokenType::INDENT, std::to_string(current_indent), currentLine});
             } else if (current_indent < last_indent) {
                 while (!indent_stack.empty() && indent_stack.back() > current_indent) {
                     indent_stack.pop_back();
-                    tokens.push_back({TokenType::DEDENT, ""});
+                    tokens.push_back({TokenType::DEDENT, "", currentLine});
                 }
                 
                 if (indent_stack.empty() || indent_stack.back() != current_indent) {
@@ -126,38 +135,41 @@ std::vector<Token> Lexer::tokenize() {
                 advance();
             }
 
-            tokens.push_back({TokenType::NUMBER, number});
+            tokens.push_back({TokenType::NUMBER, number, currentLine});
         } else if (current == '\n') {
-            tokens.push_back({TokenType::NEWLINE, "\n"});
+            tokens.push_back({TokenType::NEWLINE, "\n", currentLine});
             advance();
+            
             isStartOfLine = true;
         } else if (current == '"') {
             std::string str;
             advance();
+
             while (current != '"' && current != '\0') {
                 str += current;
                 advance();
             }
+
             advance();
-            tokens.push_back({TokenType::STRING, str});
+            tokens.push_back({TokenType::STRING, str, currentLine});
         } else if (current == '.') {
-            tokens.push_back({TokenType::DOT, "."});
+            tokens.push_back({TokenType::DOT, ".", currentLine});
             advance();
         } else if (current == ')') {
             std::string paren(1, current);
-            tokens.push_back({TokenType::RPAREN, paren});
+            tokens.push_back({TokenType::RPAREN, paren, currentLine});
             advance();
         } else if (current == '(') {
             std::string paren(1, current);
-            tokens.push_back({TokenType::LPAREN, paren});
+            tokens.push_back({TokenType::LPAREN, paren, currentLine});
             advance();
         } else if (current == '=') {
             if (peek() == '=') {
                 advance();
                 advance();
-                tokens.push_back({TokenType::EQUALITY, "=="});
+                tokens.push_back({TokenType::EQUALITY, "==", currentLine});
             } else {
-                tokens.push_back({TokenType::EQUAL, "="});
+                tokens.push_back({TokenType::EQUAL, "=", currentLine});
                 advance();
             }
         } else if (current == '+') {
@@ -165,14 +177,14 @@ std::vector<Token> Lexer::tokenize() {
                 advance();
                 advance();
 
-                tokens.push_back({TokenType::PLUS_PLUS, "++"});
+                tokens.push_back({TokenType::PLUS_PLUS, "++", currentLine});
             } else if (peek() == '=') {
                 advance();
                 advance();
 
-                tokens.push_back({TokenType::PLUS_EQUAL, "+="});
+                tokens.push_back({TokenType::PLUS_EQUAL, "+=", currentLine});
             } else {
-                tokens.push_back({TokenType::PLUS, "+"});
+                tokens.push_back({TokenType::PLUS, "+", currentLine});
                 advance();
             }
         } else if (current == '-') {
@@ -180,66 +192,66 @@ std::vector<Token> Lexer::tokenize() {
                 advance();
                 advance();
 
-                tokens.push_back({TokenType::MINUS_MINUS, "--"});
+                tokens.push_back({TokenType::MINUS_MINUS, "--", currentLine});
             } else if (peek() == '=') {
                 advance();
                 advance();
                 
-                tokens.push_back({TokenType::MINUS_EQUAL, "-="});
+                tokens.push_back({TokenType::MINUS_EQUAL, "-=", currentLine});
             } else {
-                tokens.push_back({TokenType::MINUS, "-"});
+                tokens.push_back({TokenType::MINUS, "-", currentLine});
                 advance();
             }
         } else if (current == '*') {
             std::string symbol(1, current);
-            tokens.push_back({TokenType::MUL, symbol});
+            tokens.push_back({TokenType::MUL, symbol, currentLine});
             advance();
         } else if (current == '/') {
             std::string symbol(1, current);
-            tokens.push_back({TokenType::DIV, symbol});
+            tokens.push_back({TokenType::DIV, symbol, currentLine});
             advance();
         } else if (current == ':') {
             std::string symbol(1, current);
-            tokens.push_back({TokenType::COLON, symbol});
+            tokens.push_back({TokenType::COLON, symbol, currentLine});
             advance();
         } else if (current == ',') {
             std::string symbol(1, current);
-            tokens.push_back({TokenType::COMMA, symbol});
+            tokens.push_back({TokenType::COMMA, symbol, currentLine});
             advance();
         } else if (current == '>') {
             if (peek() == '=') {
                 advance();
                 advance();
-                tokens.push_back({TokenType::GREATER_EQUAL, ">="});
+                tokens.push_back({TokenType::GREATER_EQUAL, ">=", currentLine});
             } else {
                 std::string symbol(1, current);
-                tokens.push_back({TokenType::GREATER, ">"});
+                tokens.push_back({TokenType::GREATER, ">", currentLine});
                 advance();
             }
         } else if (current == '<') {
             if (peek() == '=') {
                 advance();
                 advance();
-                tokens.push_back({TokenType::LESS_EQUAL, "<="});
+                tokens.push_back({TokenType::LESS_EQUAL, "<=", currentLine});
             } else {
                 std::string symbol(1, current);
-                tokens.push_back({TokenType::LESS, "<"});
+                tokens.push_back({TokenType::LESS, "<", currentLine});
                 advance();
             }
         } else if (current == '!') {
             if (peek() == '=') {
                 advance();
                 advance();
-                tokens.push_back({TokenType::NOT_EQUAL, "!="});
+                tokens.push_back({TokenType::NOT_EQUAL, "!=", currentLine});
             } else {
-                tokens.push_back({TokenType::BANG, "!"}); 
+                tokens.push_back({TokenType::BANG, "!", currentLine}); 
                 advance();
             }
         } else if (current == '&') {
             if (peek() == '&') {
                 advance();
                 advance();
-                tokens.push_back({TokenType::KEYWORD, "&&"});
+                tokens.push_back({TokenType::KEYWORD, "&&", currentLine});
             } else {
                 advance();
             }
@@ -247,7 +259,7 @@ std::vector<Token> Lexer::tokenize() {
             if (peek() == '|') {
                 advance();
                 advance();
-                tokens.push_back({TokenType::KEYWORD, "||"});
+                tokens.push_back({TokenType::KEYWORD, "||", currentLine});
             } else {
                 advance();
             }
@@ -260,9 +272,9 @@ std::vector<Token> Lexer::tokenize() {
             }
 
             if (keywordsList.find(identifier) != keywordsList.end()) {
-                tokens.push_back({TokenType::KEYWORD, identifier});
+                tokens.push_back({TokenType::KEYWORD, identifier, currentLine});
             } else {
-                tokens.push_back({TokenType::SYMBOL, identifier});
+                tokens.push_back({TokenType::SYMBOL, identifier, currentLine});
             }
         } else {
             advance();
@@ -271,10 +283,10 @@ std::vector<Token> Lexer::tokenize() {
 
     while (indent_stack.size() > 1) {
         indent_stack.pop_back();
-        tokens.push_back({TokenType::DEDENT, ""});
+        tokens.push_back({TokenType::DEDENT, "", currentLine});
     }
 
-    tokens.push_back({TokenType::EndOfFile, ""});
+    tokens.push_back({TokenType::EndOfFile, "", currentLine});
 
     return tokens;
 }

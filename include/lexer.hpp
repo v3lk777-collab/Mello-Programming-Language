@@ -8,10 +8,10 @@
 
 #pragma once
 #include "token.hpp"
-#include <unordered_set>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
+#include <unordered_set>
 
 inline const std::unordered_set<std::string> keywordsList = {
     "start", "loop", "wait", "turn_on", "turn_off", "if", "elif", "else", "read_serial",
@@ -24,11 +24,13 @@ private:
     char current;
     size_t length;
     size_t position;
+    int currentLine;
     std::string source;
-    
+
     bool isStartOfLine;
     std::vector<int> indent_stack;
 
+private:
     char peek();
     void advance();
     void skipWhitespace();
@@ -37,6 +39,5 @@ private:
 
 public:
     std::vector<Token> tokenize();
-
     Lexer(const std::string& source);
 };

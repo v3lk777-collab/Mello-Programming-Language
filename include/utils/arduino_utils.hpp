@@ -149,7 +149,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     std::vector<std::unique_ptr<ASTNode>> program;
 
     try {
-        Parser parser(tokens);
+        Parser parser(tokens, sourceCode);
         program = parser.parse();
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << "\n";
@@ -237,7 +237,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
         if (!hasSerial && hasSerialCommand) {
             std::vector<std::unique_ptr<ExpressionNode>> beginArgs;
 
-            beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "9600")));
+            beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "9600", 0)));
             setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs)));
         }
 
