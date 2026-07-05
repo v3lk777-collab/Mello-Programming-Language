@@ -30,7 +30,7 @@ public:
             lines.push_back(currentLineContent);
         }
 
-        std::cerr << "\033[1;31m[Mello Error]\033[0m Line " << lineNumber << ": " << message << (tokenValue.empty() ? "" : " '" + tokenValue + "'") << "\n";
+        std::cerr << "\033[1;31m[Error]\033[0m Line " << lineNumber << ": " << message << (tokenValue.empty() ? "" : " '" + tokenValue + "'") << "\n";
         
         if (lineNumber > 0 && lineNumber <= (int)lines.size()) {
             std::string lineContent = lines[lineNumber - 1];
