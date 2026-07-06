@@ -1,3 +1,5 @@
+# Blink LED code in Mello programming language
+
 pin = 13
 
 loop:
