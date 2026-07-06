@@ -15,4 +15,5 @@ add_executable(mello ${SOURCES})
 target_include_directories(mello PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/errors
 )
