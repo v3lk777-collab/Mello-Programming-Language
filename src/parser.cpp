@@ -210,22 +210,28 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
             } else if (current.type == TokenType::PLUS_EQUAL) {
                 advance();
                 std::string val = current.value;
+
                 advance();
                 reassignedVariables.insert(name);
+
                 body.push_back(std::make_unique<CompoundAssignNode>(name, "+=", val));
             } else if (current.type == TokenType::MINUS_EQUAL) {
                 advance();
                 std::string val = current.value;
+
                 advance();
                 reassignedVariables.insert(name);
+
                 body.push_back(std::make_unique<CompoundAssignNode>(name, "-=", val));
             } else if (current.type == TokenType::PLUS_PLUS) {
                 advance();
                 reassignedVariables.insert(name);
+
                 body.push_back(std::make_unique<CompoundAssignNode>(name, "++", ""));
             } else if (current.type == TokenType::MINUS_MINUS) {
                 advance();
                 reassignedVariables.insert(name);
+
                 body.push_back(std::make_unique<CompoundAssignNode>(name, "--", ""));
             } else if (current.type == TokenType::DOT) {
                 advance();
@@ -237,29 +243,38 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 
                 body.push_back(std::make_unique<MethodCallNode>(name, std::move(methodCall)));
             }
-        }
+        } else if (current.type == TokenType::KEYWORD) {
+            std::string keyword = current.value;
 
-        else if (current.type == TokenType::KEYWORD) {
-            std::string inner_keyword = current.value;
-            if (inner_keyword == "if") {
+            if (keyword == "if") {
                 body.push_back(parseIfStatement());
-            } else if (inner_keyword == "return") {
+            } else if (keyword == "return") {
                 body.push_back(parseReturnStatement());
-            } else if (inner_keyword == "every") {
+            } else if (keyword == "every") {
                 body.push_back(parseEveryStatement());
-            } else if (inner_keyword == "while") {
+            } else if (keyword == "while") {
                 body.push_back(parseWhileStatement());
-            } else if (inner_keyword == "for") {
+            } else if (keyword == "for") {
                 body.push_back(parseForStatement());
-            } else if (inner_keyword == "repeat") {
+            } else if (keyword == "repeat") {
                 body.push_back(parseRepeatStatement());
-            } else if (inner_keyword == "on_press") {
+            } else if (keyword == "on_press") {
                 body.push_back(parseOnPressStatement());
-            } else if (keywordsList.count(inner_keyword)) {
-                advance();
-                body.push_back(parseFunctionCall(inner_keyword));
             } else {
                 advance();
+
+                if (current.type == TokenType::DOT) {
+                    advance();
+
+                    std::string methodName = current.value;
+                    advance();
+
+                    auto methodCall = parseFunctionCall(methodName);
+                    
+                    body.push_back(std::make_unique<MethodCallNode>(keyword, std::move(methodCall)));
+                } else if (current.type == TokenType::LPAREN) {
+                    body.push_back(parseFunctionCall(keyword));
+                }
             }
         } else {
             advance();
@@ -288,6 +303,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
             } else {
                 args.push_back(std::make_unique<LiteralNode>(token));
             }
+
             advance();
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, this->source);

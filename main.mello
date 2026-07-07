@@ -3,5 +3,7 @@
 pin = 13
 
 loop:
+    serial.print("Mohammed")
+
     toggle(pin)
     wait(1s)

@@ -318,11 +318,11 @@ public:
             return "Serial.println(" + argsStr[0] + ");";
         }
 
-        if (funcName == "available_serial") {
+        if (funcName == "available") {
             return "Serial.available()";
         }
 
-        if (funcName == "read_serial") {
+        if (funcName == "read") {
             return "Serial.read();";
         }
 
@@ -604,7 +604,7 @@ public:
 
     std::string toCpp() override {
         std::string iterVar = "_loop_i_" + std::to_string(id);
-        std::string code = "for (int " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
+        std::string code = "for (uint16_t " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
         
         for (const auto& node : body) {
             code += node->toCpp() + "\n";
@@ -675,6 +675,17 @@ public:
 
     std::string toCpp() override {
         std::string methodStr = methodCall->toCpp();
-        return objectName + "." + methodStr;
+
+        if (methodStr.find("Serial.") == 0) {
+            methodStr = methodStr.substr(7);
+        }
+
+        std::string finalObjectName = objectName;
+
+        if (objectName == "serial") {
+            finalObjectName = "Serial";
+        }
+
+        return finalObjectName + "." + methodStr;
     }
 };
