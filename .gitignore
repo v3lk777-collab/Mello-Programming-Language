@@ -4,9 +4,6 @@ build/*
 # Output windows file
 !build/mello.exe
 
-# To Do file
-todo.txt
-
 # Ignore VS Code settings folder
 .vscode/*
 
