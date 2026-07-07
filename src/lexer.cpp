@@ -114,8 +114,9 @@ std::vector<Token> Lexer::tokenize() {
         skipWhitespace();
         skipComment();
 
-        if (fileIsEmpty())
+        if (fileIsEmpty()) {
             break;
+        }
 
         if (isdigit(current) || (current == '.' && isdigit(peek()))) {
             std::string number;
