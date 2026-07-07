@@ -24,7 +24,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 - **C/C++ (Arduino IDE):** Extremely fast and memory-efficient, but suffers from a steep learning curve, verbose syntax (semicolons, brackets), and complex hardware interrupt/timer management.
 - **MicroPython/CircuitPython:** Beautiful, readable syntax, but requires massive runtime environments, consumes heavy RAM, and is incompatible with lower-end microcontrollers like the ATmega328P.
 
-**The Mello Hypothesis:** By parsing an indentation-based, highly readable language into an Abstract Syntax Tree (AST) and transpiling it directly into strictly optimized, native C++ code before compilation, we can achieve **100% of the C++ performance footprint** with **50% of the code verbosity**.
+**The Mello Hypothesis:** By parsing an indentation-based, highly readable language into an Abstract Syntax Tree (AST) and transpiling it directly into strictly optimized, native C++ code before compilation, we can achieve **100% of the C++ performance footprint** with **60% of the code verbosity**.
 
 ---
 
@@ -43,7 +43,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 The Mello compiler is built from scratch in C++ and operates in multiple sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
-The `Lexer` scans the `.mello` file, handling Python-like indentation/dedentation logic and generating a stream of tokens. It accurately categorizes keywords (`start`, `loop`, `every`), symbols, and literals.
+The `Lexer` scans the `.mello` file, handling Python-like indentation/dedentation logic and generating a stream of tokens. It accurately categorizes keywords (`start`, `loop`, `every`, `on_press`, `or`, `and`, `turn_on`, `turn_off`, `wait`, ...), symbols, and literals.
 
 ### Phase B: Syntax Analysis (Parser)
 The `Parser` consumes the tokens and validates them against Mello's strict grammar rules. It constructs a robust Abstract Syntax Tree (AST), ensuring all logical blocks are properly nested.
@@ -55,7 +55,7 @@ During AST traversal, Mello intelligently resolves variable scoping and detects 
 Nodes in the AST (e.g., `OnPressNode`, `VarAssignNode`) invoke their respective `toCpp()` methods. This outputs optimized, pure C++ code that handles state tracking statically.
 
 ### Phase E: Automated Pipeline
-Mello automatically triggers `arduino-cli` to compile the generated C++ into a machine-readable binary (`.hex` / `.bin`) and flashes it directly to the embedded hardware.
+Mello automatically uses `clang-format` to format the code into the **Google** Style, triggers `arduino-cli` to compile the generated C++ into a machine-readable binary (`.hex` / `.bin`), and flashes it directly to the embedded hardware.
 
 ---
 
@@ -77,7 +77,7 @@ Every hardware program requires a starting point and a continuous loop.
 
 ```python
 start:
-    println("System Initialized and Ready.")
+    serial.println("System Initialized and Ready.")
 
 loop:
     # Your continuous logic goes here
@@ -123,7 +123,7 @@ pin = 13
 loop:
     every 1s:
         turn_on(pin)
-        println("1 second passed, and the CPU wasn't blocked!")
+        serial.println("1 second passed, and the CPU wasn't blocked!")
 ```
 
 **The `on_press` event (Auto-debounced button):**
@@ -133,7 +133,7 @@ buttonPin = 2
 
 loop:
     on_press buttonPin:
-        println("Button on Pin 2 was pressed safely without bouncing.")
+        serial.println("Button on Pin 2 was pressed safely without bouncing.")
 ```
 
 ### Control Flow
@@ -149,12 +149,12 @@ loop:
     if sensor_value > 50:
         turn_on(LED_PIN)
     elif sensor_value == 50:
-        print("Stable")
+        serial.print("Stable")
     else:
         turn_off(LED_PIN)
    
     repeat 5:
-       println("This runs exactly five times")
+       serial.println("This runs exactly five times")
    
     while is_active == 1:
        wait(100)               # Standard blocking delay if absolutely needed
@@ -189,14 +189,14 @@ tempSensor = A0
 systemActive = 1
 
 start:
-    println("Smart Room OS Booting...")
+    serial.println("Smart Room OS Booting...")
 
 loop:
     # Read temperature every 5 seconds without blocking the button
     every 5000:
         temp = read(tempSensor)
-        print("Current Temp: ")
-        println(temp)
+        serial.print("Current Temp: ")
+        serial.println(temp)
 
     # Listen for button press to toggle system
     on_press buttonPin:
@@ -204,11 +204,11 @@ loop:
             systemActive = 0
 
             turn_off(lightPin)
-            println("System Deactivated")
+            serial.println("System Deactivated")
         else:
             systemActive = 1
             turn_on(lightPin)
-            println("System Activated")
+            serial.println("System Activated")
 ```
 
 ---
