@@ -148,12 +148,41 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
         std::string name = current.value;
         advance();
 
-        if (current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::DOT) {
             advance();
 
+            std::string methodName = current.value;
+            advance();
+
+            if (current.type == TokenType::LPAREN) {
+                advance();
+
+                std::vector<std::unique_ptr<ExpressionNode>> args;
+                if (current.type != TokenType::RPAREN) {
+                    args.push_back(parseExpression());
+                    while (current.type == TokenType::COMMA) {
+                        advance();
+                        args.push_back(parseExpression());
+                    }
+                }
+                consume(TokenType::RPAREN, "Expected ')' after method arguments");
+
+                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args));
+                
+                return std::make_unique<MethodCallNode>(name, std::move(methodCall));
+            } else {
+                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>());
+                return std::make_unique<MethodCallNode>(name, std::move(methodCall));
+            }
+        }
+
+        if (current.type == TokenType::LPAREN) {
+            advance();
             std::vector<std::unique_ptr<ExpressionNode>> args;
+
             if (current.type != TokenType::RPAREN) {
                 args.push_back(parseExpression());
+
                 while (current.type == TokenType::COMMA) {
                     advance();
                     args.push_back(parseExpression());
@@ -597,6 +626,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
         if (current.type == TokenType::SYMBOL) {
             std::string name = current.value;
             advance();
+
             if (current.type == TokenType::EQUAL) {
                 program.push_back(parseAssignment(name));
             } else if (current.type == TokenType::LPAREN) {
@@ -609,37 +639,21 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
 
             if (keyword == "start" || keyword == "loop") {
                 program.push_back(parseFunctionDefinition(keyword));
-            }
-
-            else if (keyword == "if") {
+            } else if (keyword == "if") {
                 program.push_back(parseIfStatement());
-            }
-
-            else if (keyword == "func") {
+            } else if (keyword == "func") {
                 program.push_back(parseUserFuncDefinition());
-            }
-
-            else if (keyword == "every") {
+            } else if (keyword == "every") {
                 program.push_back(parseEveryStatement());
-            }
-
-            else if (keyword == "while") {
+            } else if (keyword == "while") {
                 program.push_back(parseWhileStatement());
-            }
-
-            else if (keyword == "for") {
+            } else if (keyword == "for") {
                 program.push_back(parseForStatement());
-            }
-
-            else if (keyword == "repeat") {
+            } else if (keyword == "repeat") {
                 program.push_back(parseRepeatStatement());
-            }
-
-            else if (keyword == "on_press") {
+            } else if (keyword == "on_press") {
                 program.push_back(parseOnPressStatement());
-            }
-
-            else if (keywordsList.count(keyword)) {
+            } else if (keywordsList.count(keyword)) {
                 program.push_back(parseKeywordFunctionCall(keyword));
             }
         }

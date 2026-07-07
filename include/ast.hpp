@@ -275,14 +275,20 @@ public:
                 + "digitalWrite(" + pin + ", " + stateVar + ");";
         }
 
-        if (funcName == "write" && argsStr.size() >= 2) {
-            std::string pin = argsStr[0];
-            std::string value = argsStr[1];
+        if (funcName == "write") {
+            if (argsStr.size() >= 2) {
+                std::string pin = argsStr[0];
+                std::string value = argsStr[1];
 
-            if (value == "0" || value == "1" || value == "HIGH" || value == "LOW") {
-                return "digitalWrite(" + pin + ", " + value + ");";
-            } else {
-                return "analogWrite(" + pin + ", " + value + ");";
+                if (value == "0" || value == "1" || value == "HIGH" || value == "LOW") {
+                    return "digitalWrite(" + pin + ", " + value + ");";
+                } else {
+                    return "analogWrite(" + pin + ", " + value + ");";
+                }
+            } else if (argsStr.size() >= 1) {
+                std::string value = argsStr[0];
+
+                return "Serial.write(" + value + ");";
             }
         }
 
@@ -310,7 +316,7 @@ public:
             return "delay(" + parseTime(fullArg) + ");";
         }
 
-        if (funcName == "serial" && argsStr.size() >= 1) {
+        if (funcName == "start" && argsStr.size() >= 1) {
             return "Serial.begin(" + argsStr[0] + ");";
         }
 
@@ -496,6 +502,7 @@ public:
         }
 
         code += "}";
+
         if (!elseBody.empty()) {
             if (elseBody.size() == 1 && dynamic_cast<IfNode*>(elseBody[0].get())) {
                 std::string inner = elseBody[0]->toCpp();
@@ -627,7 +634,7 @@ public:
         if (condStr.find(">") != std::string::npos)
             op = "--";
 
-        std::string result = "for (int " + varName + " = " + startValue + "; " + condStr + "; " + varName + op + ") {\n";
+        std::string result = "for (uint32_t " + varName + " = " + startValue + "; " + condStr + "; " + varName + op + ") {\n";
 
         for (const auto& node : body) {
             result += node->toCpp() + "\n";
@@ -654,7 +661,7 @@ public:
 
     std::string toCpp() override {
         std::string iterVar = "_loop_i_" + std::to_string(id);
-        std::string code = "for (uint16_t " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
+        std::string code = "for (uint32_t " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
         
         for (const auto& node : body) {
             code += node->toCpp() + "\n";
@@ -714,7 +721,7 @@ public:
     }
 };
 
-class MethodCallNode : public ASTNode {
+class MethodCallNode : public ExpressionNode {
 private:
     std::string objectName;
     std::unique_ptr<ASTNode> methodCall;
