@@ -286,13 +286,17 @@ public:
             }
         }
 
-        if (funcName == "read" && argsStr.size() >= 1) {
-            std::string pin = argsStr[0];
+        if (funcName == "read") {
+            if (argsStr.size() >= 1) {
+                std::string pin = argsStr[0];
 
-            if (pin.length() >= 2 && pin[0] == 'A' && isdigit(pin[1])) {
-                return "analogRead(" + pin + ")";
+                if (pin.length() >= 2 && pin[0] == 'A' && isdigit(pin[1])) {
+                    return "analogRead(" + pin + ")";
+                } else {
+                    return "digitalRead(" + pin + ")";
+                }
             } else {
-                return "digitalRead(" + pin + ")";
+                return "Serial.read();";
             }
         }
 
@@ -322,8 +326,30 @@ public:
             return "Serial.available()";
         }
 
-        if (funcName == "read") {
-            return "Serial.read();";
+        if (funcName == "availableForWrite") {
+            return "Serial.availableForWrite()";
+        }
+
+        if (funcName == "end") {
+            return "Serial.end()";
+        }
+
+        if (funcName == "find" && argsStr.size() >= 2) {
+            std::string target = argsStr[0];
+            std::string lenght = argsStr[1];
+
+            return "Serial.find(" + target + ", " + lenght + ")";
+        }
+
+        if (funcName == "findUntil" && argsStr.size() >= 2) {
+            std::string target = argsStr[0];
+            std::string terminal = argsStr[1];
+
+            return "Serial.find(" + target + ", " + terminal + ")";
+        }
+
+        if (funcName == "waitUntilSend") {
+            return "Serial.flush();";
         }
 
         if (funcName == "scale" && argsStr.size() >= 5) {
