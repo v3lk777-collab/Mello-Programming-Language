@@ -1,16 +1,16 @@
 # Build files
 build/*
 
-# Output windows file (Exception comes AFTER the ignore rule)
+# Output windows file
 !build/mello.exe
 
 # To Do file
 todo.txt
 
-# Ignore VS Code settings folder FIRST
+# Ignore VS Code settings folder
 .vscode/*
 
-# Allow useful shared settings (Exceptions come AFTER the ignore rule)
+# Allow useful shared settings
 !.vscode/launch.json
 !.vscode/tasks.json
 !.vscode/extensions.json
