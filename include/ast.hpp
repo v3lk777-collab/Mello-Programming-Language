@@ -352,6 +352,30 @@ public:
             return "Serial.flush();";
         }
 
+        if (funcName == "parseFloat") {
+            if (argsStr.size() >= 2) {
+                return "Serial.parseFloat(" + argsStr[0] + ", " + argsStr[1] + ");";
+            } else if (argsStr.size() == 1) {
+                return "Serial.parseFloat(" + argsStr[0] + ");";
+            } else {
+                return "Serial.parseFloat();";
+            }
+        }
+
+        if (funcName == "parseInt") {
+            if (argsStr.size() >= 2) {
+                return "Serial.parseInt(" + argsStr[0] + ", " + argsStr[1] + ");";
+            } else if (argsStr.size() == 1) {
+                return "Serial.parseInt(" + argsStr[0] + ");";
+            } else {
+                return "Serial.parseInt();";
+            }
+        }
+
+        if (funcName == "peek") {
+            return "Serial.peek();";
+        }
+
         if (funcName == "scale" && argsStr.size() >= 5) {
             return "map(" + argsStr[0] + ", " + argsStr[1] + ", " + argsStr[2] + ", " + argsStr[3] + ", " + argsStr[4] + ")";
         }
