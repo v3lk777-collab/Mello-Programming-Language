@@ -188,6 +188,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
     }
 
     ErrorHandler::report("Unexpected token in expression:", current.value, current.line, this->source);
+    
     return nullptr;
 }
 
@@ -235,10 +236,9 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 body.push_back(std::make_unique<CompoundAssignNode>(name, "--", ""));
             } else if (current.type == TokenType::DOT) {
                 advance();
-                
                 std::string methodName = current.value;
+
                 advance();
-                
                 auto methodCall = parseFunctionCall(methodName);
                 
                 body.push_back(std::make_unique<MethodCallNode>(name, std::move(methodCall)));
@@ -265,10 +265,9 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
 
                 if (current.type == TokenType::DOT) {
                     advance();
-
                     std::string methodName = current.value;
-                    advance();
 
+                    advance();
                     auto methodCall = parseFunctionCall(methodName);
                     
                     body.push_back(std::make_unique<MethodCallNode>(keyword, std::move(methodCall)));
