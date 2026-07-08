@@ -27,8 +27,9 @@ public:
 class VarAssignNode : public ASTNode {
 private:
     bool isNumeric(const std::string& str) {
-        if (str.empty())
+        if (str.empty()) {
             return false;
+        }
         
         bool hasDecimal = false;
         size_t start = 0;
@@ -42,8 +43,9 @@ private:
 
         for (size_t i = start; i < str.size(); ++i) {
             if (str[i] == '.') {
-                if (hasDecimal)
+                if (hasDecimal) {
                     return false;
+                }
                 
                 hasDecimal = true;
             } else if (!std::isdigit(str[i])) {
@@ -496,6 +498,7 @@ public:
         elseBody = std::move(body);
     }
 
+public:
     std::string toCpp() override {
         std::string code = "if (" + condition->toCpp() + ") {\n";
         
@@ -519,6 +522,7 @@ public:
                 code += "}";
             }
         }
+
         return code;
     }
 };
@@ -547,6 +551,7 @@ public:
         }
 
         result += "}\n";
+
         return result;
     }
 };
@@ -592,6 +597,7 @@ public:
         }
 
         code += "}";
+
         return code;
     }
 };
@@ -613,6 +619,7 @@ public:
         }
 
         result += "}\n";
+
         return result;
     }
 };
@@ -633,8 +640,9 @@ public:
         std::string op = "++"; 
         std::string startValue = "0";
 
-        if (condStr.find(">") != std::string::npos)
+        if (condStr.find(">") != std::string::npos) {
             op = "--";
+        }
 
         std::string result = "for (uint32_t " + varName + " = " + startValue + "; " + condStr + "; " + varName + op + ") {\n";
 
@@ -643,6 +651,7 @@ public:
         }
 
         result += "}\n";
+
         return result;
     }
 };
@@ -670,6 +679,7 @@ public:
         }
 
         code += "}";
+
         return code;
     }
 };
@@ -719,6 +729,7 @@ public:
 
         code += "}\n";
         code += lastVar + " = " + currVar + ";";
+
         return code;
     }
 };
