@@ -29,8 +29,10 @@
 
 std::string getComputerCoreNumber() {
     unsigned int coreCount = std::thread::hardware_concurrency();
-    if (coreCount == 0)
+
+    if (coreCount == 0) {
         coreCount = 4;
+    }
 
     return std::to_string(coreCount);
 }
@@ -126,8 +128,9 @@ bool uploadCode() {
 bool runMelloCompiler(int argc, char* argv[]) {
     std::string fileName;
 
-    if (argc > 1)
+    if (argc > 1) {
         fileName = argv[1];
+    }
 
     if (fileName.empty()) {
         std::cout << "Enter the Mello file name: ";
@@ -281,6 +284,9 @@ bool runMelloCompiler(int argc, char* argv[]) {
     }
 
     // Delete when u finish from here
+    // But wait, why are u reaing my code
+    // yk, if u steal it, i will kill u
+    // so btw, dont steal it
 
     std::string sketchCode;
 
