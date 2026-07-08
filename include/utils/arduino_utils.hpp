@@ -101,6 +101,7 @@ bool uploadCode() {
                 }
             }
         }
+        
         portsFile.close();
         std::filesystem::remove(portsFilePath); 
     }
@@ -293,8 +294,9 @@ bool runMelloCompiler(int argc, char* argv[]) {
     std::ifstream sketchCodeFile(inoFilePath.string());
 
     if (sketchCodeFile.is_open()) {
-        while (getline(sketchCodeFile, sketchCode))
+        while (getline(sketchCodeFile, sketchCode)) {
             std::cout << sketchCode << "\n";
+        }
     } else {
         std::cerr << "Warning: Cann't open the sketch code file." << "\n";
     }
@@ -307,8 +309,9 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     bool compiledSuccessfully = compileCode();
 
-    if (compiledSuccessfully && argc >= 3 && std::string(argv[2]) == "--upload")
+    if (compiledSuccessfully && argc >= 3 && std::string(argv[2]) == "--upload") {
         uploadCode();
+    }
 
     std::filesystem::remove_all(sketchDir);
 

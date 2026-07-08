@@ -60,8 +60,10 @@ std::unique_ptr<ExpressionNode> Parser::parseLogicalOr() {
 
     while (current.type == TokenType::KEYWORD && (current.value == "or" || current.value == "||")) {
         Token op = current;
+
         advance();
         auto right = parseLogicalAnd();
+
         left = std::make_unique<BinaryOpNode>(std::move(left), op, std::move(right));
     }
 
@@ -73,8 +75,10 @@ std::unique_ptr<ExpressionNode> Parser::parseLogicalAnd() {
 
     while (current.type == TokenType::KEYWORD && (current.value == "and" || current.value == "&&")) {
         Token op = current;
+
         advance();
         auto right = parseEquality();
+
         left = std::make_unique<BinaryOpNode>(std::move(left), op, std::move(right));
     }
 
@@ -86,8 +90,10 @@ std::unique_ptr<ExpressionNode> Parser::parseEquality() {
 
     while (current.type == TokenType::EQUALITY || current.type == TokenType::NOT_EQUAL) {
         Token op = current;
+
         advance();
         auto right = parseComparison();
+
         left = std::make_unique<BinaryOpNode>(std::move(left), op, std::move(right));
     }
 
@@ -97,11 +103,12 @@ std::unique_ptr<ExpressionNode> Parser::parseEquality() {
 std::unique_ptr<ExpressionNode> Parser::parseComparison() {
     auto left = parseTerm();
 
-    while (current.type == TokenType::GREATER || current.type == TokenType::GREATER_EQUAL ||
-           current.type == TokenType::LESS || current.type == TokenType::LESS_EQUAL) {
+    while (current.type == TokenType::GREATER || current.type == TokenType::GREATER_EQUAL || current.type == TokenType::LESS || current.type == TokenType::LESS_EQUAL) {
         Token op = current;
+
         advance();
         auto right = parseTerm();
+
         left = std::make_unique<BinaryOpNode>(std::move(left), op, std::move(right));
     }
 
@@ -113,6 +120,7 @@ std::unique_ptr<ExpressionNode> Parser::parseTerm() {
 
     while (current.type == TokenType::PLUS || current.type == TokenType::MINUS) {
         Token op = current;
+
         advance();
         auto right = parseFactor();
 
@@ -127,6 +135,7 @@ std::unique_ptr<ExpressionNode> Parser::parseFactor() {
 
     while (current.type == TokenType::MUL || current.type == TokenType::DIV) {
         Token op = current;
+
         advance();
         auto right = parsePrimary();
 
@@ -140,18 +149,20 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
     if (current.type == TokenType::NUMBER) {
         Token t = current;
         advance();
+
         return std::make_unique<LiteralNode>(t);
     }
 
     if (current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD) {
         Token t = current;
         std::string name = current.value;
+
         advance();
 
         if (current.type == TokenType::DOT) {
             advance();
-
             std::string methodName = current.value;
+            
             advance();
 
             if (current.type == TokenType::LPAREN) {
