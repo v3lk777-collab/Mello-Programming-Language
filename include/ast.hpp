@@ -35,8 +35,9 @@ private:
         size_t start = 0;
         
         if (str[0] == '-') {
-            if (str.size() == 1)
+            if (str.size() == 1) {
                 return false;
+            }
 
             start = 1;
         }
@@ -70,16 +71,19 @@ public:
         std::string type = "";
         std::string final_value = value->toCpp();
 
-        while (!final_value.empty() && (final_value.back() == ';' || final_value.back() == '\n' || final_value.back() == ' '))
+        while (!final_value.empty() && (final_value.back() == ';' || final_value.back() == '\n' || final_value.back() == ' ')) {
             final_value.pop_back();
+        }
 
-        if (declaredVariables.count(name))
+        if (declaredVariables.count(name)) {
             return name + " = " + final_value + ";";
+        }
 
         auto containsStringVariable = [&](const std::string& expr) {
             for (const auto& stringVariable : stringVariables) {
-                if (expr.find(stringVariable) != std::string::npos)
+                if (expr.find(stringVariable) != std::string::npos) {
                     return true;
+                }
             }
 
             return false;
@@ -87,8 +91,9 @@ public:
 
         auto containsFloatVariable = [&](const std::string& expr) {
             for (const auto& floatVariable : floatVariables) {
-                if (expr.find(floatVariable) != std::string::npos)
+                if (expr.find(floatVariable) != std::string::npos) {
                     return true;
+                }
             }
 
             return false;
