@@ -19,7 +19,9 @@ public:
 class ExpressionNode : public ASTNode {
 public:
     virtual ~ExpressionNode() = default;
-    virtual std::string getVariableName() { return ""; };
+    virtual std::string getVariableName() {
+        return "";
+    };
 };
 
 class VarAssignNode : public ASTNode {
