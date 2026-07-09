@@ -8,13 +8,12 @@
 1.  [The Vision & Problem Statement](#-1-the-vision--problem-statement)
 2.  [Core Engineering Features](#-2-core-engineering-features)
 3.  [Under the Hood: Compiler Architecture](#-3-under-the-hood-compiler-architecture)
-4.  [Prerequisites & Installation](#-4-prerequisites--installation)
-5.  [Language Syntax & Reference](#-5-language-syntax--reference)
-6.  [Code Example](#-code-example)
-7.  [Performance Benchmarks](#-7-performance-benchmarks)
-8.  [STEAM Evaluation Criteria](#-8-steam-evaluation-criteria)
-9.  [Roadmap & Future Work](#-9-roadmap--future-work)
-10. [License](#-license)
+4.  [Language Syntax & Reference](#-4-language-syntax--reference)
+5.  [Code Example](#-5-code-example)
+6.  [Performance Benchmarks](#-6-performance-benchmarks)
+7.  [STEAM Evaluation Criteria](#-7-steam-evaluation-criteria)
+8.  [Roadmap & Future Work](#-8-roadmap--future-work)
+9.  [Intellectual Property & Usage Policy](#-9-intellectual-property--usage-policy)
 
 ---
 
@@ -92,9 +91,9 @@ sensorPin = A0
 
 loop:
     turn_on(pin)                # Automatically sets pin 13 to OUTPUT and writes HIGH
-    wait(1s)                    # Wait for 1 secound
+    wait(1s)                    # Wait for 1 second
     turn_off(pin)               # Writes LOW to pin 13
-    wait(1s)                    # Wait for 1 secound
+    wait(1s)                    # Wait for 1 second
 
     value = read(sensorPin)     # Automatically reads analog/digital value
 ```
@@ -107,7 +106,7 @@ sensorPin = A0
 
 loop:
     toggle(pin)                 # Automatically sets pin 13 to OUTPUT and writes HIGH then writes LOW
-    wait(1s)                    # Wait for 1 secound
+    wait(1s)                    # Wait for 1 second
 
     value = read(sensorPin)     # Automatically reads analog/digital value
 ```
@@ -167,7 +166,7 @@ Define reusable blocks of code easily with the `func` keyword.
 pin = 13
 
 func blink_fast(pin_num):
-    toogle(pin_num)
+    toggle(pin_num)
     wait(100)
 
 loop:
@@ -242,7 +241,7 @@ As part of ongoing research and development, the following features are planned 
 
 ---
 
-## 📜 Intellectual Property & Usage Policy
+## 📜 9. Intellectual Property & Usage Policy
 
 **© 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.**
 
