@@ -248,8 +248,8 @@ As part of ongoing research and development, the following features are planned 
 
 Mello Programming Language is an original work developed for scientific research and educational purposes. 
 
-- **Usage:** You are free to view, study, and learn from this codebase.
+- **Usage:** You are free to view, study, use Mello in embedded systems like Arduino and ESP32, and learn from this codebase.
 - **Restrictions:** Unauthorized use of this source code in any academic competition (e.g., ISEF, science fairs), research submission, or commercial product is **strictly prohibited** without prior written consent from the author.
-- **Attribution:** If you find this project useful for learning, please attribute the work to the original author (Mohammed Tamer).
+- **Attribution:** If you find this project useful for learning, please attribute the work to the original author (Mohammed Tamer Mohammed Ahmed El-Azab Nour).
 
 *If you are interested in collaborating or seeking permission for specific use, please contact me directly.*
