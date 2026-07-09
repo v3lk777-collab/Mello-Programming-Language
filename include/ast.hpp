@@ -330,11 +330,11 @@ public:
         }
 
         if (funcName == "print" && argsStr.size() >= 1) {
-            return "Serial.print(" + argsStr[0] + ");";
+            return "Serial.print(F(" + argsStr[0] + "));";
         }
 
         if (funcName == "println" && argsStr.size() >= 1) {
-            return "Serial.println(" + argsStr[0] + ");";
+            return "Serial.println(F(" + argsStr[0] + "));";
         }
 
         if (funcName == "available") {

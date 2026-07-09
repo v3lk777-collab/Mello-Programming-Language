@@ -215,12 +215,12 @@ bool runMelloCompiler(int argc, char* argv[]) {
                 hasSetup = true;
             }
 
-            if ((code.find("Serial.print") != std::string::npos) || (code.find("Serial.println") != std::string::npos) || (code.find("Serial.available") != std::string::npos) || (code.find("Serial.read") != std::string::npos)) {
-                hasSerialCommand = true;
-            }
-
             if (code.find("Serial.begin") != std::string::npos) {
                 hasSerial = true;
+            }
+
+            if ((code.find("Serial.") != std::string::npos) && code.find("Serial.begin") == std::string::npos) {
+                hasSerialCommand = true;
             }
 
             if (code.find("void loop()") != std::string::npos) {
@@ -253,7 +253,6 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
         FunctionNode autoSetup("setup", std::move(setupBody));
         outputFile << autoSetup.toCpp() << "\n";
-
     } else if (!hasSerial && hasSerialCommand) {
         size_t pos = functionsCode.find("void setup() {");
 
