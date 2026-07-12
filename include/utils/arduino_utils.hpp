@@ -65,7 +65,7 @@ bool installLibraries() {
 bool compileCode() {
     std::cout << "Starting code compilation..." << "\n";
     
-    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + getTempSketchDir().string() + "\"";
+    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-Os -flto\"" + " \"" + getTempSketchDir().string() + "\"";
     int compileStatus = system(compileCommand.c_str());
     
     if (compileStatus == 0) {
@@ -127,24 +127,25 @@ bool uploadCode() {
 }
 
 bool runMelloCompiler(int argc, char* argv[]) {
-    std::string fileName;
+    std::string filePath;
 
     if (argc > 1) {
-        fileName = argv[1];
+        filePath = argv[1];
     }
 
-    if (fileName.empty()) {
-        std::cout << "Enter the Mello file name: ";
-        std::cin >> fileName;
+    if (filePath.empty()) {
+        std::cout << "Enter the Mello file path: ";
+        std::cin >> filePath;
     }
 
-    std::ifstream file(fileName);
+    std::ifstream file(filePath);
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open file " << fileName << "\n";
+        std::cerr << "Error: Could not open file " << filePath << "\n";
         return false;
     }
 
     std::string sourceCode((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
     file.close();
 
     Lexer lexer(sourceCode);
