@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cstdlib>
 #include <iostream>
 
 class ErrorHandler {
@@ -18,6 +19,8 @@ private:
 
 public:
     static void report(const std::string& message, const std::string& tokenValue, int lineNumber, const std::string& source) {
+        errorCount++;
+        
         std::vector<std::string> lines;
         std::stringstream ss(source);
         std::string currentLineContent;
