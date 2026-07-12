@@ -1,7 +1,7 @@
 pin = 13
 
 start:
-    serial.print("Mello Programming Language")
+    serial.print("Hello from Mello Programming Language")
 
 loop:
     toggle(pin)
