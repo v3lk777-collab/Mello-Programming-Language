@@ -31,8 +31,8 @@ private:
             return false;
         }
         
-        bool hasDecimal = false;
         size_t start = 0;
+        bool hasDecimal = false;
         
         if (str[0] == '-') {
             if (str.size() == 1) {
@@ -55,6 +55,27 @@ private:
         }
 
         return true;
+    }
+
+    std::string inferIntegerType(std::string value) {
+        std::string type;
+        long long number = std::stoll(value);
+
+        if (number >= 0 && number <= 255) {
+            type = "uint8_t";
+        } else if (number >= -32768 && number <= 32768) {
+            type = "int";
+        } else if (number >= 0 && number <= 65535) {
+            type = "uint16_t";
+        } else if (number >= -2147483648LL && number <= 2147483647LL) {
+            type = "long";
+        } else if (number >= 0 && number <= 4294967295LL) {
+            type = "unsigned long";
+        } else {
+            type = "int";
+        }
+
+        return type;
     }
 
 public:
@@ -132,7 +153,7 @@ public:
             type = "char";
             final_value = "'" + final_value + "'";
         } else if (isNumeric(final_value)) {
-            type = "int";
+            type = inferIntegerType(final_value);
             integerVariables.insert(name);
         } else {
             if (containsFloatVariable(final_value)) {
@@ -207,6 +228,7 @@ private:
 public:
     FunctionCallNode(const std::string& name, std::vector<std::unique_ptr<ExpressionNode>> args)
         : funcName(name), arguments(std::move(args)) {
+        
         if (!arguments.empty()) {
             std::string pinName = arguments[0]->toCpp();
             
@@ -279,9 +301,7 @@ public:
             std::string pin = argsStr[0];
             std::string stateVar = "_toggle_state_" + pin;
 
-            return "static int " + stateVar + " = LOW;\n"
-                + stateVar + " = (" + stateVar + " == LOW) ? HIGH : LOW;\n"
-                + "digitalWrite(" + pin + ", " + stateVar + ");";
+            return "static int " + stateVar + " = LOW;\n" + stateVar + " = (" + stateVar + " == LOW) ? HIGH : LOW;\n" + "digitalWrite(" + pin + ", " + stateVar + ");";
         }
 
         if (funcName == "write") {
