@@ -7,8 +7,8 @@
 // explicit written permission from the author.
 
 #pragma once
-#include "lexer.hpp"
 #include "utils.hpp"
+#include "lexer.hpp"
 
 class ASTNode {
 public:
