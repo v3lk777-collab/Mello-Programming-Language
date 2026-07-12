@@ -7,6 +7,9 @@
 // explicit written permission from the author.
 
 #pragma once
+#include "lexer.hpp"
+#include "parser.hpp"
+
 #include <thread>
 #include <vector>
 #include <cstdio>
@@ -139,6 +142,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     }
 
     std::ifstream file(filePath);
+
     if (!file.is_open()) {
         std::cerr << "Error: Could not open file " << filePath << "\n";
         return false;
