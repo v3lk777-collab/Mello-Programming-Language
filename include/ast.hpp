@@ -26,7 +26,7 @@ public:
 
 class VarAssignNode : public ASTNode {
 private:
-    bool isNumeric(const std::string& str) {
+    bool isNumeric(const std::string& str) const noexcept {
         if (str.empty()) {
             return false;
         }
@@ -34,7 +34,7 @@ private:
         size_t start = 0;
         bool hasDecimal = false;
         
-        if (str[0] == '-') {
+        if (str[0] == '-' || str[0] == '+') {
             if (str.size() == 1) {
                 return false;
             }
@@ -57,7 +57,7 @@ private:
         return true;
     }
 
-    std::string inferIntegerType(std::string value) {
+    std::string inferIntegerType(std::string value) const {
         std::string type;
         long long number = std::stoll(value);
 
@@ -168,11 +168,11 @@ public:
         declaredVariables.insert(name);
 
         bool isReassigned = reassignedVariables.count(name) > 0;
-        bool hasConst = type.find("const") != std::string::npos;
+        bool hasConst = type.find("constexpr") != std::string::npos;
         bool isKeyword = keywordsList.count(raw_value) > 0;
 
         if (!isReassigned && !hasConst && !isKeyword) {
-            return "const " + type + " " + name + " = " + final_value + ";\n";
+            return "constexpr " + type + " " + name + " = " + final_value + ";\n";
         }
 
         return type + " " + name + " = " + final_value + ";\n";
