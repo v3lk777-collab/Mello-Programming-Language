@@ -1,8 +1,9 @@
-pin = 13
+LEDPin = 13
 
 start:
-    serial.print("Hello from Mello Programming Language")
+    serial.println("Hello from Mello Programming Language")
+    serial.println("This code gonna blink a LED in pin 13 in the Arduino UNO")
 
 loop:
-    toggle(pin)
+    toggle(LEDPin)
     wait(1s)
