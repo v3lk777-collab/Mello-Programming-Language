@@ -301,7 +301,7 @@ public:
             std::string pin = argsStr[0];
             std::string stateVar = "_toggle_state_" + pin;
 
-            return "static int " + stateVar + " = LOW;\n" + stateVar + " = (" + stateVar + " == LOW) ? HIGH : LOW;\n" + "digitalWrite(" + pin + ", " + stateVar + ");";
+            return "static uint8_t " + stateVar + " = LOW;\n" + stateVar + " = (" + stateVar + " == LOW) ? HIGH : LOW;\n" + "digitalWrite(" + pin + ", " + stateVar + ");";
         }
 
         if (funcName == "write") {

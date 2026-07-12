@@ -68,7 +68,7 @@ bool installLibraries() {
 bool compileCode() {
     std::cout << "Starting code compilation..." << "\n";
     
-    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-Os -flto\"" + " \"" + getTempSketchDir().string() + "\"";
+    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + getTempSketchDir().string() + "\"";
     int compileStatus = system(compileCommand.c_str());
     
     if (compileStatus == 0) {
@@ -104,7 +104,7 @@ bool uploadCode() {
                 }
             }
         }
-        
+
         portsFile.close();
         std::filesystem::remove(portsFilePath); 
     }
