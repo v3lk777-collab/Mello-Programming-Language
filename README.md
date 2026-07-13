@@ -323,4 +323,4 @@ Mello Programming Language and the Mello IDE are original works developed for sc
 - **Restrictions:** unauthorized use of this source code in any academic competition (e.g., ISEF, science fairs), research submission, or commercial product is **strictly prohibited** without prior written consent from the author.
 - **Attribution:** if you find this project useful for learning, please attribute the work to the original author, Mohammed Tamer Mohammed Ahmed El-Azab.
 
-*Interested in collaborating or seeking permission for specific use? Please reach out directly.*
+*Interested in collaborating or seeking permission for specific use? Please reach out directly (v3lk777@gmail.com).*
