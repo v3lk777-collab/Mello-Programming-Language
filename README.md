@@ -1,60 +1,67 @@
 # Mello Programming Language 🍉
 
-**A High-Performance, Indentation-Based Programming Language and Transpiler for Streamlining Embedded Systems and IoT Development.**
+**A high-performance, indentation-based programming language and transpiler for streamlining embedded systems and IoT development.**
+
+Mello compiles directly to native C++ — no runtime interpreter, no virtual machine. Write readable, Python-like code and get the exact binary footprint of hand-written Arduino C++.
 
 ---
 
 ## 📑 Table of Contents
-1.  [The Vision & Problem Statement](#-1-the-vision--problem-statement)
-2.  [Core Engineering Features](#-2-core-engineering-features)
-3.  [Under the Hood: Compiler Architecture](#-3-under-the-hood-compiler-architecture)
-4.  [Language Syntax & Reference](#-4-language-syntax--reference)
-5.  [Code Example](#-5-code-example)
-6.  [Performance Benchmarks](#-6-performance-benchmarks)
-7.  [STEAM Evaluation Criteria](#-7-steam-evaluation-criteria)
-8.  [Roadmap & Future Work](#-8-roadmap--future-work)
-9.  [Intellectual Property & Usage Policy](#-9-intellectual-property--usage-policy)
+
+1. [The Vision & Problem Statement](#-1-the-vision--problem-statement)
+2. [Core Engineering Features](#-2-core-engineering-features)
+3. [Under the Hood: Compiler Architecture](#-3-under-the-hood-compiler-architecture)
+4. [Language Syntax & Reference](#-4-language-syntax--reference)
+5. [Code Example](#-5-code-example)
+6. [Getting Started](#-6-getting-started)
+7. [Performance Benchmarks](#-7-performance-benchmarks)
+8. [The Mello IDE](#-8-the-mello-ide)
+9. [STEAM Evaluation Criteria](#-9-steam-evaluation-criteria)
+10. [Roadmap & Future Work](#-10-roadmap--future-work)
+11. [Intellectual Property & Usage Policy](#-11-intellectual-property--usage-policy)
 
 ---
 
 ## 🎯 1. The Vision & Problem Statement
 
 Programming microcontrollers typically forces a choice between two extremes:
-- **C/C++ (Arduino IDE):** Extremely fast and memory-efficient, but suffers from a steep learning curve, verbose syntax (semicolons, brackets), and complex hardware interrupt/timer management.
-- **MicroPython/CircuitPython:** Beautiful, readable syntax, but requires massive runtime environments, consumes heavy RAM, and is incompatible with lower-end microcontrollers like the ATmega328P.
 
-**The Mello Hypothesis:** By parsing an indentation-based, highly readable language into an Abstract Syntax Tree (AST) and transpiling it directly into strictly optimized, native C++ code before compilation, we can achieve **100% of the C++ performance footprint** with **60% of the code verbosity**.
+- **C/C++ (Arduino IDE):** Extremely fast and memory-efficient, but suffers from a steep learning curve, verbose syntax (semicolons, brackets), and manual hardware timer/debounce management.
+- **MicroPython / CircuitPython:** Beautiful, readable syntax, but requires a resident runtime VM — 250,000+ bytes of Flash and thousands of bytes of RAM just to boot — which is simply incompatible with lower-end microcontrollers like the ATmega328P.
+
+**The Mello Hypothesis:** By parsing an indentation-based, highly readable language into an Abstract Syntax Tree (AST) and transpiling it directly into strictly optimized, static C++ code *before* compilation, it's possible to achieve **100% of the native C++ performance footprint** while cutting code verbosity by **up to 60%**.
 
 ---
 
 ## 🚀 2. Core Engineering Features
 
-- **Zero-Overhead Transpilation:** Mello code is converted into pure C++. There is no runtime interpreter eating up your RAM.
-- **Smart Micro-Threading (`every`):** Say goodbye to the blocking `delay()`. Mello implements a built-in `every` keyword that automatically generates non-blocking `millis()` based timers in the background, allowing true multitasking.
-- **Event-Driven Hardware (`on_press`):** Hardware interrupts and button debouncing are natively handled. The AST abstracts complex state-tracking variables automatically.
-- **Auto-Configuration:** No need for manual `pinMode()` or `Serial.begin()`. Mello's semantic analyzer detects your inputs, outputs, and serial prints, automatically generating the necessary setup routines.
-- **Indentation-Based:** Clean, Pythonic syntax enforcing readable code structures without curly braces `{}` or semicolons `;`.
+- **Zero-Overhead Transpilation:** Mello code is converted into pure C++ at compile time. There is no runtime interpreter eating up RAM or CPU cycles.
+- **Smart Micro-Threading (`every`):** Say goodbye to the blocking `delay()`. The `every` keyword automatically generates a non-blocking, `millis()`-based timer, allowing true cooperative multitasking.
+- **Event-Driven Hardware (`on_press`):** Button debouncing is handled natively — the compiler expands a single line into an edge-detected, cooldown-based debounce check, with no hand-written state variables.
+- **Auto-Configuration:** No manual `pinMode()` or `Serial.begin()` calls. The semantic analyzer scans the usage graph — every `turn_on()`, `toggle()`, `on_press`, and `serial.*` call — and generates the correct `setup()` routine automatically.
+- **Smart Type Inference:** Every variable is assigned the tightest native C++ type at transpile time (`uint8_t` for small integers, `float` for decimals, `const char*` for text), and any variable that's never reassigned is automatically marked `const`.
+- **Indentation-Based:** Clean, Pythonic syntax with no curly braces `{}` or semicolons `;`.
 
 ---
 
 ## ⚙️ 3. Under the Hood: Compiler Architecture
 
-The Mello compiler is built from scratch in C++ and operates in multiple sophisticated phases:
+The Mello compiler is built from scratch in C++17 and operates in five sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
-The `Lexer` scans the `.mello` file, handling Python-like indentation/dedentation logic and generating a stream of tokens. It accurately categorizes keywords (`start`, `loop`, `every`, `on_press`, `or`, `and`, `turn_on`, `turn_off`, `wait`, ...), symbols, and literals.
+The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 22 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `serial`, `scale`, `func`, `return`, `and`, `or`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`.
 
 ### Phase B: Syntax Analysis (Parser)
-The `Parser` consumes the tokens and validates them against Mello's strict grammar rules. It constructs a robust Abstract Syntax Tree (AST), ensuring all logical blocks are properly nested.
+The `Parser` consumes the token stream and validates it against Mello's grammar using recursive-descent parsing, constructing a full Abstract Syntax Tree (AST) with properly nested logical blocks.
 
 ### Phase C: Semantic Analysis & Auto-Routing
-During AST traversal, Mello intelligently resolves variable scoping and detects auto-pin assignments. For instance, if `turn_on(13)` is found, pin 13 is pushed to a global `outputPins` set to automatically generate `pinMode(13, OUTPUT)` in the final `setup()` function.
+During AST traversal, Mello resolves variable scoping and detects auto-pin assignments. A pin referenced by `turn_on()`, `turn_off()`, or `toggle()` is added to the `outputPins` set; a pin referenced by `on_press` is added to `inputPins` — both are used to auto-generate the correct `pinMode()` calls in `setup()`.
 
 ### Phase D: Code Generation (Transpiler)
-Nodes in the AST (e.g., `OnPressNode`, `VarAssignNode`) invoke their respective `toCpp()` methods. This outputs optimized, pure C++ code that handles state tracking statically.
+Every AST node (`OnPressNode`, `EveryNode`, `VarAssignNode`, ...) implements its own `toCpp()` method, recursively emitting optimized, static C++ — no dynamic allocation, no hidden runtime cost.
 
 ### Phase E: Automated Pipeline
-Mello automatically uses `clang-format` to format the code into the **Google** Style, triggers `arduino-cli` to compile the generated C++ into a machine-readable binary (`.hex` / `.bin`), and flashes it directly to the embedded hardware.
+Mello runs `clang-format` (Google style) on the generated source, invokes `arduino-cli` against the `arduino:avr:uno` board profile with `-O3 -flto` optimization to produce a `.hex` / `.bin` binary, and can flash it directly to a connected board by passing `--upload`.
 
 ---
 
@@ -63,7 +70,7 @@ Mello automatically uses `clang-format` to format the code into the **Google** S
 Mello is designed to be intuitive and highly readable.
 
 ### Variables & Data Handling
-Variables are dynamically assigned during transpilation but become strictly typed in the resulting C++ code.
+Variables are dynamically inferred at transpile time but become strictly typed, native C++ in the output.
 
 ```python
 name = "Mohammed"
@@ -83,38 +90,43 @@ loop:
 ```
 
 ### Hardware I/O Abstraction
-Interacting with pins is simplified to natural language commands.
+Interacting with pins is simplified to natural-language commands.
 
 ```python
 pin = 13
 sensorPin = A0
 
 loop:
-    turn_on(pin)                # Automatically sets pin 13 to OUTPUT and writes HIGH
+    turn_on(pin)                # -> digitalWrite(pin, HIGH)
     wait(1s)                    # Wait for 1 second
-    turn_off(pin)               # Writes LOW to pin 13
-    wait(1s)                    # Wait for 1 second
+    turn_off(pin)               # -> digitalWrite(pin, LOW)
+    wait(1s)
 
-    value = read(sensorPin)     # Automatically reads analog/digital value
+    value = read(sensorPin)     # "A"-prefixed pin -> analogRead(); otherwise digitalRead()
 ```
 
-Or you can use ```toggle``` build-in function to blink the LED
+Or use the built-in `toggle` function to blink a pin — it keeps its own internal state and flips between `HIGH` and `LOW` on every call:
 
 ```python
 pin = 13
-sensorPin = A0
 
 loop:
-    toggle(pin)                 # Automatically sets pin 13 to OUTPUT and writes HIGH then writes LOW
-    wait(1s)                    # Wait for 1 second
+    toggle(pin)                 # Flips HIGH/LOW every call via its own static flag
+    wait(1s)
+```
 
-    value = read(sensorPin)     # Automatically reads analog/digital value
+Other hardware and serial primitives:
+
+```python
+write(pin, 1)                   # 0/1/HIGH/LOW -> digitalWrite(); any other value -> analogWrite()
+write(character)                # Single argument -> Serial.write()
+scale(value, 0, 1023, 0, 255)   # -> map(value, 0, 1023, 0, 255)
 ```
 
 ### Advanced Event-Driven Structures
 Mello shines in handling hardware events without blocking the CPU execution thread.
 
-**The `every` loop (Non-blocking timer):**
+**The `every` loop (non-blocking timer):**
 
 ```python
 pin = 13
@@ -125,7 +137,7 @@ loop:
         serial.println("1 second passed, and the CPU wasn't blocked!")
 ```
 
-**The `on_press` event (Auto-debounced button):**
+**The `on_press` event (auto-debounced button):**
 
 ```python
 buttonPin = 2
@@ -136,7 +148,7 @@ loop:
 ```
 
 ### Control Flow
-Standard logical operators and loops are fully supported.
+Standard logical operators and three loop constructs are fully supported.
 
 ```python
 LED_PIN = 13
@@ -151,12 +163,15 @@ loop:
         serial.print("Stable")
     else:
         turn_off(LED_PIN)
-   
+
     repeat 5:
-       serial.println("This runs exactly five times")
-   
+        serial.println("This runs exactly five times")
+
     while is_active == 1:
-       wait(100)               # Standard blocking delay if absolutely needed
+        wait(100)               # Standard blocking delay if absolutely needed
+
+    for i < 10:                 # Direction (++ / --) inferred from the comparison operator
+        serial.println(i)
 ```
 
 ### Custom Functions
@@ -177,8 +192,7 @@ loop:
 
 ## 💻 5. Code Example
 
-### Mello Code Example
-A practical example showcasing multi-tasking and event handling in a Smart Room Controller.
+A practical example showcasing multi-tasking and event handling in a Smart Room Controller — a non-blocking sensor poll running alongside a debounced button listener, neither one blocking the other.
 
 ```python
 # Mello Smart Room Example
@@ -197,11 +211,10 @@ loop:
         serial.print("Current Temp: ")
         serial.println(temp)
 
-    # Listen for button press to toggle system
+    # Listen for button press to toggle the system
     on_press buttonPin:
         if systemActive == 1:
             systemActive = 0
-
             turn_off(lightPin)
             serial.println("System Deactivated")
         else:
@@ -212,43 +225,102 @@ loop:
 
 ---
 
-## 📊 6. Performance Benchmarks
+## 🛠️ 6. Getting Started
 
-Mello has been rigorously tested against standard alternatives:
+### Option A — Prebuilt Windows Binary
 
-- **Memory Footprint (RAM & Flash):** Because Mello transpiles directly to C++, a standard Mello `blink` program uses approximately **900 Bytes** of Flash and **9 Bytes** of RAM on an ATmega328P. A similar MicroPython script requires flashing a ~250KB firmware and consumes significantly more RAM just to maintain the interpreter state. Mello provides **Native C++ Performance**.
-- **Lines of Code (LoC):** On average, Mello reduces the required lines of code by **40% to 60%** compared to native Arduino C++ due to the intelligent abstraction of timers, state variables, and `setup()` routines.
+A prebuilt `mello.exe` is committed directly to the repository at `build/mello.exe`, so Windows users can skip building entirely:
+
+```bash
+git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
+cd Mello-Programming-Language/build
+
+mello.exe path\to\main.mello
+mello.exe path\to\main.mello --upload
+```
+
+### Option B — Build from Source
+
+The compiler is built with CMake and requires a C++17 toolchain (Linux, macOS, or Windows).
+
+```bash
+git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
+cd Mello-Programming-Language
+
+mkdir build && cd build
+cmake ..
+cmake --build .
+```
+
+Compile a `.mello` file:
+
+```bash
+./mello path/to/main.mello
+```
+
+Compile **and** flash directly to a connected Arduino Uno:
+
+```bash
+./mello path/to/main.mello --upload
+```
+
+> Prefer a dedicated editor? See [The Mello IDE](#-8-the-mello-ide) below.
 
 ---
 
-## 🏆 7. STEAM Evaluation Criteria
+## 📊 7. Performance Benchmarks
+
+Mello has been rigorously tested against standard alternatives on an ATmega328P:
+
+| Framework | Flash | RAM | Compatibility |
+|---|---|---|---|
+| **Mello** | ~900 Bytes | 9 Bytes | Full 8-bit/32-bit parity |
+| **Native Arduino C++** | ~900 Bytes | 9 Bytes | Full 8-bit/32-bit parity |
+| **MicroPython VM** | > 250,000 Bytes | > 8,000 Bytes | Incompatible — fails to initialize |
+
+- **Lines of Code (LoC):** Mello reduces required lines of code by **40–60%** compared to native Arduino C++, primarily through automatic timer state, debounce state, and `setup()` boilerplate.
+- **Native Binary Output:** Because Mello transpiles straight to C++, its binaries are byte-for-byte comparable to hand-written Arduino code — there's no interpreter tax to pay.
+
+---
+
+## 🖥️ 8. The Mello IDE
+
+A dedicated desktop IDE is in active development at **[Mello-IDE](https://github.com/v3lk777-collab/Mello-IDE)** — a native companion app for writing, managing, and compiling `.mello` files without a bare terminal.
+
+- **Native desktop shell:** built with [Tauri](https://tauri.app) — a Rust backend paired with a TypeScript + Vite front-end, keeping the packaged app far lighter than a full Electron/Chromium bundle.
+- **Bundled compiler:** the same CMake-built C++ compiler documented above ships directly with the IDE, so compiling is a local, offline operation.
+- **Status:** early-stage, actively developed, not yet a versioned release.
+
+---
+
+## 🏆 9. STEAM Evaluation Criteria
 
 This project is explicitly designed to meet high-level engineering evaluation standards:
 
-- **Systems Engineering:** Demonstrates complex architecture (Lexical Analysis, Abstract Syntax Trees).
-- **Efficiency:** Solves real-world computational limitations in low-end embedded systems.
-- **Innovation:** Introduces novel paradigms (`every` loops, auto-pin assignment) to hardware programming.
+- **Systems Engineering:** demonstrates a complete compiler architecture — lexical analysis, AST construction, semantic auto-routing, and native code generation.
+- **Efficiency:** solves a real computational bottleneck — expressive syntax on hardware with kilobytes, not gigabytes, of memory.
+- **Innovation:** introduces novel paradigms (`every`, `on_press`, auto-pin assignment, auto-`const` type inference) to hardware programming without sacrificing native performance.
 
 ---
 
-## 🗺️ 8. Roadmap & Future Work
+## 🗺️ 10. Roadmap & Future Work
 
 As part of ongoing research and development, the following features are planned for upcoming compiler versions:
 
-- **Static Type Checker:** Implementing a strict pre-compilation type checking phase to guarantee complete memory safety and prevent type mismatches before flashing.
-- **Native Power Management (`sleep` modes):** Introducing keywords to instantly push the microcontroller into `AVR_SLEEP` modes to maximize battery life for IoT devices.
-- **Array/List Abstractions:** Safe, static-bound array handling for sensor data averaging and mathematical processing.
+- **Static Type Checker:** a strict pre-compilation type-checking phase to guarantee complete memory safety and prevent type mismatches before flashing.
+- **Native Power Management (`sleep` modes):** keywords to push the microcontroller into `AVR_SLEEP` modes, maximizing battery life for IoT devices.
+- **Array / List Abstractions:** safe, static-bound array handling for sensor data averaging and mathematical processing.
 
 ---
 
-## 📜 9. Intellectual Property & Usage Policy
+## 📜 11. Intellectual Property & Usage Policy
 
-**© 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.**
+**© 2026–2027 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.**
 
-Mello Programming Language is an original work developed for scientific research and educational purposes. 
+Mello Programming Language and the Mello IDE are original works developed for scientific research and educational purposes.
 
-- **Usage:** You are free to view, study, use Mello in embedded systems like Arduino and ESP32, and learn from this codebase.
-- **Restrictions:** Unauthorized use of this source code in any academic competition (e.g., ISEF, science fairs), research submission, or commercial product is **strictly prohibited** without prior written consent from the author.
-- **Attribution:** If you find this project useful for learning, please attribute the work to the original author (Mohammed Tamer Mohammed Ahmed El-Azab Nour).
+- **Usage:** you are free to view, study, use Mello in embedded systems like Arduino and ESP32, and learn from this codebase.
+- **Restrictions:** unauthorized use of this source code in any academic competition (e.g., ISEF, science fairs), research submission, or commercial product is **strictly prohibited** without prior written consent from the author.
+- **Attribution:** if you find this project useful for learning, please attribute the work to the original author, Mohammed Tamer Mohammed Ahmed El-Azab.
 
-*If you are interested in collaborating or seeking permission for specific use, please contact me directly.*
+*Interested in collaborating or seeking permission for specific use? Please reach out directly.*
