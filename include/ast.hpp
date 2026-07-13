@@ -25,6 +25,12 @@ public:
 };
 
 class VarAssignNode : public ASTNode {
+public:
+    std::string name;
+    TokenType val_type;
+    std::string raw_value;
+    std::unique_ptr<ASTNode> value;
+
 private:
     bool isNumeric(const std::string& str) const noexcept {
         if (str.empty()) {
@@ -77,12 +83,6 @@ private:
 
         return type;
     }
-
-public:
-    std::string name;
-    TokenType val_type;
-    std::string raw_value;
-    std::unique_ptr<ASTNode> value;
 
 public:
     VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type) 
