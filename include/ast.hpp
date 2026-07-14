@@ -490,8 +490,8 @@ public:
 
 class CompoundAssignNode : public ASTNode {
 private:
-    std::string name;
     std::string op;
+    std::string name;
     std::string value;
 
 public:

@@ -17,7 +17,7 @@
 
 Parser::Parser(const std::vector<Token>& tokens, const std::string& source)
     : tokens(tokens), source(source), position(0) {
-
+    
     if (!tokens.empty()) {
         current = tokens[0];
     }

@@ -297,6 +297,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     std::ifstream sketchCodeFile(inoFilePath.string());
 
+    std::cout << "-----------------------------------------------------------------------------\n";
     if (sketchCodeFile.is_open()) {
         while (getline(sketchCodeFile, sketchCode)) {
             std::cout << sketchCode << "\n";
@@ -304,6 +305,8 @@ bool runMelloCompiler(int argc, char* argv[]) {
     } else {
         std::cerr << "Warning: Cann't open the sketch code file." << "\n";
     }
+
+    std::cout << "-----------------------------------------------------------------------------\n\n";
 
     sketchCodeFile.close();
 
