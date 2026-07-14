@@ -27,6 +27,7 @@ public:
 class VarAssignNode : public ASTNode {
 public:
     std::string name;
+    bool isConstantVar;
     TokenType val_type;
     std::string raw_value;
     std::unique_ptr<ASTNode> value;
@@ -85,9 +86,10 @@ private:
     }
 
 public:
-    VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type) 
-        : name(name), value(std::move(value)), raw_value(raw), val_type(val_type) {}
+    VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar) 
+        : name(name), value(std::move(value)), raw_value(raw), val_type(val_type), isConstantVar(isConstantVar) {}
 
+public:
     std::string toCpp() override {
         std::string type = "";
         std::string final_value = value->toCpp();
@@ -171,7 +173,7 @@ public:
         bool hasConst = type.find("constexpr") != std::string::npos;
         bool isKeyword = keywordsList.count(raw_value) > 0;
 
-        if (!isReassigned && !hasConst && !isKeyword) {
+        if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar) {
             return "constexpr " + type + " " + name + " = " + final_value + ";\n";
         }
 

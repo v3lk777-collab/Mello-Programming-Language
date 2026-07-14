@@ -10,7 +10,9 @@
 #include "lexer.hpp"
 #include "error_handler.hpp"
 
+#include <cctype>
 #include <iostream>
+#include <algorithm>
 #include <stdexcept>
 
 Parser::Parser(const std::vector<Token>& tokens, const std::string& source)
@@ -361,6 +363,11 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
     std::string raw = current.value;
     TokenType type_of_value = current.type;
 
+    bool isConstantVar = false;
+    bool isAllUpercase = std::all_of(var_name.begin(), var_name.end(), [] (unsigned char c) {
+        return std::isupper(c);
+    });
+
     auto expr_value = parseExpression(); 
 
     if (parsedVariables.count(var_name)) {
@@ -369,11 +376,15 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
         parsedVariables.insert(var_name);
     }
 
+    if (isAllUpercase) {
+        isConstantVar = true;
+    }
+
     if (current.type == TokenType::NEWLINE) {
         advance();
     }
 
-    return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value);
+    return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value, isConstantVar);
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDefinition(const std::string& keyword) {

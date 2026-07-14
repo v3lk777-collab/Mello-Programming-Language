@@ -9,6 +9,7 @@
 #pragma once
 #include "ast.hpp"
 #include "token.hpp"
+
 #include <vector>
 #include <memory>
 
@@ -26,6 +27,8 @@ private:
 
 private:
     std::vector<std::unique_ptr<ASTNode>> parseBlock();
+
+private:
     std::unique_ptr<ExpressionNode> parseExpression();
     std::unique_ptr<ExpressionNode> parseLogicalOr();
     std::unique_ptr<ExpressionNode> parseLogicalAnd();
@@ -34,6 +37,8 @@ private:
     std::unique_ptr<ExpressionNode> parseTerm();
     std::unique_ptr<ExpressionNode> parseFactor();
     std::unique_ptr<ExpressionNode> parsePrimary();
+
+private:
     std::unique_ptr<ASTNode> parseFunctionCall(const std::string& func_name);
     std::unique_ptr<ASTNode> parseAssignment(const std::string& var_name);
     std::unique_ptr<ASTNode> parseFunctionDefinition(const std::string& keyword);

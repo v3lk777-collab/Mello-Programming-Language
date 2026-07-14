@@ -8,6 +8,7 @@
 
 #pragma once
 #include "token.hpp"
+
 #include <set>
 #include <string>
 #include <vector>

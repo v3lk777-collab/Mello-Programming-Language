@@ -6,8 +6,8 @@
 // academic or commercial purpose is strictly prohibited without 
 // explicit written permission from the author.
 
-
 #include "lexer.hpp"
+
 #include <iostream>
 
 Lexer::Lexer(const std::string& source) {
@@ -275,7 +275,7 @@ std::vector<Token> Lexer::tokenize() {
 
             if (keywordsList.find(identifier) != keywordsList.end()) {
                 tokens.push_back({TokenType::KEYWORD, identifier, currentLine});
-            } else {
+            }  else {
                 tokens.push_back({TokenType::SYMBOL, identifier, currentLine});
             }
         } else {
