@@ -227,6 +227,23 @@ private:
     std::string funcName;
     std::vector<std::unique_ptr<ExpressionNode>> arguments;
 
+private:
+    bool isNumber(const std::string &str) {
+        if (str.empty()) {
+            return false;
+        }
+
+        for (const auto &c : str) {
+            if (c == '-' || c == '+' || c == '*' || c == '/') {
+                return !std::isdigit(c);
+            }
+        }
+
+        return std::all_of(str.begin(), str.end(), [] (unsigned char c) {
+            return std::isdigit(c);
+        });
+    }
+
 public:
     FunctionCallNode(const std::string& name, std::vector<std::unique_ptr<ExpressionNode>> args)
         : funcName(name), arguments(std::move(args)) {
@@ -286,8 +303,9 @@ public:
     std::string toCpp() override {
         std::vector<std::string> argsStr;
 
-        for (const auto& arg : arguments)
+        for (const auto& arg : arguments) {
             argsStr.push_back(arg->toCpp());
+        }
 
         if (funcName == "turn_on" && argsStr.size() >= 1) {
             std::string pin = argsStr[0];
@@ -352,10 +370,18 @@ public:
         }
 
         if (funcName == "print" && argsStr.size() >= 1) {
+            if (parsedVariables.count(argsStr[0]) || isNumber(argsStr[0])) {
+                return "Serial.print(" + argsStr[0] + ");";
+            }
+
             return "Serial.print(F(" + argsStr[0] + "));";
         }
 
         if (funcName == "println" && argsStr.size() >= 1) {
+            if (parsedVariables.count(argsStr[0]) || isNumber(argsStr[0])) {
+                return "Serial.println(" + argsStr[0] + ");";
+            }
+
             return "Serial.println(F(" + argsStr[0] + "));";
         }
 
@@ -429,6 +455,8 @@ public:
 class LiteralNode : public ExpressionNode {
 public:
     Token token;
+
+public:
     LiteralNode(Token t)
         : token(t) {}
 
@@ -699,7 +727,7 @@ public:
 
     std::string toCpp() override {
         std::string iterVar = "_loop_i_" + std::to_string(id);
-        std::string code = "for (uint32_t " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
+        std::string code = "for (int " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
         
         for (const auto& node : body) {
             code += node->toCpp() + "\n";

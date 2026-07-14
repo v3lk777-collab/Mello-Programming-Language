@@ -14,6 +14,7 @@
 #include <vector>
 #include <cstdio>
 #include <string>
+#include <iomanip>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -297,16 +298,16 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     std::ifstream sketchCodeFile(inoFilePath.string());
 
-    std::cout << "-----------------------------------------------------------------------------\n";
+    std::cout << "-------------------------------------------------------------------------------------\n";
     if (sketchCodeFile.is_open()) {
         while (getline(sketchCodeFile, sketchCode)) {
-            std::cout << sketchCode << "\n";
+            std::cout << "| " << std::left << std::setw(82) << sketchCode << "|\n";
         }
     } else {
         std::cerr << "Warning: Cann't open the sketch code file." << "\n";
     }
 
-    std::cout << "-----------------------------------------------------------------------------\n\n";
+    std::cout << "-------------------------------------------------------------------------------------\n\n";
 
     sketchCodeFile.close();
 

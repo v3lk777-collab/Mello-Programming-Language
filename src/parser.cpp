@@ -333,22 +333,18 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
     while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
         if (current.type == TokenType::COMMA) {
             advance();
-            continue;
+            
+            if (current.type == TokenType::RPAREN) {
+                ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, this->source);
+            }
         }
 
-        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING) {
-            Token token = current;
-
-            if (current.type == TokenType::STRING) {
-                token.value = "\"" + current.value + "\"";
-                args.push_back(std::make_unique<LiteralNode>(token));
-            } else {
-                args.push_back(std::make_unique<LiteralNode>(token));
-            }
-
-            advance();
+        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+            args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, this->source);
+            advance();
+            continue;
         }
     }
     
