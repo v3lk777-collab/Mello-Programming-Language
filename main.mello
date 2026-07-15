@@ -1,3 +1,4 @@
+counter = 1
 LED_Pin = 13                                                                       # Set var 'LED_Pin' to 13 (pin 13)
 
 start:                                                                             # Run once the power hits the Arduino or ESP32
@@ -7,3 +8,10 @@ start:                                                                          
 loop:                                                                              # Work All the time after 'start'
     toggle(LED_Pin)                                                                # Turn on and off the pin LED_Pin (13)
     wait(1s)                                                                       # wait for a secound
+
+    counter = counter + 255
+
+    serial.ptintln(counter)
+
+    if counter == 1:
+        serial.println("Damn it, fuck it")
