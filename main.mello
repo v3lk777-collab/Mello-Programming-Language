@@ -8,10 +8,3 @@ start:                                                                          
 loop:                                                                              # Work All the time after 'start'
     toggle(LED_Pin)                                                                # Turn on and off the pin LED_Pin (13)
     wait(1s)                                                                       # wait for a secound
-
-    counter = counter + 255
-
-    serial.ptintln(counter)
-
-    if counter == 1:
-        serial.println("Damn it, fuck it")
