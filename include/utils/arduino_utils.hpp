@@ -20,16 +20,8 @@
 #include <iostream>
 #include <filesystem>
 
-#ifdef _WIN32
-    const std::string ARDUINO_CLI_PATH = "..\\bin\\win32\\arduino-cli.exe";
-    const std::string CLANG_FORMAT_PATH = "..\\bin\\win32\\clang-format.exe";
-#elif defined(__APPLE__)
-    const std::string ARDUINO_CLI_PATH = "../bin/mac/arduino-cli";
-    const std::string CLANG_FORMAT_PATH = "../bin/mac/clang-format";
-#else
-    const std::string ARDUINO_CLI_PATH = "../bin/linux/arduino-cli";
-    const std::string CLANG_FORMAT_PATH = "../bin/linux/clang-format";
-#endif
+std::string ARDUINO_CLI_PATH = "arduino-cli"; 
+std::string CLANG_FORMAT_PATH = "clang-format";
 
 std::string getComputerCoreNumber() {
     unsigned int coreCount = std::thread::hardware_concurrency();
@@ -140,6 +132,18 @@ bool runMelloCompiler(int argc, char* argv[]) {
     if (filePath.empty()) {
         std::cout << "Enter the Mello file path: ";
         std::cin >> filePath;
+    }
+
+    for (int i = 2; i < argc; i++) {
+        std::string arg = argv[i];
+        
+        if (arg == "--upload") {
+            shouldUpload = true;
+        } else if (arg.find("arduino-cli") != std::string::npos) {
+            ARDUINO_CLI_PATH = arg;
+        } else if (arg.find("clang-format") != std::string::npos) {
+            CLANG_FORMAT_PATH = arg;
+        }
     }
 
     std::ifstream file(filePath);
