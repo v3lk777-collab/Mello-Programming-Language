@@ -20,6 +20,7 @@
 #include <iostream>
 #include <filesystem>
 
+bool shouldUpload = false;
 std::string ARDUINO_CLI_PATH = "arduino-cli"; 
 std::string CLANG_FORMAT_PATH = "clang-format";
 
@@ -136,7 +137,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     for (int i = 2; i < argc; i++) {
         std::string arg = argv[i];
-        
+
         if (arg == "--upload") {
             shouldUpload = true;
         } else if (arg.find("arduino-cli") != std::string::npos) {
@@ -321,7 +322,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     bool compiledSuccessfully = compileCode();
 
-    if (compiledSuccessfully && argc >= 3 && std::string(argv[2]) == "--upload") {
+    if (compiledSuccessfully && shouldUpload) {
         uploadCode();
     }
 
