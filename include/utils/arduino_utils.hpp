@@ -317,7 +317,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     bool compiledSuccessfully = compileCode();
 
-    if (compiledSuccessfully && (argc > 2 && argv[2] == "--upload")) {
+    if (compiledSuccessfully && argc > 2 && std::string(argv[2]) == "--upload") {
         uploadCode();
     }
 

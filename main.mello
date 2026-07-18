@@ -7,4 +7,4 @@ start:                                                                          
 
 loop:                                                                              # Work All the time after 'start'
     toggle(LED_Pin)                                                                # Turn on and off the pin LED_Pin (13)
-    wait(1s)                                                                       # wait for a secound
+    wait(1s)                                                                       # Wait for a secound
