@@ -8,15 +8,15 @@ Mello compiles directly to native C++ — no runtime interpreter, no virtual mac
 
 ## 📑 Table of Contents
 
-1. [The Vision & Problem Statement](#-1-the-vision--problem-statement)
-2. [Core Engineering Features](#-2-core-engineering-features)
-3. [Under the Hood: Compiler Architecture](#-3-under-the-hood-compiler-architecture)
-4. [Language Syntax & Reference](#-4-language-syntax--reference)
-5. [Code Example](#-5-code-example)
-6. [Getting Started](#-6-getting-started)
-7. [Performance Benchmarks](#-7-performance-benchmarks)
-8. [The Mello IDE](#-8-the-mello-ide)
-9. [STEAM Evaluation Criteria](#-9-steam-evaluation-criteria)
+1.  [The Vision & Problem Statement](#-1-the-vision--problem-statement)
+2.  [Core Engineering Features](#-2-core-engineering-features)
+3.  [Under the Hood: Compiler Architecture](#-3-under-the-hood-compiler-architecture)
+4.  [Language Syntax & Reference](#-4-language-syntax--reference)
+5.  [Code Example](#-5-code-example)
+6.  [Getting Started](#-6-getting-started)
+7.  [Performance Benchmarks](#-7-performance-benchmarks)
+8.  [The Mello IDE](#-8-the-mello-ide)
+9.  [STEAM Evaluation Criteria](#-9-steam-evaluation-criteria)
 10. [Roadmap & Future Work](#-10-roadmap--future-work)
 11. [Intellectual Property & Usage Policy](#-11-intellectual-property--usage-policy)
 
@@ -315,7 +315,7 @@ As part of ongoing research and development, the following features are planned 
 
 ## 📜 11. Intellectual Property & Usage Policy
 
-**© 2026–2027 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.**
+**© 2026 / 2027 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.**
 
 Mello Programming Language and the Mello IDE are original works developed for scientific research and educational purposes.
 
