@@ -1,4 +1,3 @@
-counter = 1
 LED_Pin = 13                                                                       # Set var 'LED_Pin' to 13 (pin 13)
 
 start:                                                                             # Run once the power hits the Arduino or ESP32

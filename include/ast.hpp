@@ -181,6 +181,48 @@ public:
     }
 };
 
+class ListNode : public ASTNode {
+private:
+    std::string listName;
+    std::vector<std::string> listMembers;
+
+private:
+    std::string inferElementType() const {
+        if (listMembers.empty()) {
+            return "int";
+        }
+
+        const std::string& first = listMembers.front();
+
+        if (!first.empty() && first.front() == '"') {
+            return "const char*";
+        } else if (first == "true" || first == "false") {
+            return "bool";
+        } else if (first.find('.') != std::string::npos) {
+            return "float";
+        } else {
+            return "int";
+        }
+    }
+
+public:
+    ListNode(const std::string& name, const std::vector<std::string>& listMembers)
+        : listName(name), listMembers(listMembers) {}
+
+    std::string toCpp() override {
+        std::string type = inferElementType();
+        std::string result = type + " " + listName + "[" + std::to_string(listMembers.size()) + "] = {";
+
+        for (size_t i = 0; i < listMembers.size(); ++i) {
+            result += listMembers[i];
+            if (i + 1 < listMembers.size()) result += ", ";
+        }
+
+        result += "};\n";
+        return result;
+    }
+};
+
 class FunctionNode : public ASTNode {
 private:
     std::string funcName;

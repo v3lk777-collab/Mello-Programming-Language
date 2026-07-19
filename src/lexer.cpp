@@ -165,6 +165,14 @@ std::vector<Token> Lexer::tokenize() {
             std::string paren(1, current);
             tokens.push_back({TokenType::LPAREN, paren, currentLine});
             advance();
+        } else if (current == ']') {
+            std::string paren(1, current);
+            tokens.push_back({TokenType::RBRACKET, paren, currentLine});
+            advance();
+        } else if (current == '[') {
+            std::string paren(1, current);
+            tokens.push_back({TokenType::LBRACKET, paren, currentLine});
+            advance();
         } else if (current == '=') {
             if (peek() == '=') {
                 advance();

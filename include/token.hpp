@@ -35,6 +35,8 @@ enum class TokenType {
     COMMA,
     LPAREN,
     RPAREN,
+    LBRACKET,
+    RBRACKET,
     INDENT,
     DEDENT,
     NEWLINE,

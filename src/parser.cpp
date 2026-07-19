@@ -354,17 +354,33 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
 }
 
 std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
-    advance(); 
+    advance();
+
+    if (current.type == TokenType::LBRACKET) {
+        auto listNode = parseListLiteral(var_name);
+
+        if (parsedVariables.count(var_name)) {
+            reassignedVariables.insert(var_name);
+        } else {
+            parsedVariables.insert(var_name);
+        }
+
+        if (current.type == TokenType::NEWLINE) {
+            advance();
+        }
+
+        return listNode;
+    }
 
     std::string raw = current.value;
     TokenType type_of_value = current.type;
 
     bool isConstantVar = false;
     bool isAllUpercase = std::all_of(var_name.begin(), var_name.end(), [] (unsigned char c) {
-        return std::isupper(c);
+        return std::isupper(c) || c == '_';
     });
 
-    auto expr_value = parseExpression(); 
+    auto expr_value = parseExpression();
 
     if (parsedVariables.count(var_name)) {
         reassignedVariables.insert(var_name);
@@ -381,6 +397,33 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
     }
 
     return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value, isConstantVar);
+}
+
+std::unique_ptr<ASTNode> Parser::parseListLiteral(const std::string& name) {
+    advance();
+
+    std::vector<std::string> members;
+
+    while (current.type != TokenType::RBRACKET) {
+        auto element = parseExpression();
+        std::string elementCpp = element->toCpp();
+
+        while (!elementCpp.empty() && (elementCpp.back() == ';' || elementCpp.back() == '\n')) {
+            elementCpp.pop_back();
+        }
+
+        members.push_back(elementCpp);
+
+        if (current.type == TokenType::COMMA) {
+            advance();
+        } else {
+            break;
+        }
+    }
+
+    consume(TokenType::RBRACKET, "Expected ']' to close list literal");
+
+    return std::make_unique<ListNode>(name, members);
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDefinition(const std::string& keyword) {
