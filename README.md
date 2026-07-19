@@ -285,7 +285,7 @@ Mello has been rigorously tested against standard alternatives on an ATmega328P:
 
 ## 🖥️ 8. The Mello IDE
 
-A dedicated desktop IDE is in active development at **[Mello-IDE](https://github.com/v3lk777-collab/Mello-IDE)** — a native companion app for writing, managing, and compiling `.mello` files without a bare terminal.
+A dedicated desktop IDE is in active development at **[Mello-IDE](https://github.com/v3lk777-collab/Mello-IDE)** (under development) — a native companion app for writing, managing, and compiling `.mello` files without a bare terminal.
 
 - **Native desktop shell:** built with [Tauri](https://tauri.app) — a Rust backend paired with a TypeScript + Vite front-end, keeping the packaged app far lighter than a full Electron/Chromium bundle.
 - **Bundled compiler:** the same CMake-built C++ compiler documented above ships directly with the IDE, so compiling is a local, offline operation.
@@ -323,4 +323,4 @@ Mello Programming Language and the Mello IDE are original works developed for sc
 - **Restrictions:** unauthorized use of this source code in any academic competition (e.g., ISEF, science fairs), research submission, or commercial product is **strictly prohibited** without prior written consent from the author.
 - **Attribution:** if you find this project useful for learning, please attribute the work to the original author, Mohammed Tamer Mohammed Ahmed El-Azab.
 
-*Interested in collaborating or seeking permission for specific use? Please reach out directly (v3lk777@gmail.com).*
+*Interested in collaborating or seeking permission for specific use? Please reach out directly (v3lk777@gmail.com).* 

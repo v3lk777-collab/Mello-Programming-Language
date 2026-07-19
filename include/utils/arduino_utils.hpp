@@ -21,15 +21,18 @@
 #include <filesystem>
 
 #ifdef _WIN32
-    std::string ARDUINO_CLI_PATH = "..\\bin\\win32\\arduino-cli.exe"; 
-    std::string CLANG_FORMAT_PATH = "..\\bin\\win32\\clang-format.exe";
+    #define ARDUINO_CLI_DEFAULT "..\\bin\\win32\\arduino-cli.exe"
+    #define CLANG_FORMAT_DEFAULT "..\\bin\\win32\\clang-format.exe"
 #elif defined(__APPLE__)
-    std::string ARDUINO_CLI_PATH = "../bin/mac/arduino-cli"; 
-    std::string CLANG_FORMAT_PATH = "../bin/mac/clang-format";
+    #define ARDUINO_CLI_DEFAULT "../bin/mac/arduino-cli"
+    #define CLANG_FORMAT_DEFAULT "../bin/mac/clang-format"
 #else
-    std::string ARDUINO_CLI_PATH = "../bin/linux/arduino-cli"; 
-    std::string CLANG_FORMAT_PATH = "../bin/linux/clang-format";
+    #define ARDUINO_CLI_DEFAULT "../bin/linux/arduino-cli"
+    #define CLANG_FORMAT_DEFAULT "../bin/linux/clang-format"
 #endif
+
+const std::string ARDUINO_CLI_PATH = ARDUINO_CLI_DEFAULT;
+const std::string CLANG_FORMAT_PATH = CLANG_FORMAT_DEFAULT;
 
 std::string getComputerCoreNumber() {
     unsigned int coreCount = std::thread::hardware_concurrency();
