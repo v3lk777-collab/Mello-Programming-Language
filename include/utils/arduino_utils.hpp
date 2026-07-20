@@ -281,7 +281,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     outputFile.close();
 
     if (!std::filesystem::exists(ARDUINO_CLI_PATH)) {
-        std::cerr << "Error: arduino-cli.exe not found at the specified path!" << "\n";
+        std::cerr << "Error: arduino-cli.exe not found at the specified path" << "\n";
         return false;
     }
 
@@ -289,7 +289,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
         std::string formatCommand = CLANG_FORMAT_PATH + " --style=Google -i \"" + inoFilePath.string() + "\"";
         std::system(formatCommand.c_str());
     } else {
-        std::cerr << "Warning: clang-format not found locally, skipping formatting." << "\n";
+        std::cerr << "Warning: clang-format not found locally, skipping formatting" << "\n";
     }
 
     // Delete when u finish from here
@@ -307,7 +307,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
             std::cout << "| " << std::left << std::setw(82) << sketchCode << "|\n";
         }
     } else {
-        std::cerr << "Warning: Cann't open the sketch code file." << "\n";
+        std::cerr << "Warning: Cann't open the sketch code file" << "\n";
     }
 
     std::cout << "-------------------------------------------------------------------------------------\n\n";
@@ -320,11 +320,32 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     bool compiledSuccessfully = compileCode();
 
-    if (compiledSuccessfully && argc > 2 && std::string(argv[2]) == "--upload") {
+    bool isUpload = false;
+    bool isCompileCode = true;
+    bool isSaveSketchCodeDir = false;
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--upload") {
+            isUpload = true;
+        } else if (arg == "--save-code") {
+            isSaveSketchCodeDir = true;
+        } else if (arg == "--no-compile") {
+            isCompileCode = false;
+        } else {
+            std::cerr << "Warning: There is not arg called " << arg << "\n";
+        }
+    }
+
+    if (compiledSuccessfully && isUpload) {
         uploadCode();
     }
 
-    std::filesystem::remove_all(sketchDir);
+    if (!isSaveSketchCodeDir) {
+        std::filesystem::remove_all(sketchDir);
+    } else {
+        std::cout << "Transpiled C++ code saved inside: " << sketchDir << "\n";
+    }
 
     return true;
 }
