@@ -324,7 +324,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     bool isCompileCode = true;
     bool isSaveSketchCodeDir = false;
 
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 2; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "--upload") {
             isUpload = true;
@@ -333,7 +333,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
         } else if (arg == "--no-compile") {
             isCompileCode = false;
         } else {
-            std::cerr << "Warning: There is not arg called " << arg << "\n";
+            std::cerr << "Warning: There is not arg called '" << arg << "'\n";
         }
     }
 
