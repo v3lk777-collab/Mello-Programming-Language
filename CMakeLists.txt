@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 set(SOURCES
     src/main.cpp
     src/lexer.cpp
@@ -20,5 +24,5 @@ target_include_directories(mello PRIVATE
 )
 
 if (MINGW)
-    target_link_options(mello PRIVATE -static -static-libgcc -static-libstdc++)
+    target_link_options(mello PRIVATE -static)
 endif()
