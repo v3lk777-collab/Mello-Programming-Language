@@ -1,4 +1,4 @@
-# Mello Programming Language 🍉
+# Mello Programming Language
 
 **A high-performance, indentation-based programming language and transpiler for streamlining embedded systems and IoT development.**
 
@@ -6,7 +6,7 @@ Mello compiles directly to native C++ — no runtime interpreter, no virtual mac
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1.  [The Vision & Problem Statement](#-1-the-vision--problem-statement)
 2.  [Core Engineering Features](#-2-core-engineering-features)
@@ -22,7 +22,7 @@ Mello compiles directly to native C++ — no runtime interpreter, no virtual mac
 
 ---
 
-## 🎯 1. The Vision & Problem Statement
+## 1. The Vision & Problem Statement
 
 Programming microcontrollers typically forces a choice between two extremes:
 
@@ -33,7 +33,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 
 ---
 
-## 🚀 2. Core Engineering Features
+## 2. Core Engineering Features
 
 - **Zero-Overhead Transpilation:** Mello code is converted into pure C++ at compile time. There is no runtime interpreter eating up RAM or CPU cycles.
 - **Smart Micro-Threading (`every`):** Say goodbye to the blocking `delay()`. The `every` keyword automatically generates a non-blocking, `millis()`-based timer, allowing true cooperative multitasking.
@@ -44,7 +44,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 
 ---
 
-## ⚙️ 3. Under the Hood: Compiler Architecture
+## 3. Under the Hood: Compiler Architecture
 
 The Mello compiler is built from scratch in C++17 and operates in five sophisticated phases:
 
@@ -65,7 +65,7 @@ Mello runs `clang-format` (Google style) on the generated source, invokes `ardui
 
 ---
 
-## 📖 4. Language Syntax & Reference
+## 4. Language Syntax & Reference
 
 Mello is designed to be intuitive and highly readable.
 
@@ -190,7 +190,7 @@ loop:
 
 ---
 
-## 💻 5. Code Example
+## 5. Code Example
 
 A practical example showcasing multi-tasking and event handling in a Smart Room Controller — a non-blocking sensor poll running alongside a debounced button listener, neither one blocking the other.
 
@@ -225,7 +225,7 @@ loop:
 
 ---
 
-## 🛠️ 6. Getting Started
+## 6. Getting Started
 
 ### Option A — Prebuilt Windows Binary
 
@@ -234,10 +234,33 @@ A prebuilt `mello.exe` is committed directly to the repository at `build/mello.e
 ```bash
 git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
 cd Mello-Programming-Language/build
+```
 
+To compile the code
+
+```bash
 mello.exe path\to\main.mello
+```
+
+To compile and upload it to the board
+
+```bash
 mello.exe path\to\main.mello --upload
 ```
+
+If you only want to transpile without running the compiler backend
+
+```bash
+mello.exe path\to\main.mello --no-compile
+```
+
+If you want to keep the generated C++ sketch file after compilation
+
+```bash
+mello.exe path\to\main.mello --save-code
+```
+
+---
 
 ### Option B — Build from Source
 
@@ -268,7 +291,7 @@ Compile **and** flash directly to a connected Arduino Uno:
 
 ---
 
-## 📊 7. Performance Benchmarks
+## 7. Performance Benchmarks
 
 Mello has been rigorously tested against standard alternatives on an ATmega328P:
 
@@ -283,7 +306,7 @@ Mello has been rigorously tested against standard alternatives on an ATmega328P:
 
 ---
 
-## 🖥️ 8. The Mello IDE
+## 8. The Mello IDE
 
 A dedicated desktop IDE is in active development at **[Mello-IDE](https://github.com/v3lk777-collab/Mello-IDE)** (under development) — a native companion app for writing, managing, and compiling `.mello` files without a bare terminal.
 
@@ -293,7 +316,7 @@ A dedicated desktop IDE is in active development at **[Mello-IDE](https://github
 
 ---
 
-## 🏆 9. STEAM Evaluation Criteria
+## 9. STEAM Evaluation Criteria
 
 This project is explicitly designed to meet high-level engineering evaluation standards:
 
@@ -303,7 +326,7 @@ This project is explicitly designed to meet high-level engineering evaluation st
 
 ---
 
-## 🗺️ 10. Roadmap & Future Work
+## 10. Roadmap & Future Work
 
 As part of ongoing research and development, the following features are planned for upcoming compiler versions:
 
@@ -313,7 +336,7 @@ As part of ongoing research and development, the following features are planned 
 
 ---
 
-## 📜 11. Intellectual Property & Usage Policy
+## 11. Intellectual Property & Usage Policy
 
 **© 2026 / 2027 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.**
 
