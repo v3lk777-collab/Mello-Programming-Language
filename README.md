@@ -236,6 +236,21 @@ git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
 cd Mello-Programming-Language/build
 ```
 
+### Option B — Build from Source
+
+The compiler is built with CMake and requires a C++17 toolchain (Linux, macOS, or Windows).
+
+```bash
+git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
+cd Mello-Programming-Language
+
+mkdir build && cd build
+cmake ..
+cmake --build .
+```
+
+### Run Mello programming language
+
 To compile the code
 
 ```bash
@@ -258,33 +273,6 @@ If you want to keep the generated C++ sketch file after compilation
 
 ```bash
 mello.exe path\to\main.mello --save-code
-```
-
----
-
-### Option B — Build from Source
-
-The compiler is built with CMake and requires a C++17 toolchain (Linux, macOS, or Windows).
-
-```bash
-git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
-cd Mello-Programming-Language
-
-mkdir build && cd build
-cmake ..
-cmake --build .
-```
-
-Compile a `.mello` file:
-
-```bash
-./mello path/to/main.mello
-```
-
-Compile **and** flash directly to a connected Arduino Uno:
-
-```bash
-./mello path/to/main.mello --upload
 ```
 
 > Prefer a dedicated editor? See [The Mello IDE](#-8-the-mello-ide) below.
