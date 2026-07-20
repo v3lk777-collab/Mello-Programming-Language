@@ -29,6 +29,8 @@ inline std::set<std::string> includedLibraries;
 inline std::set<std::string> declaredVariables;
 inline std::set<std::string> reassignedVariables;
 
+inline std::set<std::string> listsNames;
+
 inline std::string currentParsingUserFunc = "";
 inline std::vector<std::string> currentFuncParamNames;
 inline std::map<std::string, std::vector<bool>> userFuncInputParams;

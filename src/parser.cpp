@@ -357,6 +357,8 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
     advance();
 
     if (current.type == TokenType::LBRACKET) {
+        listsNames.insert(var_name);
+
         auto listNode = parseListLiteral(var_name);
 
         if (parsedVariables.count(var_name)) {
