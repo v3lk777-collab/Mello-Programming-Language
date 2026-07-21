@@ -172,6 +172,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
                 advance();
 
                 std::vector<std::unique_ptr<ExpressionNode>> args;
+
                 if (current.type != TokenType::RPAREN) {
                     args.push_back(parseExpression());
                     while (current.type == TokenType::COMMA) {
@@ -179,6 +180,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
                         args.push_back(parseExpression());
                     }
                 }
+
                 consume(TokenType::RPAREN, "Expected ')' after method arguments");
 
                 auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args));
