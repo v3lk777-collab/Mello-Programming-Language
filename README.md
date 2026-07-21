@@ -73,9 +73,13 @@ Mello is designed to be intuitive and highly readable.
 Variables are dynamically inferred at transpile time but become strictly typed, native C++ in the output.
 
 ```python
-name = "Mohammed"
-sensor_pin = 5
-threshold = 10.5
+name = "Mohammed"      # String variable
+sensor_pin = 5         # Intger variable
+threshold = 10.5       # Float variable
+isAMelloCode = true    # Boolean variable
+char = 'A'             # Char variable
+
+PIN = 13               # Constant intger variable
 ```
 
 ### Main Execution Blocks
