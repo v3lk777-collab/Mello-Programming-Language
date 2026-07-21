@@ -108,7 +108,7 @@ loop:
 Or use the built-in `toggle` function to blink a pin — it keeps its own internal state and flips between `HIGH` and `LOW` on every call:
 
 ```python
-pin = 13
+PIN = 13                        # Create a constant var
 
 loop:
     toggle(pin)                 # Flips HIGH/LOW every call via its own static flag
@@ -118,8 +118,8 @@ loop:
 Other hardware and serial primitives:
 
 ```python
-write(pin, 1)                   # 0/1/HIGH/LOW -> digitalWrite(); any other value -> analogWrite()
-write(character)                # Single argument -> Serial.write()
+write(pin, HIGH)                # 0/1/HIGH/LOW -> digitalWrite(); any other value -> analogWrite()
+serial.write(character)         # Single argument -> Serial.write()
 scale(value, 0, 1023, 0, 255)   # -> map(value, 0, 1023, 0, 255)
 ```
 
