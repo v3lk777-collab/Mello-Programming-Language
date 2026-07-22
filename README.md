@@ -192,6 +192,20 @@ loop:
     blink_fast(pin)
 ```
 
+### Break / Continue Control Transfer Statements
+Use `break` and `continue` in while / for loops
+
+```python
+counter = 0
+
+start:
+    while counter <= 100:
+        if counter == 50:
+            break
+        
+        number++
+```
+
 ---
 
 ## 5. Code Example
@@ -210,7 +224,7 @@ start:
 
 loop:
     # Read temperature every 5 seconds without blocking the button
-    every 5000:
+    every 5s:
         temp = read(tempSensor)
         serial.print("Current Temp: ")
         serial.println(temp)
