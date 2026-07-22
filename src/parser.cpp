@@ -305,6 +305,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 body.push_back(parseRepeatStatement());
             } else if (keyword == "on_press") {
                 body.push_back(parseOnPressStatement());
+            } else if (keyword == "break" || keyword == "continue") {
+                body.push_back(parseControlTransferStatements(keyword));
             } else {
                 advance();
 
@@ -324,6 +326,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
             advance();
         }
     }
+
     return body;
 }
 
@@ -544,6 +547,12 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseElseChain() {
     return result;
 }
 
+std::unique_ptr<ASTNode> Parser::parseControlTransferStatements(const std::string& statement) {
+    advance();
+
+    return std::make_unique<ControlTransferStatementsNode>(statement);
+}
+
 std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     advance();
     std::string funcName = current.value;
@@ -611,6 +620,7 @@ std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     match(TokenType::NEWLINE);
     
     consume(TokenType::INDENT, "Expected indentation after every");
+
     auto body = parseBlock();
     consume(TokenType::DEDENT, "Expected dedent at end of every block");
     
@@ -624,7 +634,9 @@ std::unique_ptr<ASTNode> Parser::parseWhileStatement() {
 
     consume(TokenType::COLON, "Expected ':' after while condition");
     match(TokenType::NEWLINE);
+
     consume(TokenType::INDENT, "Expected indentation after while");
+
     auto body = parseBlock();
     consume(TokenType::DEDENT, "Expected dedent at end of while block");
 
@@ -638,7 +650,9 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
 
     consume(TokenType::COLON, "Expected ':' after while condition");
     match(TokenType::NEWLINE);
+
     consume(TokenType::INDENT, "Expected indentation after while");
+
     auto body = parseBlock();
     consume(TokenType::DEDENT, "Expected dedent at end of while block");
 
@@ -719,6 +733,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
                 program.push_back(parseRepeatStatement());
             } else if (keyword == "on_press") {
                 program.push_back(parseOnPressStatement());
+            } else if (keyword == "break" || keyword == "continue") {
+                program.push_back(parseControlTransferStatements(keyword));
             } else if (keywordsList.count(keyword)) {
                 program.push_back(parseKeywordFunctionCall(keyword));
             }

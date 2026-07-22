@@ -53,6 +53,7 @@ private:
     std::unique_ptr<ASTNode> parseForStatement();
     std::unique_ptr<ASTNode> parseRepeatStatement();
     std::unique_ptr<ASTNode> parseOnPressStatement();
+    std::unique_ptr<ASTNode> parseControlTransferStatements(const std::string& statement);
 
 public:
     Parser(const std::vector<Token>& tokens, const std::string& source);

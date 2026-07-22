@@ -1,9 +1,0 @@
-LED_Pin = 13                                                                       # Set var 'LED_Pin' to 13 (pin 13)
-
-start:                                                                             # Run once the power hits the Arduino or ESP32
-    serial.println("Hello from Mello Programming Language")                        # Prints a line in the serial
-    serial.println("This code gonna blink a LED in pin 13 in the Arduino UNO")     # Prints a line in the serial
-
-loop:                                                                              # Work All the time after 'start'
-    toggle(LED_Pin)                                                                # Turn on and off the pin LED_Pin (13)
-    wait(1s)                                                                       # Wait for a secound

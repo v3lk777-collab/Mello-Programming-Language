@@ -856,3 +856,22 @@ public:
         return finalObjectName + "." + methodStr;
     }
 };
+
+class ControlTransferStatementsNode : public ASTNode {
+private:
+    std::string statement;
+
+public:
+    ControlTransferStatementsNode(const std::string& statement)
+        : statement(std::move(statement)) {}
+    
+    std::string toCpp() override {
+        if (statement == "break") {
+            return "break;";
+        } else if (statement == "continue") {
+            return "continue;";
+        }
+
+        return "";
+    }
+};

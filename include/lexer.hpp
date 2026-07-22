@@ -17,7 +17,7 @@
 inline const std::unordered_set<std::string> keywordsList = {
     "start", "loop", "wait", "turn_on", "turn_off", "if", "elif", "else",
     "write", "read", "serial", "scale", "func", "return", "and", "or",
-    "every", "while", "for", "repeat", "on_press", "toggle"
+    "every", "while", "for", "repeat", "on_press", "toggle", "break", "continue"
 };
 
 class Lexer {
