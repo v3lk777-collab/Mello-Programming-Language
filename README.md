@@ -176,6 +176,12 @@ loop:
 
     for i < 10:                 # Direction (++ / --) inferred from the comparison operator
         serial.println(i)
+
+    for i in range(10):         # Equivalent to for i < 10, but with an explicit counter
+        serial.println(i)
+
+    for i in range(2, 10, 2):   # start, stop, and step are all customizable
+        serial.println(i)
 ```
 
 ### Custom Functions
@@ -203,7 +209,7 @@ start:
         if counter == 50:
             break
         
-        number++
+        counter++
 ```
 
 ---
@@ -340,7 +346,7 @@ As part of ongoing research and development, the following features are planned 
 
 - **Static Type Checker:** a strict pre-compilation type-checking phase to guarantee complete memory safety and prevent type mismatches before flashing.
 - **Native Power Management (`sleep` modes):** keywords to push the microcontroller into `AVR_SLEEP` modes, maximizing battery life for IoT devices.
-- **Array / List Abstractions:** safe, static-bound array handling for sensor data averaging and mathematical processing.
+**Array/List Abstractions:** read access (arr[i]) is supported; bounds-checked writes and dynamic sizing are still planned.
 
 ---
 
