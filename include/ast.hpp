@@ -507,6 +507,28 @@ public:
     }
 };
 
+class UnaryOpNode : public ExpressionNode {
+private:
+    Token op;
+    std::unique_ptr<ExpressionNode> right;
+
+public:
+    UnaryOpNode(Token op, std::unique_ptr<ExpressionNode> right)
+        : op(op), right(std::move(right)) {}
+
+    std::string toCpp() override {
+        std::string opStr = op.value;
+
+        if (opStr == "not") {
+            opStr = "!";
+        }
+
+        std::string rightStr = right->toCpp();
+
+        return opStr + rightStr;
+    }
+};
+
 class BinaryOpNode : public ExpressionNode {
 private:
     Token op;

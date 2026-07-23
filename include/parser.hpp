@@ -32,6 +32,7 @@ private:
     std::unique_ptr<ExpressionNode> parseExpression();
     std::unique_ptr<ExpressionNode> parseLogicalOr();
     std::unique_ptr<ExpressionNode> parseLogicalAnd();
+    std::unique_ptr<ExpressionNode> parseLogicalNot();
     std::unique_ptr<ExpressionNode> parseEquality();
     std::unique_ptr<ExpressionNode> parseComparison();
     std::unique_ptr<ExpressionNode> parseTerm();
