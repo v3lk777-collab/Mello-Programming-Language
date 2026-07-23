@@ -45,7 +45,6 @@ bool Parser::match(TokenType type) {
     return false;
 }
 
-
 void Parser::consume(TokenType type, const std::string& errorMessage) {
     if (current.type == type) {
         advance();
