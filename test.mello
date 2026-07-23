@@ -1,6 +1,9 @@
 number = 0
 
 start:
+    for i in range(0, 10, 2):
+        serial.println("Mohammed")
+
     while number <= 10:
         if number == 5:
             break

@@ -775,6 +775,7 @@ public:
     ForNode(std::unique_ptr<ExpressionNode> cond, std::vector<std::unique_ptr<ASTNode>> b)
         : condition(std::move(cond)), body(std::move(b)) {}
 
+public:
     std::string toCpp() override {
         std::string condStr = condition->toCpp();
         std::string varName = condition->getVariableName();
@@ -787,6 +788,32 @@ public:
         }
 
         std::string result = "for (uint32_t " + varName + " = " + startValue + "; " + condStr + "; " + varName + op + ") {\n";
+
+        for (const auto& node : body) {
+            result += node->toCpp() + "\n";
+        }
+
+        result += "}\n";
+
+        return result;
+    }
+};
+
+class ForRnageNode : public ASTNode {
+private:
+    std::string varName;
+    std::unique_ptr<ExpressionNode> start;
+    std::unique_ptr<ExpressionNode> stop;
+    std::unique_ptr<ExpressionNode> step;
+    std::vector<std::unique_ptr<ASTNode>> body;
+
+public:
+    ForRnageNode(std::string varName, std::unique_ptr<ExpressionNode> start, std::unique_ptr<ExpressionNode> stop, std::unique_ptr<ExpressionNode> step, std::vector<std::unique_ptr<ASTNode>> body)
+        : varName(std::move(varName)), start(std::move(start)), stop(std::move(stop)), step(std::move(step)), body(std::move(body)) {}
+
+public:
+    std::string toCpp() override {
+        std::string result = "for (uint32_t " + varName + " = " + start->toCpp() + "; " + varName + " < " + stop->toCpp() + "; " + varName + " += " + step->toCpp() + ") {";
 
         for (const auto& node : body) {
             result += node->toCpp() + "\n";

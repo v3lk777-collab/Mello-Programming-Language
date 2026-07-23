@@ -674,6 +674,46 @@ std::unique_ptr<ASTNode> Parser::parseWhileStatement() {
 std::unique_ptr<ASTNode> Parser::parseForStatement() {
     advance();
 
+    if (current.type == TokenType::SYMBOL) {
+        std::string varName = current.value;
+
+        advance();
+
+        consume(TokenType::KEYWORD, "Missing 'in' keyword");
+        consume(TokenType::KEYWORD, "Expected 'range' after 'in'");
+        consume(TokenType::LPAREN, "Expected '(' after 'range'");
+
+        auto startExpression = parseExpression();
+        std::unique_ptr<ExpressionNode> stopExpression;
+        std::unique_ptr<ExpressionNode> stepExpression;
+
+        if (current.type == TokenType::COMMA) {
+            advance();
+            stopExpression = parseExpression();
+        } else {
+            stopExpression = std::move(startExpression);
+            startExpression = std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "0", current.line));
+        }
+
+        if (current.type == TokenType::COMMA) {
+            advance();
+            stepExpression = parseExpression();
+        } else {
+            stepExpression = std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "1", current.line));
+        }
+
+        consume(TokenType::RPAREN, "Expected ')' after range arguments");
+        consume(TokenType::COLON, "Expected ':' after for-range");
+
+        match(TokenType::NEWLINE);
+        consume(TokenType::INDENT, "Expected indentation after for");
+
+        auto body = parseBlock();
+        consume(TokenType::DEDENT, "Expected dedent at end of for block");
+
+        return std::make_unique<ForRnageNode>(varName, std::move(startExpression), std::move(stopExpression), std::move(stepExpression), std::move(body));
+    }
+    
     auto condition = parseExpression();
 
     consume(TokenType::COLON, "Expected ':' after while condition");
