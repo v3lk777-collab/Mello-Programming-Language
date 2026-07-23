@@ -217,7 +217,7 @@ A practical example showcasing multi-tasking and event handling in a Smart Room 
 buttonPin = 2
 lightPin = 13
 tempSensor = A0
-systemActive = 1
+systemActive = true
 
 start:
     serial.println("Smart Room OS Booting...")
@@ -231,12 +231,12 @@ loop:
 
     # Listen for button press to toggle the system
     on_press buttonPin:
-        if systemActive == 1:
-            systemActive = 0
+        if systemActive == true:
+            systemActive = false
             turn_off(lightPin)
             serial.println("System Deactivated")
         else:
-            systemActive = 1
+            systemActive = false
             turn_on(lightPin)
             serial.println("System Activated")
 ```
