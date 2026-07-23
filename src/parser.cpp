@@ -205,6 +205,19 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
             }
         }
 
+        if (current.type == TokenType::LBRACKET) {
+            advance();
+
+            auto indexExpression = parseExpression();
+            consume(TokenType::RBRACKET, "Expected ']' after array index");
+
+            if (!arraysNamesList.count(name)) {
+                ErrorHandler::report("Undefined array name", name, current.line, this->source);
+            }
+
+            return std::make_unique<ArrayIndexNode>(name, std::move(indexExpression));
+        }
+
         if (current.type == TokenType::LPAREN) {
             advance();
             std::vector<std::unique_ptr<ExpressionNode>> args;
@@ -361,6 +374,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, this->source);
+
             advance();
             continue;
         }
@@ -375,9 +389,11 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
     advance();
 
     if (current.type == TokenType::LBRACKET) {
-        listsNames.insert(var_name);
+        if (!arraysNamesList.count(var_name)) {
+            arraysNamesList.insert(var_name);
+        }
 
-        auto listNode = parseListLiteral(var_name);
+        auto listNode = parseArrayLiteral(var_name);
 
         if (parsedVariables.count(var_name)) {
             reassignedVariables.insert(var_name);
@@ -419,7 +435,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
     return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value, isConstantVar);
 }
 
-std::unique_ptr<ASTNode> Parser::parseListLiteral(const std::string& name) {
+std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
     advance();
 
     std::vector<std::string> members;
@@ -443,7 +459,7 @@ std::unique_ptr<ASTNode> Parser::parseListLiteral(const std::string& name) {
 
     consume(TokenType::RBRACKET, "Expected ']' to close list literal");
 
-    return std::make_unique<ListNode>(name, members);
+    return std::make_unique<ArrayNode>(name, members);
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDefinition(const std::string& keyword) {
@@ -705,6 +721,7 @@ std::unique_ptr<ASTNode> Parser::parseOnPressStatement() {
 
     return std::make_unique<OnPressNode>(pin, std::move(body));
 }
+
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
     std::vector<std::unique_ptr<ASTNode>> program;

@@ -181,18 +181,18 @@ public:
     }
 };
 
-class ListNode : public ASTNode {
+class ArrayNode : public ASTNode {
 private:
-    std::string listName;
-    std::vector<std::string> listMembers;
+    std::string arrayName;
+    std::vector<std::string> arrayMembers;
 
 private:
     std::string inferElementType() const {
-        if (listMembers.empty()) {
+        if (arrayMembers.empty()) {
             return "int";
         }
 
-        const std::string& first = listMembers.front();
+        const std::string& first = arrayMembers.front();
 
         if (!first.empty() && first.front() == '"') {
             return "const char*";
@@ -206,20 +206,37 @@ private:
     }
 
 public:
-    ListNode(const std::string& name, const std::vector<std::string>& listMembers)
-        : listName(name), listMembers(listMembers) {}
+    ArrayNode(const std::string& name, const std::vector<std::string>& arrayMembers)
+        : arrayName(name), arrayMembers(arrayMembers) {}
 
+public:
     std::string toCpp() override {
         std::string type = inferElementType();
-        std::string result = type + " " + listName + "[" + std::to_string(listMembers.size()) + "] = {";
+        std::string result = type + " " + arrayName + "[" + std::to_string(arrayMembers.size()) + "] = {";
 
-        for (size_t i = 0; i < listMembers.size(); ++i) {
-            result += listMembers[i];
-            if (i + 1 < listMembers.size()) result += ", ";
+        for (size_t i = 0; i < arrayMembers.size(); ++i) {
+            result += arrayMembers[i];
+            if (i + 1 < arrayMembers.size()) result += ", ";
         }
 
         result += "};\n";
+
         return result;
+    }
+};
+
+class ArrayIndexNode : public ExpressionNode {
+private:
+    std::string arrayName;
+    std::unique_ptr<ExpressionNode> indexExpression;
+
+public:
+    ArrayIndexNode(std::string arrayName, std::unique_ptr<ExpressionNode> indexExpression)
+        : arrayName(std::move(arrayName)), indexExpression(std::move(indexExpression)) {}
+
+public:
+    std::string toCpp() override {
+        return arrayName + "[" + indexExpression->toCpp() + "]";
     }
 };
 
@@ -261,6 +278,19 @@ public:
 
         result += "}";
         return result;
+    }
+};
+
+class LiteralNode : public ExpressionNode {
+public:
+    Token token;
+
+public:
+    LiteralNode(Token t)
+        : token(t) {}
+
+    std::string toCpp() override {
+        return token.value;
     }
 };
 
@@ -412,19 +442,25 @@ public:
         }
 
         if (funcName == "print" && argsStr.size() >= 1) {
-            if (parsedVariables.count(argsStr[0]) || isNumber(argsStr[0])) {
-                return "Serial.print(" + argsStr[0] + ");";
+            auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
+            bool isStringLiteral = literal && literal->token.type == TokenType::STRING;
+
+            if (isStringLiteral) {
+                return "Serial.print(F(" + argsStr[0] + "));";
             }
 
-            return "Serial.print(F(" + argsStr[0] + "));";
+            return "Serial.print(" + argsStr[0] + ");";
         }
 
         if (funcName == "println" && argsStr.size() >= 1) {
-            if (parsedVariables.count(argsStr[0]) || isNumber(argsStr[0])) {
-                return "Serial.println(" + argsStr[0] + ");";
+            auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
+            bool isStringLiteral = literal && literal->token.type == TokenType::STRING;
+
+            if (isStringLiteral) {
+                return "Serial.println(F(" + argsStr[0] + "));";
             }
 
-            return "Serial.println(F(" + argsStr[0] + "));";
+            return "Serial.println(" + argsStr[0] + ");";
         }
 
         if (funcName == "available") {
@@ -491,19 +527,6 @@ public:
         }
         
         return funcName + "(" + fallbackArgs + ");";
-    }
-};
-
-class LiteralNode : public ExpressionNode {
-public:
-    Token token;
-
-public:
-    LiteralNode(Token t)
-        : token(t) {}
-
-    std::string toCpp() override {
-        return token.value;
     }
 };
 

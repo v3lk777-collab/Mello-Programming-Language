@@ -7,6 +7,7 @@
 // explicit written permission from the author.
 
 #pragma once
+
 #include <set>
 #include <map>
 #include <string>
@@ -29,7 +30,7 @@ inline std::set<std::string> includedLibraries;
 inline std::set<std::string> declaredVariables;
 inline std::set<std::string> reassignedVariables;
 
-inline std::set<std::string> listsNames;
+inline std::set<std::string> arraysNamesList;
 
 inline std::string currentParsingUserFunc = "";
 inline std::vector<std::string> currentFuncParamNames;
