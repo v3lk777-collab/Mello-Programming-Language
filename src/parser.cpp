@@ -761,7 +761,6 @@ std::unique_ptr<ASTNode> Parser::parseOnPressStatement() {
     return std::make_unique<OnPressNode>(pin, std::move(body));
 }
 
-
 std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
     std::vector<std::unique_ptr<ASTNode>> program;
 
