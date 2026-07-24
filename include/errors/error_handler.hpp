@@ -7,6 +7,7 @@
 // explicit written permission from the author.
 
 #pragma once
+
 #include <string>
 #include <vector>
 #include <sstream>
