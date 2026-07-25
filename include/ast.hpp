@@ -14,12 +14,16 @@
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
+
+public:
     virtual std::string toCpp() = 0;
 };
 
 class ExpressionNode : public ASTNode {
 public:
     virtual ~ExpressionNode() = default;
+
+public:
     virtual std::string getVariableName() {
         return "";
     };
