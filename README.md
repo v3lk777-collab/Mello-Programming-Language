@@ -49,7 +49,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 The Mello compiler is built from scratch in C++17 and operates in five sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
-The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 22 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `serial`, `scale`, `func`, `return`, `and`, `or`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`.
+The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 22 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `serial.*` family, `scale`, `func`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`.
 
 ### Phase B: Syntax Analysis (Parser)
 The `Parser` consumes the token stream and validates it against Mello's grammar using recursive-descent parsing, constructing a full Abstract Syntax Tree (AST) with properly nested logical blocks.
@@ -77,8 +77,7 @@ name = "Mohammed"      # String variable
 sensor_pin = 5         # Intger variable
 threshold = 10.5       # Float variable
 isAMelloCode = true    # Boolean variable
-char = 'A'             # Char variable
-
+character = 'A'             # Char variable
 PIN = 13               # Constant intger variable
 ```
 

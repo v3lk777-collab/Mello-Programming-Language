@@ -713,7 +713,7 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
 
         return std::make_unique<ForRangeNode>(varName, std::move(startExpression), std::move(stopExpression), std::move(stepExpression), std::move(body));
     }
-    
+
     auto condition = parseExpression();
 
     consume(TokenType::COLON, "Expected ':' after while condition");
