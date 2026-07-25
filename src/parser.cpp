@@ -679,8 +679,17 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
 
         advance();
 
-        consume(TokenType::KEYWORD, "Missing 'in' keyword");
-        consume(TokenType::KEYWORD, "Expected 'range' after 'in'");
+        if (current.value != "in") {
+            ErrorHandler::report("Expected 'in' keyword", current.value, current.line, this->source);
+        }
+
+        advance();
+
+        if (current.value != "range") {
+            ErrorHandler::report("Expected 'range' after 'in'", current.value, current.line, this->source);
+        }
+
+        advance();
         consume(TokenType::LPAREN, "Expected '(' after 'range'");
 
         auto startExpression = parseExpression();
