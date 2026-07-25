@@ -88,7 +88,7 @@ private:
 
 public:
     VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar) 
-        : name(name), value(std::move(value)), raw_value(raw), val_type(val_type), isConstantVar(isConstantVar) {}
+        : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar) {}
 
 public:
     std::string toCpp() override {
@@ -207,8 +207,8 @@ private:
     }
 
 public:
-    ArrayNode(const std::string& name, const std::vector<std::string>& arrayMembers)
-        : arrayName(name), arrayMembers(arrayMembers) {}
+    ArrayNode(std::string name, std::vector<std::string> arrayMembers)
+        : arrayName(std::move(name)), arrayMembers(std::move(arrayMembers)) {}
 
 public:
     std::string toCpp() override {
@@ -247,9 +247,10 @@ private:
     std::vector<std::unique_ptr<ASTNode>> body;
 
 public:
-    FunctionNode(const std::string& name, std::vector<std::unique_ptr<ASTNode>> funcBody)
-        : funcName(name), body(std::move(funcBody)) {}
+    FunctionNode(std::string name, std::vector<std::unique_ptr<ASTNode>> funcBody)
+        : funcName(std::move(name)), body(std::move(funcBody)) {}
 
+public:
     std::string toCpp() override {
         if (funcName == "start") {
             funcName = "setup";
@@ -318,8 +319,8 @@ private:
     }
 
 public:
-    FunctionCallNode(const std::string& name, std::vector<std::unique_ptr<ExpressionNode>> args)
-        : funcName(name), arguments(std::move(args)) {
+    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args)
+        : funcName(std::move(name)), arguments(std::move(args)) {
         
         if (!arguments.empty()) {
             std::string pinName = arguments[0]->toCpp();
@@ -580,6 +581,7 @@ public:
         return "";
     }
 
+public:
     std::string toCpp() override {
         std::string opStr = op.value;
 
@@ -612,8 +614,9 @@ private:
 
 public:
     CompoundAssignNode(std::string name, std::string op, std::string value)
-        : name(name), op(op), value(value) {}
+        : name(std::move(name)), op(std::move(op)), value(std::move(value)) {}
 
+public:
     std::string toCpp() override {
         if (op == "++") {
             return name + "++;";
@@ -637,6 +640,7 @@ public:
     IfNode(std::unique_ptr<ASTNode> cond, std::vector<std::unique_ptr<ASTNode>> body)
         : condition(std::move(cond)), thenBody(std::move(body)) {}
 
+public:
     void setElseBody(std::vector<std::unique_ptr<ASTNode>> body) {
         elseBody = std::move(body);
     }
@@ -679,7 +683,8 @@ private:
 public:
     UserFuncNode(const std::string& name, std::vector<std::string> params, std::vector<std::unique_ptr<ASTNode>> body)
         : funcName(name), params(std::move(params)), body(std::move(body)) {}
-    
+
+public:
     std::string toCpp() override {
         std::string result = "void " + funcName + "(";
 
@@ -706,7 +711,8 @@ private:
 public:
     ReturnNode(const std::string& val)
         : value(val) {}
-    
+
+public:
     std::string toCpp() override {
         return "return " + value + ";";
     }
@@ -726,6 +732,7 @@ public:
         id = counter++;
     }
 
+public:
     std::string toCpp() override {
         interval = parseTime(interval);
 
@@ -754,6 +761,7 @@ public:
     WhileNode(std::unique_ptr<ExpressionNode> cond, std::vector<std::unique_ptr<ASTNode>> b)
         : condition(std::move(cond)), body(std::move(b)) {}
 
+public:
     std::string toCpp() override {
         std::string result = "while (" + condition->toCpp() + ") {\n";
 
@@ -800,7 +808,7 @@ public:
     }
 };
 
-class ForRnageNode : public ASTNode {
+class ForRangeNode : public ASTNode {
 private:
     std::string varName;
     std::unique_ptr<ExpressionNode> start;
@@ -809,7 +817,7 @@ private:
     std::vector<std::unique_ptr<ASTNode>> body;
 
 public:
-    ForRnageNode(std::string varName, std::unique_ptr<ExpressionNode> start, std::unique_ptr<ExpressionNode> stop, std::unique_ptr<ExpressionNode> step, std::vector<std::unique_ptr<ASTNode>> body)
+    ForRangeNode(std::string& varName, std::unique_ptr<ExpressionNode> start, std::unique_ptr<ExpressionNode> stop, std::unique_ptr<ExpressionNode> step, std::vector<std::unique_ptr<ASTNode>> body)
         : varName(std::move(varName)), start(std::move(start)), stop(std::move(stop)), step(std::move(step)), body(std::move(body)) {}
 
 public:
@@ -840,6 +848,7 @@ public:
         id = counter++;
     }
 
+public:
     std::string toCpp() override {
         std::string iterVar = "_loop_i_" + std::to_string(id);
         std::string code = "for (int " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
@@ -862,6 +871,7 @@ public:
     GroupNode(std::unique_ptr<ASTNode> e)
         : expr(std::move(e)) {}
 
+public:
     std::string toCpp() override {
         return "(" + expr->toCpp() + ")";
     }
@@ -882,6 +892,7 @@ public:
         inputPins.insert(pin);
     }
 
+public:
     std::string toCpp() override {
         std::string timerVar = "_btn_timer_" + std::to_string(id);
         std::string lastVar = "_btn_last_" + std::to_string(id);
@@ -913,6 +924,7 @@ public:
     MethodCallNode(std::string obj, std::unique_ptr<ASTNode> method)
         : objectName(obj), methodCall(std::move(method)) {}
 
+public:
     std::string toCpp() override {
         std::string methodStr = methodCall->toCpp();
 
@@ -937,7 +949,8 @@ private:
 public:
     ControlTransferStatementsNode(const std::string& statement)
         : statement(std::move(statement)) {}
-    
+
+public:
     std::string toCpp() override {
         if (statement == "break") {
             return "break;";

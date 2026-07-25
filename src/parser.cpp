@@ -711,7 +711,7 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
         auto body = parseBlock();
         consume(TokenType::DEDENT, "Expected dedent at end of for block");
 
-        return std::make_unique<ForRnageNode>(varName, std::move(startExpression), std::move(stopExpression), std::move(stepExpression), std::move(body));
+        return std::make_unique<ForRangeNode>(varName, std::move(startExpression), std::move(stopExpression), std::move(stepExpression), std::move(body));
     }
     
     auto condition = parseExpression();
@@ -737,6 +737,7 @@ std::unique_ptr<ASTNode> Parser::parseRepeatStatement() {
     match(TokenType::NEWLINE);
     
     consume(TokenType::INDENT, "Expected indentation after repeat");
+
     auto body = parseBlock();
     consume(TokenType::DEDENT, "Expected dedent at end of repeat block");
     
