@@ -479,9 +479,9 @@ public:
 
         if (funcName == "find" && argsStr.size() >= 2) {
             std::string target = argsStr[0];
-            std::string lenght = argsStr[1];
+            std::string length = argsStr[1];
 
-            return "Serial.find(" + target + ", " + lenght + ")";
+            return "Serial.find(" + target + ", " + length + ")";
         }
 
         if (funcName == "findUntil" && argsStr.size() >= 2) {
@@ -817,7 +817,7 @@ private:
     std::vector<std::unique_ptr<ASTNode>> body;
 
 public:
-    ForRangeNode(std::string& varName, std::unique_ptr<ExpressionNode> start, std::unique_ptr<ExpressionNode> stop, std::unique_ptr<ExpressionNode> step, std::vector<std::unique_ptr<ASTNode>> body)
+    ForRangeNode(std::string varName, std::unique_ptr<ExpressionNode> start, std::unique_ptr<ExpressionNode> stop, std::unique_ptr<ExpressionNode> step, std::vector<std::unique_ptr<ASTNode>> body)
         : varName(std::move(varName)), start(std::move(start)), stop(std::move(stop)), step(std::move(step)), body(std::move(body)) {}
 
 public:
