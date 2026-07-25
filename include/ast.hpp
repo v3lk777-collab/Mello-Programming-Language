@@ -175,7 +175,7 @@ public:
         bool isKeyword = keywordsList.count(raw_value) > 0;
         bool isArrayAccess = final_value.find('[') != std::string::npos;
 
-        if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar || isArrayAccess) {
+        if (isArrayAccess) {
             return type + " " + name + " = " + final_value + ";\n";
         }
 
