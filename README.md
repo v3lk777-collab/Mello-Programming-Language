@@ -346,8 +346,6 @@ As part of ongoing research and development, the following features are planned 
 
 - **Static Type Checker:** a strict pre-compilation type-checking phase to guarantee complete memory safety and prevent type mismatches before flashing.
 - **Native Power Management (`sleep` modes):** keywords to push the microcontroller into `AVR_SLEEP` modes, maximizing battery life for IoT devices.
-**Array/List Abstractions:** read access (arr[i]) is supported; bounds-checked writes and dynamic sizing are still planned.
-
 ---
 
 ## 11. Intellectual Property & Usage Policy
