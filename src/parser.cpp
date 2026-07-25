@@ -274,7 +274,9 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
             std::string name = current.value;
             advance();
 
-            if (current.type == TokenType::EQUAL) {
+            if (current.type == TokenType::LBRACKET) {
+                body.push_back(parseArrayAssignment(name));
+            } else if (current.type == TokenType::EQUAL) {
                 body.push_back(parseAssignment(name));
             } else if (current.type == TokenType::LPAREN) {
                 body.push_back(parseFunctionCall(name));
@@ -459,6 +461,27 @@ std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
     consume(TokenType::RBRACKET, "Expected ']' to close list literal");
 
     return std::make_unique<ArrayNode>(name, members);
+}
+
+std::unique_ptr<ASTNode> Parser::parseArrayAssignment(const std::string& name) {
+    advance();
+
+    if (!arraysNamesList.count(name)) {
+        ErrorHandler::report("Undefined array name", name, current.line, this->source);
+    }
+
+    auto indexExpression = parseExpression();
+
+    consume(TokenType::RBRACKET, "Expected ']' after array index");
+    consume(TokenType::EQUAL, "Expected '=' after array index for assignment");
+
+    auto valueExpression = parseExpression();
+
+    if (current.type == TokenType::NEWLINE) {
+        advance();
+    }
+
+    return std::make_unique<ArrayAssignNode>(name, std::move(indexExpression), std::move(valueExpression));
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionDefinition(const std::string& keyword) {

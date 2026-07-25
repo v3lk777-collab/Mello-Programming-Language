@@ -173,6 +173,11 @@ public:
         bool isReassigned = reassignedVariables.count(name) > 0;
         bool hasConst = type.find("constexpr") != std::string::npos;
         bool isKeyword = keywordsList.count(raw_value) > 0;
+        bool isArrayAccess = final_value.find('[') != std::string::npos;
+
+        if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar || isArrayAccess) {
+            return type + " " + name + " = " + final_value + ";\n";
+        }
 
         if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar) {
             return "constexpr " + type + " " + name + " = " + final_value + ";\n";
@@ -238,6 +243,22 @@ public:
 public:
     std::string toCpp() override {
         return arrayName + "[" + indexExpression->toCpp() + "]";
+    }
+};
+
+class ArrayAssignNode : public ExpressionNode {
+private:
+    std::string arrayName;
+    std::unique_ptr<ExpressionNode> indexExpression;
+    std::unique_ptr<ExpressionNode> valueExpression;
+
+public:
+    ArrayAssignNode(std::string arrayName, std::unique_ptr<ExpressionNode> indexExpression, std::unique_ptr<ExpressionNode> valueExpression)
+        : arrayName(std::move(arrayName)), indexExpression(std::move(indexExpression)), valueExpression(std::move(valueExpression)) {}
+
+public:
+    std::string toCpp() override {
+        return arrayName + "[" + indexExpression->toCpp() + "]" + " = " + valueExpression->toCpp() + ";";
     }
 };
 

@@ -1,11 +1,6 @@
-number = 0
+list = [1, 2, 3, 4, 5]
 
 start:
-    for i in range(0, 10, 2):
-        serial.println("Mohammed")
-
-    while number <= 10:
-        if number == 5:
-            break
-        
-        number++
+    list[0] = 99
+    value = list[0]
+    serial.println(value)
