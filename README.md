@@ -46,7 +46,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 
 ## 3. Under the Hood: Compiler Architecture
 
-The Mello compiler is built from scratch in C++17 and operates in five sophisticated phases:
+The Mello compiler is built from scratch in C++23 and CMake 3.25, operates in five sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
 The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 22 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `serial.*` family, `scale`, `func`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`.
