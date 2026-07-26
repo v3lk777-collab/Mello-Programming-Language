@@ -39,7 +39,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 - **Smart Micro-Threading (`every`):** Say goodbye to the blocking `delay()`. The `every` keyword automatically generates a non-blocking, `millis()`-based timer, allowing true cooperative multitasking.
 - **Event-Driven Hardware (`on_press`):** Button debouncing is handled natively — the compiler expands a single line into an edge-detected, cooldown-based debounce check, with no hand-written state variables.
 - **Auto-Configuration:** No manual `pinMode()` or `Serial.begin()` calls. The semantic analyzer scans the usage graph — every `turn_on()`, `toggle()`, `on_press`, and `serial.*` call — and generates the correct `setup()` routine automatically.
-- **Smart Type Inference:** Every variable is assigned the tightest native C++ type at transpile time (`uint8_t` for small integers, `float` for decimals, `const char*` for text), and any variable that's never reassigned is automatically marked `const`.
+- **Smart Type Inference:** Every variable is assigned the tightest native C++ type at transpile time (`uint8_t` for small integers, `float` for decimals, `const char*` for text), and any variable that's never reassigned is automatically marked `constexpr`.
 - **Indentation-Based:** Clean, Pythonic syntax with no curly braces `{}` or semicolons `;`.
 
 ---
@@ -49,7 +49,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 The Mello compiler is built from scratch in C++23 and CMake 3.25, operates in five sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
-The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 22 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `serial.*` family, `scale`, `func`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`.
+The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 28 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `func`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `serial.*` family.
 
 ### Phase B: Syntax Analysis (Parser)
 The `Parser` consumes the token stream and validates it against Mello's grammar using recursive-descent parsing, constructing a full Abstract Syntax Tree (AST) with properly nested logical blocks.
@@ -77,7 +77,7 @@ name = "Mohammed"      # String variable
 sensor_pin = 5         # Intger variable
 threshold = 10.5       # Float variable
 isAMelloCode = true    # Boolean variable
-character = 'A'             # Char variable
+character = 'A'        # Char variable
 PIN = 13               # Constant intger variable
 ```
 
@@ -121,9 +121,14 @@ loop:
 Other hardware and serial primitives:
 
 ```python
-write(pin, HIGH)                # 0/1/HIGH/LOW -> digitalWrite(); any other value -> analogWrite()
-serial.write(character)         # Single argument -> Serial.write()
-scale(value, 0, 1023, 0, 255)   # -> map(value, 0, 1023, 0, 255)
+pin = 13
+character = 'A'
+value = 50
+
+start:
+    write(pin, HIGH)                # 0/1/HIGH/LOW -> digitalWrite(); any other value -> analogWrite()
+    serial.write(character)         # Single argument -> Serial.write()
+    scale(value, 0, 1023, 0, 255)   # -> map(value, 0, 1023, 0, 255)
 ```
 
 ### Advanced Event-Driven Structures
