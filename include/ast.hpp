@@ -890,15 +890,15 @@ public:
 
 class GroupNode : public ExpressionNode {
 public:
-    std::unique_ptr<ASTNode> expr;
+    std::unique_ptr<ASTNode> expression;
 
 public:
-    GroupNode(std::unique_ptr<ASTNode> e)
-        : expr(std::move(e)) {}
+    GroupNode(std::unique_ptr<ASTNode> expression)
+        : expression(std::move(expression)) {}
 
 public:
     std::string toCpp() override {
-        return "(" + expr->toCpp() + ")";
+        return "(" + expression->toCpp() + ")";
     }
 };
 
@@ -914,6 +914,7 @@ public:
 
         static int counter = 0;
         id = counter++;
+
         inputPins.insert(pin);
     }
 
