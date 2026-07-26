@@ -266,7 +266,7 @@ cd Mello-Programming-Language/build
 
 ### Option B — Build from Source
 
-The compiler is built with CMake and requires a C++17 toolchain (Linux, macOS, or Windows).
+The compiler is built with CMake 3.25 or later and requires a C++23 toolchain (Linux, macOS, or Windows).
 
 ```bash
 git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
