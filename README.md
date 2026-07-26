@@ -2,7 +2,6 @@
 
 [![C++](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/23)
 [![CMake](https://img.shields.io/badge/CMake-3.25%2B-informational.svg)](https://cmake.org/)
-[![License](https://img.shields.io/badge/license-GPLv3-green.svg)](LICENSE)
 
 **A high-performance, indentation-based programming language and transpiler for streamlining embedded systems and IoT development.**
 
