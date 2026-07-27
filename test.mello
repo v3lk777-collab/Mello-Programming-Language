@@ -1,6 +1,5 @@
-list = [1, 2, 3, 4, 5]
+pin = 13
 
-start:
-    list[0] = 99
-    value = list[0]
-    serial.println(value)
+loop:
+    toggle(pin)
+    wait(1s)

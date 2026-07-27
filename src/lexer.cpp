@@ -10,11 +10,12 @@
 
 #include <iostream>
 
-Lexer::Lexer(const std::string& source) {
-    this->source = source;
+Lexer::Lexer(std::string source) {
+    this->source = std::move(source);
     this->position = 0;
-    this->length = source.length();
-    this->current = (this->length > 0) ? source[0] : '\0';
+
+    this->length = this->source.length();
+    this->current = (this->length > 0) ? this->source[0] : '\0';
     this->currentLine = 1;
 
     this->indent_stack.push_back(0);

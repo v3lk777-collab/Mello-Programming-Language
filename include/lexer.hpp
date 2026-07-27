@@ -40,5 +40,5 @@ private:
 
 public:
     std::vector<Token> tokenize();
-    Lexer(const std::string& source);
+    Lexer(std::string source);
 };
