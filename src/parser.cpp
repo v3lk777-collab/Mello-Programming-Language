@@ -195,11 +195,11 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
                 consume(TokenType::RPAREN, "Expected ')' after method arguments");
 
-                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args));
+                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args), current.line, this->source);
                 
                 return std::make_unique<MethodCallNode>(name, std::move(methodCall));
             } else {
-                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>());
+                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>(), current.line, this->source);
                 return std::make_unique<MethodCallNode>(name, std::move(methodCall));
             }
         }
@@ -232,7 +232,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
             consume(TokenType::RPAREN, "Expected ')' after function arguments");
 
-            return std::make_unique<FunctionCallNode>(name, std::move(args));
+            return std::make_unique<FunctionCallNode>(name, std::move(args), current.line, this->source);
         }
 
         return std::make_unique<LiteralNode>(t);
@@ -383,7 +383,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
     
     consume(TokenType::RPAREN, "Expected ')' after arguments in " + func_name);
     
-    return std::make_unique<FunctionCallNode>(func_name, std::move(args));
+    return std::make_unique<FunctionCallNode>(func_name, std::move(args), current.line, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
@@ -519,7 +519,7 @@ std::unique_ptr<ASTNode> Parser::parseKeywordFunctionCall(const std::string& key
 
     consume(TokenType::RPAREN, "Expected ')' after arguments in '" + keyword + "'");
 
-    return std::make_unique<FunctionCallNode>(keyword, std::move(args));
+    return std::make_unique<FunctionCallNode>(keyword, std::move(args), current.line, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseIfStatement() {

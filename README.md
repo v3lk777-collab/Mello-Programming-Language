@@ -352,7 +352,6 @@ This project is explicitly designed to meet high-level engineering evaluation st
 As part of ongoing research and development, the following features are planned for upcoming compiler versions:
 
 - **Static Type Checker:** a strict pre-compilation type-checking phase to guarantee complete memory safety and prevent type mismatches before flashing.
-- **Native Power Management (`sleep` modes):** keywords to push the microcontroller into `AVR_SLEEP` modes, maximizing battery life for IoT devices.
 ---
 
 ## 11. Intellectual Property & Usage Policy

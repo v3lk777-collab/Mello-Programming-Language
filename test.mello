@@ -4,4 +4,4 @@ loop:
     toggle(pin)
     wait(1s)
 
-    pin = "Mohammed"
+    sleep(idle) # You can use `idel` or `adc` or `deep`

@@ -56,13 +56,15 @@ bool installLibraries() {
 
     std::cout << "Checking and installing required libraries..." << "\n";
     
-    for (const auto& lib : includedLibraries) {        
-        std::string installLibrariesCommand = ARDUINO_CLI_PATH + " lib install \"" + lib + "\"";
+    for (const auto& lib : includedLibraries) {
+        if (!lib.starts_with("avr")) {
+            std::string installLibrariesCommand = ARDUINO_CLI_PATH + " lib install \"" + lib + "\"";
         
-        int status = system(installLibrariesCommand.c_str());
-        
-        if (status != 0) {
-            std::cerr << "Warning: Failed to install '" << lib << "'. It might be built-in or the name is incorrect." << "\n";
+            int status = system(installLibrariesCommand.c_str());
+            
+            if (status != 0) {
+                std::cerr << "Warning: Failed to install '" << lib << "'. It might be built-in or the name is incorrect." << "\n";
+            }
         }
     }
     
@@ -258,7 +260,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
             std::vector<std::unique_ptr<ExpressionNode>> beginArgs;
 
             beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "9600", 0)));
-            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs)));
+            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), 0, ""));
         }
 
         FunctionNode autoSetup("setup", std::move(setupBody));

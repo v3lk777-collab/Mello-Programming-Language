@@ -349,6 +349,10 @@ private:
     std::vector<std::unique_ptr<ExpressionNode>> arguments;
 
 private:
+    int currentLine;
+    std::string source;
+
+private:
     bool isNumber(const std::string &str) {
         if (str.empty()) {
             return false;
@@ -366,9 +370,9 @@ private:
     }
 
 public:
-    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args)
-        : funcName(std::move(name)), arguments(std::move(args)) {
-        
+    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args, int currentLine, std::string source)
+        : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), source(std::move(source)) {
+
         if (!arguments.empty()) {
             std::string pinName = arguments[0]->toCpp();
             
@@ -570,7 +574,36 @@ public:
             return "map(" + argsStr[0] + ", " + argsStr[1] + ", " + argsStr[2] + ", " + argsStr[3] + ", " + argsStr[4] + ")";
         }
 
+        if (funcName == "sleep") {
+            if (argsStr.empty()) {
+                ErrorHandler::report("sleep() requires one argument:", "idle | adc | deep", currentLine, source);
+            }
+
+            includedLibraries.insert("avr/sleep");
+
+            std::string sleepModeType;
+            std::string sleepMode = argsStr[0];
+
+            if (sleepMode == "idle") {
+                sleepModeType = "SLEEP_MODE_IDLE";
+            } else if (sleepMode == "adc") {
+                sleepModeType = "SLEEP_MODE_ADC";
+            } else if (sleepMode == "deep") {
+                sleepModeType = "SLEEP_MODE_PWR_DOWN";
+            } else {
+                ErrorHandler::report("Unknown sleep mode:", sleepMode, currentLine, source);
+            }
+
+            std::string result = "set_sleep_mode(" + sleepModeType + ");";
+            result += "sleep_enable();";
+            result += "sleep_mode();";
+            result += "sleep_disable();";
+
+            return result;
+        }
+
         std::string fallbackArgs = "";
+
         for (size_t i = 0; i < argsStr.size(); ++i) {
             fallbackArgs += argsStr[i] + (i < argsStr.size() - 1 ? ", " : "");
         }
@@ -596,8 +629,9 @@ public:
         }
 
         std::string rightStr = right->toCpp();
+        std::string result = opStr + rightStr;
 
-        return opStr + rightStr;
+        return result;
     }
 };
 
