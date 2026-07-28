@@ -10,6 +10,7 @@
 
 #include "utils.hpp"
 #include "lexer.hpp"
+#include "error_handler.hpp"
 
 class ASTNode {
 public:
@@ -36,6 +37,10 @@ public:
     TokenType val_type;
     std::string raw_value;
     std::unique_ptr<ASTNode> value;
+
+private:
+    int currentLine;
+    std::string source;
 
 private:
     bool isNumeric(const std::string& str) const noexcept {
@@ -91,8 +96,8 @@ private:
     }
 
 public:
-    VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar) 
-        : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar) {}
+    VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar, int currentLine, std::string source) 
+        : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), source(std::move(source)) {}
 
 public:
     std::string toCpp() override {
@@ -104,6 +109,20 @@ public:
         }
 
         if (declaredVariables.count(name)) {
+            bool wasString = stringVariables.count(name) > 0;
+            bool wasFloat = floatVariables.count(name) > 0;
+            bool wasInt = integerVariables.count(name) > 0;
+
+            bool isNowString = (val_type == TokenType::STRING) || final_value.find("\"") != std::string::npos;
+            bool isNowFloat = !isNowString && final_value.find('.') != std::string::npos && isNumeric(final_value);
+            bool isNowInt = !isNowString && !isNowFloat && isNumeric(final_value);
+
+            bool mismatch = (wasString && !isNowString && (isNowInt || isNowFloat)) || ((wasFloat || wasInt) && isNowString);
+        
+            if (mismatch) {
+                ErrorHandler::report("Type mismatch: cannot reassign variable:", name, currentLine, source);
+            }
+
             return name + " = " + final_value + ";";
         }
 
@@ -226,7 +245,10 @@ public:
 
         for (size_t i = 0; i < arrayMembers.size(); ++i) {
             result += arrayMembers[i];
-            if (i + 1 < arrayMembers.size()) result += ", ";
+
+            if (i + 1 < arrayMembers.size()) {
+                result += ", ";
+            }
         }
 
         result += "};\n";

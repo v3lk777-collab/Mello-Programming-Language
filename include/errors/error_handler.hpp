@@ -53,4 +53,4 @@ public:
     }
 };
 
-int ErrorHandler::errorCount = 0;
+inline int ErrorHandler::errorCount = 0;

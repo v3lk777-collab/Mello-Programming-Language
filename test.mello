@@ -3,3 +3,5 @@ pin = 13
 loop:
     toggle(pin)
     wait(1s)
+
+    pin = "Mohammed"

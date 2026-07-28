@@ -433,7 +433,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
         advance();
     }
 
-    return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value, isConstantVar);
+    return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value, isConstantVar, this->current.line, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
