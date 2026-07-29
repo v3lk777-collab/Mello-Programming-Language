@@ -1,7 +1,6 @@
-pin = 13
+sensors = [8, 3, 9, 1, 6]
 
 loop:
-    toggle(pin)
-    wait(1s)
-
-    sleep(idle) # You can use `idel` or `adc` or `deep`
+    serial.write(sensors[0])
+    serial.write(sensors[1])
+    serial.write(sensors[2])

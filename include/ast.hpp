@@ -862,8 +862,8 @@ private:
     std::vector<std::unique_ptr<ASTNode>> body;
 
 public:
-    ForNode(std::unique_ptr<ExpressionNode> cond, std::vector<std::unique_ptr<ASTNode>> b)
-        : condition(std::move(cond)), body(std::move(b)) {}
+    ForNode(std::unique_ptr<ExpressionNode> cond, std::vector<std::unique_ptr<ASTNode>> body)
+        : condition(std::move(cond)), body(std::move(body)) {}
 
 public:
     std::string toCpp() override {
@@ -923,7 +923,7 @@ private:
 
 public:
     RepeatNode(std::string count, std::vector<std::unique_ptr<ASTNode>> body)
-        : count(count), body(std::move(body)) {
+        : count(std::move(count)), body(std::move(body)) {
 
         static int counter = 0;
         id = counter++;
@@ -966,7 +966,7 @@ private:
 
 public:
     OnPressNode(std::string pin, std::vector<std::unique_ptr<ASTNode>> body)
-        : pin(pin), body(std::move(body)) {
+        : pin(std::move(pin)), body(std::move(body)) {
 
         static int counter = 0;
         id = counter++;
@@ -1003,8 +1003,8 @@ private:
     std::unique_ptr<ASTNode> methodCall;
 
 public:
-    MethodCallNode(std::string obj, std::unique_ptr<ASTNode> method)
-        : objectName(obj), methodCall(std::move(method)) {}
+    MethodCallNode(std::string object, std::unique_ptr<ASTNode> method)
+        : objectName(std::move(object)), methodCall(std::move(method)) {}
 
 public:
     std::string toCpp() override {
