@@ -80,16 +80,16 @@ private:
 
         if (number >= 0 && number <= 255) {
             type = "uint8_t";
-        } else if (number >= -32768 && number <= 32768) {
-            type = "int";
+        } else if (number >= -32768 && number <= 32767) {
+            type = "int16_t";
         } else if (number >= 0 && number <= 65535) {
             type = "uint16_t";
         } else if (number >= -2147483648LL && number <= 2147483647LL) {
-            type = "long";
+            type = "int32_t";
         } else if (number >= 0 && number <= 4294967295LL) {
-            type = "unsigned long";
+            type = "uint32_t";
         } else {
-            type = "int";
+            type = "int32_t";
         }
 
         return type;
@@ -293,9 +293,13 @@ private:
     std::string funcName;
     std::vector<std::unique_ptr<ASTNode>> body;
 
+private:
+    int currentLine;
+    std::string source;
+
 public:
-    FunctionNode(std::string name, std::vector<std::unique_ptr<ASTNode>> funcBody)
-        : funcName(std::move(name)), body(std::move(funcBody)) {}
+    FunctionNode(std::string name, std::vector<std::unique_ptr<ASTNode>> funcBody, int currentLine, std::string source)
+        : funcName(std::move(name)), body(std::move(funcBody)), currentLine(currentLine), source(std::move(source)) {}
 
 public:
     std::string toCpp() override {
@@ -313,10 +317,24 @@ public:
             for (const auto& pin : outputPins) {
                 if (!inputPins.count(pin)) {
                     result += "pinMode(" + pin + ", OUTPUT);\n";
+                } else {
+                    ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, source);
                 }
             }
 
-            if (!inputPins.empty() || !outputPins.empty()) {
+            for (const auto& pin : inputPullUpPins) {
+                if (!inputPins.count(pin) && !outputPins.count(pin)) {
+                    result += "pinMode(" + pin + ", INPUT_PULLUP);\n";
+                } else {
+                    if (inputPins.count(pin)) {
+                        ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, source);
+                    } else {
+                        ErrorHandler::report("Error: This var was use in output pin", pin, currentLine, source);
+                    }
+                }
+            }
+
+            if (!inputPins.empty() || !outputPins.empty() || !inputPullUpPins.empty()) {
                 result += "\n";
             }
         }
@@ -335,8 +353,8 @@ public:
     Token token;
 
 public:
-    LiteralNode(Token t)
-        : token(t) {}
+    LiteralNode(Token token)
+        : token(token) {}
 
     std::string toCpp() override {
         return token.value;
@@ -594,10 +612,11 @@ public:
                 ErrorHandler::report("Unknown sleep mode:", sleepMode, currentLine, source);
             }
 
-            std::string result = "set_sleep_mode(" + sleepModeType + ");";
-            result += "sleep_enable();";
-            result += "sleep_mode();";
-            result += "sleep_disable();";
+            std::string result = "set_sleep_mode(" + sleepModeType + ");\n";
+
+            result += "sleep_enable();\n";
+            result += "sleep_mode();\n";
+            result += "sleep_disable();\n";
 
             return result;
         }
@@ -870,14 +889,11 @@ public:
         std::string condStr = condition->toCpp();
         std::string varName = condition->getVariableName();
 
-        std::string op = "++"; 
-        std::string startValue = "0";
+        bool isDecrement = condStr.find(">") != std::string::npos;
+        std::string op = isDecrement ? "--" : "++"; 
+        std::string varType = isDecrement ? "int32_t" : "uint32_t";
 
-        if (condStr.find(">") != std::string::npos) {
-            op = "--";
-        }
-
-        std::string result = "for (uint32_t " + varName + " = " + startValue + "; " + condStr + "; " + varName + op + ") {\n";
+        std::string result = "for (" + varType + " " + varName + " = 0; " + condStr + "; " + varName + op + ") {\n";
 
         for (const auto& node : body) {
             result += node->toCpp() + "\n";
@@ -971,7 +987,7 @@ public:
         static int counter = 0;
         id = counter++;
 
-        inputPins.insert(pin);
+        inputPullUpPins.insert(pin);
     }
 
 public:

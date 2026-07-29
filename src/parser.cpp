@@ -499,7 +499,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDefinition(const std::string& keyw
 
     consume(TokenType::DEDENT, "Expected dedent at the end of function body");
 
-    return std::make_unique<FunctionNode>(keyword, std::move(body));
+    return std::make_unique<FunctionNode>(keyword, std::move(body), current.line, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseKeywordFunctionCall(const std::string& keyword) {

@@ -263,7 +263,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
             setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), 0, ""));
         }
 
-        FunctionNode autoSetup("setup", std::move(setupBody));
+        FunctionNode autoSetup("setup", std::move(setupBody), 0, "");
         outputFile << autoSetup.toCpp() << "\n";
     } else if (!hasSerial && hasSerialCommand) {
         size_t pos = functionsCode.find("void setup() {");
@@ -277,7 +277,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     outputFile << functionsCode << "\n";
 
     if (!hasLoop) {
-        FunctionNode autoLoop("loop", {});
+        FunctionNode autoLoop("loop", {}, 0, "");
         outputFile << autoLoop.toCpp();
     }
 

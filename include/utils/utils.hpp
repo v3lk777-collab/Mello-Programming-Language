@@ -19,6 +19,7 @@
 
 inline std::set<std::string> inputPins;
 inline std::set<std::string> outputPins;
+inline std::set<std::string> inputPullUpPins;
 
 inline std::set<std::string> floatVariables;
 inline std::set<std::string> stringVariables;
