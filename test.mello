@@ -1,6 +1,34 @@
-sensors = [8, 3, 9, 1, 6]
+redLEDPin = 5
+greenLEDPin = 2
+yellowLEDPin = 12
+buttonPin = 18
+
+trafficState = 0
+
+start:
+    serial.start(115200)
 
 loop:
-    serial.write(sensors[0])
-    serial.write(sensors[1])
-    serial.write(sensors[2])
+    on_press buttonPin:
+        turn_off(yellowLEDPin)
+        turn_off(greenLEDPin)
+        turn_on(redLEDPin)
+        println("MOVE")
+
+    every 1s:
+        turn_off(redLEDPin)
+        turn_off(yellowLEDPin)
+        turn_off(greenLEDPin)
+
+        if trafficState == 0:
+            turn_on(redLEDPin)
+            println("RED")
+            trafficState = 1
+        elif trafficState == 1:
+            turn_on(yellowLEDPin)
+            println("YELLOW")
+            trafficState = 2
+        elif trafficState == 2:
+            turn_on(greenLEDPin)
+            println("GREEN")
+            trafficState = 0

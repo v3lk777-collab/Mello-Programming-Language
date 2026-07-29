@@ -966,7 +966,7 @@ private:
 
 public:
     OnPressNode(std::string pin, std::vector<std::unique_ptr<ASTNode>> body)
-        : pin(std::move(pin)), body(std::move(body)) {
+        : pin(pin), body(std::move(body)) {
 
         static int counter = 0;
         id = counter++;
