@@ -28,7 +28,7 @@ loop:
             turn_on(yellowLEDPin)
             println("YELLOW")
             trafficState = 2
-        elif trafficState == 2:
+        elif trafficState == 2
             turn_on(greenLEDPin)
             println("GREEN")
             trafficState = 0

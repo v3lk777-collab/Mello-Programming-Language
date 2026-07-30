@@ -31,6 +31,10 @@ char Lexer::peek() {
 }
 
 void Lexer::advance() {
+    if (current == '\n') {
+        currentLine++;
+    }
+    
     do {
         position++;
 
@@ -85,7 +89,6 @@ std::vector<Token> Lexer::tokenize() {
                 skipComment();
 
                 if (current == '\n') {
-                    currentLine++;
                     advance();
                 }
                 
