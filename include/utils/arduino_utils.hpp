@@ -299,7 +299,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     // But wait, why are u reaing my code
     // yk, if u steal it, i will kill u
     // so btw, dont steal it
-
+    /*
     std::string sketchCode;
 
     std::ifstream sketchCodeFile(inoFilePath.string());
@@ -316,12 +316,10 @@ bool runMelloCompiler(int argc, char* argv[]) {
     std::cout << "-------------------------------------------------------------------------------------\n\n";
 
     sketchCodeFile.close();
-
+    */
     // to here
 
     installLibraries();
-
-    bool compiledSuccessfully = compileCode();
 
     bool isUpload = false;
     bool isCompileCode = true;
@@ -339,6 +337,8 @@ bool runMelloCompiler(int argc, char* argv[]) {
             std::cerr << "Warning: There is not arg called '" << arg << "'\n";
         }
     }
+
+    bool compiledSuccessfully = isCompileCode ? compileCode() : false;
 
     if (compiledSuccessfully && isUpload) {
         uploadCode();
