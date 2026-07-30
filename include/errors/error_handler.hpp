@@ -48,7 +48,17 @@ public:
             std::cerr << "  " << lineNumber << " | " << lineContent << "\n";
 
             std::string prefix = std::string(std::to_string(lineNumber).size() + 3, ' ');
-            std::cerr << prefix << "^" << "\n";
+            std::cerr << "  | ";
+
+            for (int i = 1; i < token.column; i++) {
+                std::cerr << ' ';
+            }
+
+            for (size_t i = 0; i < token.value.length(); i++) {
+                std::cerr << '^';
+            }
+
+            std::cerr << '\n';
         }
 
         exit(EXIT_FAILURE);
