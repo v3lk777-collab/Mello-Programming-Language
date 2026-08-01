@@ -13,7 +13,7 @@ loop:
         turn_off(yellowLEDPin)
         turn_off(greenLEDPin)
         turn_on(redLEDPin)
-        println("MOVE")
+        serial.println("MOVE")
 
     every 1s:
         turn_off(redLEDPin)
@@ -22,13 +22,13 @@ loop:
 
         if trafficState == 0:
             turn_on(redLEDPin)
-            println("RED")
+            serial.println("RED")
             trafficState = 1
         elif trafficState == 1:
             turn_on(yellowLEDPin)
-            println("YELLOW")
+            serial.println("YELLOW")
             trafficState = 2
         elif trafficState == 2:
             turn_on(greenLEDPin)
-            println("GREEN")
+            serial.println("GREEN")
             trafficState = 0
