@@ -640,6 +640,7 @@ public:
     UnaryOpNode(Token op, std::unique_ptr<ExpressionNode> right)
         : op(op), right(std::move(right)) {}
 
+public:
     std::string toCpp() override {
         std::string opStr = op.value;
 
