@@ -27,7 +27,7 @@ void Parser::advance() {
     if (position < tokens.size()) {
         position++;
     }
-    
+
     if (position < tokens.size()) {
         current = tokens[position];
     } else {
@@ -49,7 +49,7 @@ void Parser::consume(TokenType type, const std::string& errorMessage) {
     if (current.type == type) {
         advance();
     } else {
-        ErrorHandler::report(errorMessage, current.value, current.line, this->source);
+        ErrorHandler::report(errorMessage, current.value, current.line, current.column, this->source);
     }
 }
 
@@ -195,11 +195,11 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
                 consume(TokenType::RPAREN, "Expected ')' after method arguments");
 
-                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args), current.line, this->source);
+                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args), current.line, current.column, this->source);
                 
                 return std::make_unique<MethodCallNode>(name, std::move(methodCall));
             } else {
-                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>(), current.line, this->source);
+                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>(), current.line, current.column, this->source);
                 return std::make_unique<MethodCallNode>(name, std::move(methodCall));
             }
         }
@@ -211,7 +211,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
             consume(TokenType::RBRACKET, "Expected ']' after array index");
 
             if (!arraysNamesList.count(name)) {
-                ErrorHandler::report("Undefined array name", name, current.line, this->source);
+                ErrorHandler::report("Undefined array name", name, current.line, current.column, this->source);
             }
 
             return std::make_unique<ArrayIndexNode>(name, std::move(indexExpression));
@@ -232,7 +232,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
             consume(TokenType::RPAREN, "Expected ')' after function arguments");
 
-            return std::make_unique<FunctionCallNode>(name, std::move(args), current.line, this->source);
+            return std::make_unique<FunctionCallNode>(name, std::move(args), current.line, current.column, this->source);
         }
 
         return std::make_unique<LiteralNode>(t);
@@ -257,7 +257,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
         return std::make_unique<GroupNode>(std::move(expr));
     }
 
-    ErrorHandler::report("Unexpected token in expression:", current.value, current.line, this->source);
+    ErrorHandler::report("Unexpected token in expression:", current.value, current.line, current.column, this->source);
     
     return nullptr;
 }
@@ -367,14 +367,14 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
             advance();
             
             if (current.type == TokenType::RPAREN) {
-                ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, this->source);
+                ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, current.column, this->source);
             }
         }
 
         if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
             args.push_back(parseExpression());
         } else {
-            ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, this->source);
+            ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
 
             advance();
             continue;
@@ -383,7 +383,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
     
     consume(TokenType::RPAREN, "Expected ')' after arguments in " + func_name);
     
-    return std::make_unique<FunctionCallNode>(func_name, std::move(args), current.line, this->source);
+    return std::make_unique<FunctionCallNode>(func_name, std::move(args), current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
@@ -433,7 +433,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
         advance();
     }
 
-    return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value, isConstantVar, this->current.line, this->source);
+    return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value, isConstantVar, this->current.line, this->current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
@@ -467,7 +467,7 @@ std::unique_ptr<ASTNode> Parser::parseArrayAssignment(const std::string& name) {
     advance();
 
     if (!arraysNamesList.count(name)) {
-        ErrorHandler::report("Undefined array name", name, current.line, this->source);
+        ErrorHandler::report("Undefined array name", name, current.line, current.column, this->source);
     }
 
     auto indexExpression = parseExpression();
@@ -499,7 +499,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionDefinition(const std::string& keyw
 
     consume(TokenType::DEDENT, "Expected dedent at the end of function body");
 
-    return std::make_unique<FunctionNode>(keyword, std::move(body), current.line, this->source);
+    return std::make_unique<FunctionNode>(keyword, std::move(body), current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseKeywordFunctionCall(const std::string& keyword) {
@@ -519,7 +519,7 @@ std::unique_ptr<ASTNode> Parser::parseKeywordFunctionCall(const std::string& key
 
     consume(TokenType::RPAREN, "Expected ')' after arguments in '" + keyword + "'");
 
-    return std::make_unique<FunctionCallNode>(keyword, std::move(args), current.line, this->source);
+    return std::make_unique<FunctionCallNode>(keyword, std::move(args), current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseIfStatement() {
@@ -661,7 +661,7 @@ std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     advance();
 
     if (current.type != TokenType::NUMBER && current.type != TokenType::SYMBOL) {
-        ErrorHandler::report("Expected a number or identifier for interval", current.value, current.line, this->source);
+        ErrorHandler::report("Expected a number or identifier for interval", current.value, current.line, current.column, this->source);
     }
 
     std::string interval = current.value;
@@ -703,13 +703,13 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
         advance();
 
         if (current.value != "in") {
-            ErrorHandler::report("Expected 'in' keyword", current.value, current.line, this->source);
+            ErrorHandler::report("Expected 'in' keyword", current.value, current.line, current.column, this->source);
         }
 
         advance();
 
         if (current.value != "range") {
-            ErrorHandler::report("Expected 'range' after 'in'", current.value, current.line, this->source);
+            ErrorHandler::report("Expected 'range' after 'in'", current.value, current.line, current.column, this->source);
         }
 
         advance();
@@ -845,7 +845,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
             std::string badToken = current.value;
 
             advance();
-            ErrorHandler::report("Unexpected token in expression", badToken, current.line, this->source);
+            ErrorHandler::report("Unexpected token in expression", badToken, current.line, current.column, this->source);
         }
     }
 

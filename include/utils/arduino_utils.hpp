@@ -260,10 +260,10 @@ bool runMelloCompiler(int argc, char* argv[]) {
             std::vector<std::unique_ptr<ExpressionNode>> beginArgs;
 
             beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "9600", 0)));
-            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), 0, ""));
+            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), 0, 0, ""));
         }
 
-        FunctionNode autoSetup("setup", std::move(setupBody), 0, "");
+        FunctionNode autoSetup("setup", std::move(setupBody), 0, 0, "");
         outputFile << autoSetup.toCpp() << "\n";
     } else if (!hasSerial && hasSerialCommand) {
         size_t pos = functionsCode.find("void setup() {");
@@ -277,7 +277,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     outputFile << functionsCode << "\n";
 
     if (!hasLoop) {
-        FunctionNode autoLoop("loop", {}, 0, "");
+        FunctionNode autoLoop("loop", {}, 0, 0, "");
         outputFile << autoLoop.toCpp();
     }
 

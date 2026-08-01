@@ -40,6 +40,7 @@ public:
 
 private:
     int currentLine;
+    int currentColumn;
     std::string source;
 
 private:
@@ -96,8 +97,8 @@ private:
     }
 
 public:
-    VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar, int currentLine, std::string source) 
-        : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), source(std::move(source)) {}
+    VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar, int currentLine, int currentColumn, std::string source) 
+        : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     std::string toCpp() override {
@@ -120,7 +121,7 @@ public:
             bool mismatch = (wasString && !isNowString && (isNowInt || isNowFloat)) || ((wasFloat || wasInt) && isNowString);
         
             if (mismatch) {
-                ErrorHandler::report("Type mismatch: cannot reassign variable:", name, currentLine, source);
+                ErrorHandler::report("Type mismatch: cannot reassign variable:", name, currentLine, currentColumn, source);
             }
 
             return name + " = " + final_value + ";";
@@ -295,11 +296,12 @@ private:
 
 private:
     int currentLine;
+    int currentColumn;
     std::string source;
 
 public:
-    FunctionNode(std::string name, std::vector<std::unique_ptr<ASTNode>> funcBody, int currentLine, std::string source)
-        : funcName(std::move(name)), body(std::move(funcBody)), currentLine(currentLine), source(std::move(source)) {}
+    FunctionNode(std::string name, std::vector<std::unique_ptr<ASTNode>> funcBody, int currentLine, int currentColumn, std::string source)
+        : funcName(std::move(name)), body(std::move(funcBody)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     std::string toCpp() override {
@@ -318,7 +320,7 @@ public:
                 if (!inputPins.count(pin)) {
                     result += "pinMode(" + pin + ", OUTPUT);\n";
                 } else {
-                    ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, source);
+                    ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, currentColumn, source);
                 }
             }
 
@@ -327,9 +329,9 @@ public:
                     result += "pinMode(" + pin + ", INPUT_PULLUP);\n";
                 } else {
                     if (inputPins.count(pin)) {
-                        ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, source);
+                        ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, currentColumn, source);
                     } else {
-                        ErrorHandler::report("Error: This var was use in output pin", pin, currentLine, source);
+                        ErrorHandler::report("Error: This var was use in output pin", pin, currentLine, currentColumn, source);
                     }
                 }
             }
@@ -368,6 +370,7 @@ private:
 
 private:
     int currentLine;
+    int currentColumn;
     std::string source;
 
 private:
@@ -388,8 +391,8 @@ private:
     }
 
 public:
-    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args, int currentLine, std::string source)
-        : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), source(std::move(source)) {
+    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args, int currentLine, int currentColumn, std::string source)
+        : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {
 
         if (!arguments.empty()) {
             std::string pinName = arguments[0]->toCpp();
@@ -594,7 +597,7 @@ public:
 
         if (funcName == "sleep") {
             if (argsStr.empty()) {
-                ErrorHandler::report("sleep() requires one argument:", "idle | adc | deep", currentLine, source);
+                ErrorHandler::report("sleep() requires one argument:", "idle | adc | deep", currentLine, currentColumn, source);
             }
 
             includedLibraries.insert("avr/sleep");
@@ -609,7 +612,7 @@ public:
             } else if (sleepMode == "deep") {
                 sleepModeType = "SLEEP_MODE_PWR_DOWN";
             } else {
-                ErrorHandler::report("Unknown sleep mode:", sleepMode, currentLine, source);
+                ErrorHandler::report("Unknown sleep mode:", sleepMode, currentLine, currentColumn, source);
             }
 
             std::string result = "set_sleep_mode(" + sleepModeType + ");\n";

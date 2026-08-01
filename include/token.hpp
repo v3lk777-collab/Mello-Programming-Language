@@ -46,12 +46,13 @@ enum class TokenType {
 
 struct Token {
     int line;
+    int column;
     TokenType type;
     std::string value;
 
     Token()
-        : type(TokenType::EndOfFile), value(""), line(0) {}
+        : type(TokenType::EndOfFile), value(""), line(0), column(0) {}
 
-    Token(TokenType type, const std::string& value, int line = 0)
-        : type(type), value(value), line(line) {}
+    Token(TokenType type, const std::string& value, int line = 0, int column = 0)
+        : type(type), value(value), line(line), column(column) {}
 };

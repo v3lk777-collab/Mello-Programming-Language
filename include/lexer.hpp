@@ -27,6 +27,7 @@ private:
     size_t length;
     size_t position;
     int currentLine;
+    int currentColumn;
     std::string source;
 
     bool isStartOfLine;

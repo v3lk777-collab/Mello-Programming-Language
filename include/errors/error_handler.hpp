@@ -19,7 +19,7 @@ private:
     static int errorCount;
 
 public:
-    static void report(const std::string& message, const std::string& tokenValue, int lineNumber, const std::string& source) {
+    static void report(const std::string& message, const std::string& tokenValue, int lineNumber, int columnNumber, const std::string& source) {
         errorCount++;
 
         std::vector<std::string> lines;
@@ -45,10 +45,19 @@ public:
         if (lineNumber > 0 && lineNumber <= static_cast<int>(lines.size())) {
             std::string lineContent = lines[lineNumber - 1];
 
-            std::cerr << "  " << lineNumber << " | " << lineContent << "\n";
+            std::string prefix = "  " + std::to_string(lineNumber) + " | ";
 
-            std::string prefix = std::string(std::to_string(lineNumber).size() + 3, ' ');
-            std::cerr << prefix << "^" << "\n";
+            std::cerr << prefix << lineContent << "\n";
+            std::cerr << std::string(prefix.length(), ' ');
+
+            for (int i = 1; i < columnNumber; i++) {
+                std::cerr << ' ';
+            }
+
+            size_t caretLength = displayToken.empty() ? 1 : displayToken.length();
+            std::cerr << std::string(caretLength, '^');
+
+            std::cerr << '\n';
         }
 
         exit(EXIT_FAILURE);
