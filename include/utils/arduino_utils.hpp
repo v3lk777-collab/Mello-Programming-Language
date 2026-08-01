@@ -299,7 +299,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     // But wait, why are u reaing my code
     // yk, if u steal it, i will kill u
     // so btw, dont steal it
-    /*
+
     std::string sketchCode;
 
     std::ifstream sketchCodeFile(inoFilePath.string());
@@ -316,7 +316,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
     std::cout << "-------------------------------------------------------------------------------------\n\n";
 
     sketchCodeFile.close();
-    */
+
     // to here
 
     installLibraries();
