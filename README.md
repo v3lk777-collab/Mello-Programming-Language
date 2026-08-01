@@ -105,10 +105,10 @@ pin = 13
 sensorPin = A0
 
 loop:
-    turn_on(pin)                # -> digitalWrite(pin, HIGH)
-    wait(1s)                    # Wait for 1 second
-    turn_off(pin)               # -> digitalWrite(pin, LOW)
-    wait(1s)
+    turn_on(pin)                # -> digitalWrite(pin, HIGH);
+    wait(1s)                    # -> delay(1000);
+    turn_off(pin)               # -> digitalWrite(pin, LOW);
+    wait(1s)                    # -> delay(1000);
 
     value = read(sensorPin)     # "A"-prefixed pin -> analogRead(); otherwise digitalRead()
 ```
