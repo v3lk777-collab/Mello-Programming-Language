@@ -11,12 +11,25 @@
 #include <string>
 #include <filesystem>
 
-std::filesystem::path getBuildCacheDir();
-std::filesystem::path getTempSketchDir();
-std::string getComputerCoreNumber();
-std::filesystem::path getTempSketchDir();
+class Compiler {
+private:
+    std::string boardType = "uno";
+    std::filesystem::path sketchDir;
 
-bool installLibraries();
-bool compileCode();
-bool uploadCode();
-bool runMelloCompiler(int argc, char* argv[]);
+private:
+    std::filesystem::path getTempSketchDir();
+
+private:
+    std::string getComputerCoreNumber();
+
+private:
+    bool installLibraries();
+    bool compileCode();
+    bool uploadCode();
+    bool runMelloCompiler(int argc, char* argv[]);
+
+public:
+    Compiler() = default;
+
+    bool run(int argc, char* argv[]);
+};

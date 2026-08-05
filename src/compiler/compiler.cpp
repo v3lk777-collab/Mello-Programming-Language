@@ -6,15 +6,19 @@
 // academic or commercial purpose is strictly prohibited without 
 // explicit written permission from the author.
 
+#include "compiler.hpp"
+
 #include "lexer.hpp"
 #include "parser.hpp"
 
 #include <thread>
 #include <vector>
+#include <random>
+#include <format>
+#include <cstdint>
 #include <iomanip>
 #include <fstream>
 #include <iostream>
-#include <filesystem>
 #include <unordered_set>
 
 #ifdef _WIN32
@@ -34,13 +38,11 @@
 const std::string ARDUINO_CLI_PATH = ARDUINO_CLI_DEFAULT;
 const std::string CLANG_FORMAT_PATH = CLANG_FORMAT_DEFAULT;
 
-std::string boardType = "uno";
-
 const std::unordered_set<std::string> ARDUINO_SUPPORTED_BOARDS = {
     "uno", "nano"
 };
 
-std::string getComputerCoreNumber() {
+std::string Compiler::getComputerCoreNumber() {
     unsigned int coreCount = std::thread::hardware_concurrency();
 
     if (coreCount == 0) {
@@ -50,11 +52,30 @@ std::string getComputerCoreNumber() {
     return std::to_string(coreCount);
 }
 
-std::filesystem::path getTempSketchDir() {
-    return std::filesystem::temp_directory_path() / "output";
+std::filesystem::path Compiler::getTempSketchDir() {
+    std::random_device rd;
+    std::mt19937_64 generator(rd());
+    std::uniform_int_distribution<uint64_t> distribution(0, 0xFFFFFFFFFFFFFFFF);
+
+    uint64_t high_bits = distribution(generator);
+    uint64_t low_bits = distribution(generator);
+
+    low_bits = (low_bits & 0x3FFFFFFFFFFFFFFF) | 0x8000000000000000;
+
+    high_bits = (high_bits & 0xFFFFFFFFFFFF0FFF) | 0x0000000000004000;
+
+    auto uuid = std::format("{:08x}-{:04x}-{:04x}-{:04x}-{:012x}",
+        (high_bits >> 32),
+        ((high_bits >> 16) & 0xFFFF),
+        (high_bits & 0xFFFF),
+        (low_bits >> 48),
+        (low_bits & 0xFFFFFFFFFFFF)
+    );
+
+    return std::filesystem::temp_directory_path() / uuid;
 }
 
-bool installLibraries() {
+bool Compiler::installLibraries() {
     if (includedLibraries.empty()) {
         return true; 
     }
@@ -93,22 +114,24 @@ bool installLibraries() {
     return true;
 }
 
-bool compileCode() {
+bool Compiler::compileCode() {
     std::cout << "Starting code compilation..." << "\n";
 
-    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:" + boardType  + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + getTempSketchDir().string() + "\"";
+    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:" + boardType  + " --build-path \"" + sketchDir.string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + sketchDir.string() + "\"";
     int compileStatus = system(compileCommand.c_str());
     
     if (compileStatus == 0) {
         std::cout << "Compilation successful!" << "\n";
+
         return true;
     } else {
         std::cerr << "Compilation failed!" << "\n";
+
         return false;
     }
 }
 
-bool uploadCode() {
+bool Compiler::uploadCode() {
     std::cout << "Searching for connected Arduino boards..." << "\n";
     std::filesystem::path portsFilePath = std::filesystem::temp_directory_path() / "ports.txt";
     std::string listCommand = ARDUINO_CLI_PATH + " board list --format json > \"" + portsFilePath.string() + "\"";
@@ -145,7 +168,7 @@ bool uploadCode() {
     std::cout << "Found Arduino on port: " << detectedPort << "\n";
     std::cout << "Uploading code to the board..." << "\n";
 
-    std::string uploadCommand = ARDUINO_CLI_PATH + " upload -p " + detectedPort + " --fqbn arduino:avr:" + boardType + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " \"" + getTempSketchDir().string() + "\"";
+    std::string uploadCommand = ARDUINO_CLI_PATH + " upload -p " + detectedPort + " --fqbn arduino:avr:" + boardType + " --build-path \"" + sketchDir.string() + "/build_cache\"" + " \"" + sketchDir.string() + "\"";
     int uploadStatus = system(uploadCommand.c_str());
 
     if (uploadStatus == 0) {
@@ -157,7 +180,7 @@ bool uploadCode() {
     }
 }
 
-bool runMelloCompiler(int argc, char* argv[]) {
+bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     std::string filePath;
 
     if (argc > 1) {
@@ -199,9 +222,9 @@ bool runMelloCompiler(int argc, char* argv[]) {
         return false;
     }
 
-    std::filesystem::path sketchDir = getTempSketchDir();
+    sketchDir = getTempSketchDir();
     std::filesystem::create_directories(sketchDir);
-    std::filesystem::path inoFilePath = sketchDir / "output.ino";
+    std::filesystem::path inoFilePath = sketchDir / (sketchDir.filename().string() + ".ino");
 
     std::ofstream outputFile(inoFilePath.string());
 
@@ -286,12 +309,14 @@ bool runMelloCompiler(int argc, char* argv[]) {
         }
 
         FunctionNode autoSetup("setup", std::move(setupBody), 0, 0, "");
+
         outputFile << autoSetup.toCpp() << "\n";
     } else if (!hasSerial && hasSerialCommand) {
         size_t pos = functionsCode.find("void setup() {");
 
         if (pos != std::string::npos) {
             size_t insertPos = functionsCode.find('\n', pos) + 1;
+
             functionsCode.insert(insertPos, "Serial.begin(9600);\n");
         }
     }
@@ -300,6 +325,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     if (!hasLoop) {
         FunctionNode autoLoop("loop", {}, 0, 0, "");
+
         outputFile << autoLoop.toCpp();
     }
 
@@ -381,7 +407,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
             std::filesystem::remove_all(entry.path());
         }
     } else {
-        std::cout << "Transpiled C++ code saved inside: " << sketchDir << "\n";
+        std::cout << "Transpiled Arduino C++ code saved inside: " << sketchDir << "\n";
     }
 
     if (isShouldDeleteCache) {
@@ -389,4 +415,8 @@ bool runMelloCompiler(int argc, char* argv[]) {
     }
 
     return true;
+}
+
+bool Compiler::run(int argc, char* argv[]) {
+    return runMelloCompiler(argc, argv);
 }

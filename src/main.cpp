@@ -9,7 +9,9 @@
 #include "compiler.hpp"
 
 int main(int argc, char* argv[]) {
-    if (!runMelloCompiler(argc, argv)) {
+    Compiler compiler;
+
+    if (!compiler.run(argc, argv)) {
         return EXIT_FAILURE;
     }
 
