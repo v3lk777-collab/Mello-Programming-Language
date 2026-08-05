@@ -20,12 +20,15 @@
 #ifdef _WIN32
     #define ARDUINO_CLI_DEFAULT "..\\bin\\win32\\arduino-cli.exe"
     #define CLANG_FORMAT_DEFAULT "..\\bin\\win32\\clang-format.exe"
+
 #elif defined(__APPLE__)
     #define ARDUINO_CLI_DEFAULT "../bin/mac/arduino-cli"
     #define CLANG_FORMAT_DEFAULT "../bin/mac/clang-format"
+
 #else
     #define ARDUINO_CLI_DEFAULT "../bin/linux/arduino-cli"
     #define CLANG_FORMAT_DEFAULT "../bin/linux/clang-format"
+
 #endif
 
 const std::string ARDUINO_CLI_PATH = ARDUINO_CLI_DEFAULT;
@@ -184,12 +187,15 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     try {
         Parser parser(tokens, sourceCode);
+
         program = parser.parse();
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << "\n";
+
         return false;
     } catch (const std::exception& error) {
         std::cerr << error.what() << "\n";
+
         return false;
     }
 
@@ -201,6 +207,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     if (!outputFile.is_open()) {
         std::cerr << "Error: Could not open output file." << "\n";
+
         return false;
     }
 
@@ -225,10 +232,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
             std::string code = varNode->toCpp();
 
             if (code.find(varNode->name + " =") == 0) {
-                std::cerr << "\nSyntax Error: You cannot reassign the variable '" 
-                          << varNode->name << "' outside of a function.\n"
-                          << "Please move '" << varNode->name << " = ...' inside 'func start():' or 'func loop():'.\n" 
-                          << "\n";
+                std::cerr << "\nSyntax Error: You cannot reassign the variable '" << varNode->name << "' outside of a function.\n" << "Please move '" << varNode->name << " = ...' inside 'func start():' or 'func loop():'.\n" << "\n";
                 
                 outputFile.close();
                 
@@ -356,7 +360,7 @@ bool runMelloCompiler(int argc, char* argv[]) {
         } else if (arg == "--no-compile") {
             isCompileCode = false;
         } else if (arg == "--delete-cache") {
-
+            isShouldDeleteCache = true;
         } else {
             std::cerr << "Warning: There is not arg called '" << arg << "'\n";
         }
@@ -378,6 +382,10 @@ bool runMelloCompiler(int argc, char* argv[]) {
         }
     } else {
         std::cout << "Transpiled C++ code saved inside: " << sketchDir << "\n";
+    }
+
+    if (isShouldDeleteCache) {
+        std::filesystem::remove_all(sketchDir);
     }
 
     return true;

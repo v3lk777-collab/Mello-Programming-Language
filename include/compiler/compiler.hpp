@@ -11,6 +11,8 @@
 #include <string>
 #include <filesystem>
 
+std::filesystem::path getBuildCacheDir();
+std::filesystem::path getTempSketchDir();
 std::string getComputerCoreNumber();
 std::filesystem::path getTempSketchDir();
 
