@@ -6,20 +6,16 @@
 // academic or commercial purpose is strictly prohibited without 
 // explicit written permission from the author.
 
-#pragma once
-
 #include "lexer.hpp"
 #include "parser.hpp"
 
 #include <thread>
 #include <vector>
-#include <cstdio>
-#include <string>
 #include <iomanip>
-#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <filesystem>
+#include <unordered_set>
 
 #ifdef _WIN32
     #define ARDUINO_CLI_DEFAULT "..\\bin\\win32\\arduino-cli.exe"
@@ -34,6 +30,12 @@
 
 const std::string ARDUINO_CLI_PATH = ARDUINO_CLI_DEFAULT;
 const std::string CLANG_FORMAT_PATH = CLANG_FORMAT_DEFAULT;
+
+std::string boardType = "uno";
+
+const std::unordered_set<std::string> ARDUINO_SUPPORTED_BOARDS = {
+    "uno", "nano"
+};
 
 std::string getComputerCoreNumber() {
     unsigned int coreCount = std::thread::hardware_concurrency();
@@ -54,9 +56,25 @@ bool installLibraries() {
         return true; 
     }
 
+    std::string command = ARDUINO_CLI_PATH + " lib list > libs.txt";
+    std::system(command.c_str());
+
+    std::unordered_set<std::string> installedLibraries;
+
+    std::ifstream file("libs.txt");
+    std::string line;
+
+    while (std::getline(file, line)) {
+        installedLibraries.insert(line);
+    }
+
     std::cout << "Checking and installing required libraries..." << "\n";
     
     for (const auto& lib : includedLibraries) {
+        if (installedLibraries.contains(lib)) {
+            continue;
+        }
+
         if (!lib.starts_with("avr")) {
             std::string installLibrariesCommand = ARDUINO_CLI_PATH + " lib install \"" + lib + "\"";
         
@@ -74,8 +92,8 @@ bool installLibraries() {
 
 bool compileCode() {
     std::cout << "Starting code compilation..." << "\n";
-    
-    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + getTempSketchDir().string() + "\"";
+
+    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:" + boardType  + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + getTempSketchDir().string() + "\"";
     int compileStatus = system(compileCommand.c_str());
     
     if (compileStatus == 0) {
@@ -124,9 +142,9 @@ bool uploadCode() {
     std::cout << "Found Arduino on port: " << detectedPort << "\n";
     std::cout << "Uploading code to the board..." << "\n";
 
-    std::string uploadCommand = ARDUINO_CLI_PATH + " upload -p " + detectedPort + " --fqbn arduino:avr:uno" + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " \"" + getTempSketchDir().string() + "\"";
+    std::string uploadCommand = ARDUINO_CLI_PATH + " upload -p " + detectedPort + " --fqbn arduino:avr:" + boardType + " --build-path \"" + getTempSketchDir().string() + "/build_cache\"" + " \"" + getTempSketchDir().string() + "\"";
     int uploadStatus = system(uploadCommand.c_str());
-    
+
     if (uploadStatus == 0) {
         std::cout << "Upload successful!" << "\n";
         return true;
@@ -323,16 +341,22 @@ bool runMelloCompiler(int argc, char* argv[]) {
 
     bool isUpload = false;
     bool isCompileCode = true;
+    bool isShouldDeleteCache = false;
     bool isSaveSketchCodeDir = false;
 
     for (int i = 2; i < argc; ++i) {
         std::string arg = argv[i];
-        if (arg == "--upload") {
+
+        if (ARDUINO_SUPPORTED_BOARDS.count(arg)) {
+            boardType = arg;
+        } else if (arg == "--upload") {
             isUpload = true;
         } else if (arg == "--save-code") {
             isSaveSketchCodeDir = true;
         } else if (arg == "--no-compile") {
             isCompileCode = false;
+        } else if (arg == "--delete-cache") {
+
         } else {
             std::cerr << "Warning: There is not arg called '" << arg << "'\n";
         }
@@ -345,7 +369,13 @@ bool runMelloCompiler(int argc, char* argv[]) {
     }
 
     if (!isSaveSketchCodeDir) {
-        std::filesystem::remove_all(sketchDir);
+        for (const auto& entry : std::filesystem::directory_iterator(sketchDir)) {
+            if (entry.path().filename() == "build_cache" && !isShouldDeleteCache) {
+                continue;
+            }
+
+            std::filesystem::remove_all(entry.path());
+        }
     } else {
         std::cout << "Transpiled C++ code saved inside: " << sketchDir << "\n";
     }

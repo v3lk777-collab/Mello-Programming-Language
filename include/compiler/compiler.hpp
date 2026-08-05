@@ -9,14 +9,12 @@
 #pragma once
 
 #include <string>
+#include <filesystem>
 
-class ErrorHandler {
-private:
-    static int errorCount;
+std::string getComputerCoreNumber();
+std::filesystem::path getTempSketchDir();
 
-public:
-    static void report(const std::string& message, const std::string& tokenValue, int lineNumber, int columnNumber, const std::string& source);
-    static bool hasErrors();
-};
-
-inline int ErrorHandler::errorCount = 0;
+bool installLibraries();
+bool compileCode();
+bool uploadCode();
+bool runMelloCompiler(int argc, char* argv[]);

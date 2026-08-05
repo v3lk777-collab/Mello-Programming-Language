@@ -6,7 +6,7 @@
 // academic or commercial purpose is strictly prohibited without 
 // explicit written permission from the author.
 
-#include "arduino_utils.hpp"
+#include "compiler.hpp"
 
 int main(int argc, char* argv[]) {
     if (!runMelloCompiler(argc, argv)) {
