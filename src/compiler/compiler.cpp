@@ -115,7 +115,7 @@ bool Compiler::installLibraries() {
 }
 
 bool Compiler::compileCode() {
-    std::cout << "Starting code compilation..." << "\n";
+    std::cout << "Starting code compilation...\n" << std::flush;
 
     std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:" + boardType  + " --build-path \"" + sketchDir.string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + sketchDir.string() + "\"";
     int compileStatus = system(compileCommand.c_str());
@@ -370,7 +370,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     // yk, if u steal it, i will kill u
     // so btw, dont steal it
 
-    printSketchFileCode(inoFilePath);
+    // printSketchFileCode(inoFilePath);
 
     // to here
 
