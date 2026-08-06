@@ -180,6 +180,28 @@ bool Compiler::uploadCode() {
     }
 }
 
+void Compiler::printSketchFileCode(std::filesystem::path inoFilePath) {
+    std::string sketchCode;
+
+    std::ifstream sketchCodeFile(inoFilePath.string());
+
+    constexpr char BORDER[] = "-------------------------------------------------------------------------------------";
+
+    std::cout << BORDER << "\n";
+
+    if (sketchCodeFile.is_open()) {
+        while (getline(sketchCodeFile, sketchCode)) {
+            std::cout << "| " << std::left << std::setw(82) << sketchCode << "|\n";
+        }
+    } else {
+        std::cerr << "Warning: Cann't open the sketch code file\n";
+    }
+
+    std::cout << BORDER << "\n";
+
+    sketchCodeFile.close();
+}
+
 bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     std::string filePath;
 
@@ -348,22 +370,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     // yk, if u steal it, i will kill u
     // so btw, dont steal it
 
-    std::string sketchCode;
-
-    std::ifstream sketchCodeFile(inoFilePath.string());
-
-    std::cout << "-------------------------------------------------------------------------------------\n";
-    if (sketchCodeFile.is_open()) {
-        while (getline(sketchCodeFile, sketchCode)) {
-            std::cout << "| " << std::left << std::setw(82) << sketchCode << "|\n";
-        }
-    } else {
-        std::cerr << "Warning: Cann't open the sketch code file" << "\n";
-    }
-
-    std::cout << "-------------------------------------------------------------------------------------\n\n";
-
-    sketchCodeFile.close();
+    printSketchFileCode(inoFilePath);
 
     // to here
 

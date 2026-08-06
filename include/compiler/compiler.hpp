@@ -17,10 +17,11 @@ private:
     std::filesystem::path sketchDir;
 
 private:
-    std::filesystem::path getTempSketchDir();
+    void printSketchFileCode(std::filesystem::path inoFilePath);
 
 private:
     std::string getComputerCoreNumber();
+    std::filesystem::path getTempSketchDir();
 
 private:
     bool installLibraries();
