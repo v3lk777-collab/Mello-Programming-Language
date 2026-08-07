@@ -836,6 +836,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
                 program.push_back(parseOnPressStatement());
             } else if (keyword == "break" || keyword == "continue") {
                 program.push_back(parseControlTransferStatements(keyword));
+            } else if (keyword == "pass") {
+                advance();
             } else if (keywordsList.count(keyword)) {
                 program.push_back(parseKeywordFunctionCall(keyword));
             }

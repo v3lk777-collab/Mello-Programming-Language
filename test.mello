@@ -5,6 +5,8 @@ buttonPin = 18
 
 trafficState = 0
 
+number = 1
+
 start:
     serial.start(115200)
 
@@ -14,6 +16,9 @@ loop:
         turn_off(greenLEDPin)
         turn_on(redLEDPin)
         serial.println("MOVE")
+
+    if number == 1:
+        pass
 
     every 1s:
         turn_off(redLEDPin)
@@ -29,6 +34,7 @@ loop:
             turn_on(yellowLEDPin)
             serial.println("YELLOW")
             trafficState = 2
+
 
         elif trafficState == 2:
             turn_on(greenLEDPin)

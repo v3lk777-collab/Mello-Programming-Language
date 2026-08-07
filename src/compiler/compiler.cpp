@@ -53,6 +53,7 @@ std::string Compiler::getComputerCoreNumber() {
 }
 
 std::filesystem::path Compiler::getTempSketchDir() {
+    /*
     std::random_device rd;
     std::mt19937_64 generator(rd());
     std::uniform_int_distribution<uint64_t> distribution(0, 0xFFFFFFFFFFFFFFFF);
@@ -71,8 +72,9 @@ std::filesystem::path Compiler::getTempSketchDir() {
         (low_bits >> 48),
         (low_bits & 0xFFFFFFFFFFFF)
     );
+    */
 
-    return std::filesystem::temp_directory_path() / uuid;
+    return std::filesystem::temp_directory_path() / /* uuid */ "output";
 }
 
 bool Compiler::installLibraries() {
