@@ -83,7 +83,7 @@ isAMelloCode = true    # Boolean variable
 character = 'A'        # Char variable (single quotes only)
 PIN = 13               # Constant intger variable
 
-array = [0, 1, 3, 4,]  # Array
+array = [0, 1, 3, 4]   # Array
 ```
 
 ### Main Execution Blocks
