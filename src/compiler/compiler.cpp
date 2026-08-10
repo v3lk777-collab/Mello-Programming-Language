@@ -82,7 +82,7 @@ bool Compiler::installLibraries() {
         return true; 
     }
 
-    std::string command = ARDUINO_CLI_PATH + " lib list > " + sketchDir + "/libs.txt";
+    std::string command = ARDUINO_CLI_PATH + " lib list > \"" + (sketchDir / "libs.txt").string() + "\"";
     std::system(command.c_str());
 
     std::unordered_set<std::string> installedLibraries;
@@ -94,7 +94,7 @@ bool Compiler::installLibraries() {
         installedLibraries.insert(line);
     }
 
-    std::cout << "Checking and installing required libraries..." << "\n";
+    std::cout << "Checking and installing required libraries...\n" << std::flush;
     
     for (const auto& lib : includedLibraries) {
         if (installedLibraries.contains(lib)) {
@@ -133,8 +133,7 @@ bool Compiler::compileCode() {
     }
 }
 
-bool Compiler::uploadCode() {
-    std::cout << "Searching for connected Arduino boards..." << "\n";
+std::string Compiler::findArduinoBoard() {
     std::filesystem::path portsFilePath = std::filesystem::temp_directory_path() / "ports.txt";
     std::string listCommand = ARDUINO_CLI_PATH + " board list --format json > \"" + portsFilePath.string() + "\"";
     system(listCommand.c_str());
@@ -164,9 +163,17 @@ bool Compiler::uploadCode() {
 
     if (detectedPort.empty()) {
         std::cerr << "No board detected! Please connect your Arduino." << "\n";
-        return false;
+        exit(EXIT_FAILURE);
     }
 
+    return detectedPort;
+}
+
+bool Compiler::uploadCode() {
+    std::cout << "Searching for connected Arduino boards...\n" << std::flush;
+
+    std::string detectedPort = findArduinoBoard();
+    
     std::cout << "Found Arduino on port: " << detectedPort << "\n";
     std::cout << "Uploading code to the board..." << "\n";
 

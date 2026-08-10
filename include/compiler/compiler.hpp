@@ -24,6 +24,9 @@ private:
     std::filesystem::path getTempSketchDir();
 
 private:
+    std::string findArduinoBoard();
+
+private:
     bool installLibraries();
     bool compileCode();
     bool uploadCode();
