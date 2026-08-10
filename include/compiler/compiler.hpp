@@ -10,6 +10,7 @@
 
 #include <string>
 #include <filesystem>
+#include <unordered_set>
 
 class Compiler {
 private:
@@ -22,6 +23,7 @@ private:
 private:
     std::string getComputerCoreNumber();
     std::filesystem::path getTempSketchDir();
+    std::unordered_set<std::string> getInstalledLibraries();
 
 private:
     bool installLibraries();

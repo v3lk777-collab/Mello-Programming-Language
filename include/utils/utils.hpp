@@ -25,9 +25,11 @@ inline std::set<std::string> floatVariables;
 inline std::set<std::string> stringVariables;
 inline std::set<std::string> integerVariables;
 
+inline std::set<std::string> includedLibraries;
+inline std::set<std::string> installedLibraries;
+
 inline std::set<std::string> funcParams;
 inline std::set<std::string> parsedVariables;
-inline std::set<std::string> includedLibraries;
 inline std::set<std::string> declaredVariables;
 inline std::set<std::string> reassignedVariables;
 

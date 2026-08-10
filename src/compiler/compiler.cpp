@@ -19,7 +19,6 @@
 #include <iomanip>
 #include <fstream>
 #include <iostream>
-#include <unordered_set>
 
 #ifdef _WIN32
     #define ARDUINO_CLI_DEFAULT  "..\\bin\\win32\\arduino-cli.exe"
@@ -77,24 +76,62 @@ std::filesystem::path Compiler::getTempSketchDir() {
     return std::filesystem::temp_directory_path() / /* uuid */ "output";
 }
 
-bool Compiler::installLibraries() {
-    if (includedLibraries.empty()) {
-        return true; 
+std::unordered_set<std::string> Compiler::getInstalledLibraries() {
+    std::unordered_set<std::string> libraries;
+
+    std::ifstream libFile(sketchDir / "libs.txt");
+
+    if (!libFile) {
+        return libraries;
     }
 
-    std::string command = ARDUINO_CLI_PATH + " lib list > libs.txt";
-    std::system(command.c_str());
-
-    std::unordered_set<std::string> installedLibraries;
-
-    std::ifstream file("libs.txt");
     std::string line;
 
-    while (std::getline(file, line)) {
-        installedLibraries.insert(line);
+    std::getline(libFile, line);
+
+    while (std::getline(libFile, line)) {
+        constexpr std::size_t installedColumn = 30;
+
+        if (line.size() <= installedColumn) {
+            continue;
+        }
+
+        std::string libraryName = line.substr(0, installedColumn);
+
+        libraryName.erase(libraryName.find_last_not_of(' ') + 1);
+
+        if (!libraryName.empty()) {
+            libraries.insert(libraryName);
+        }
     }
 
-    std::cout << "Checking and installing required libraries..." << "\n";
+    return libraries;
+}
+
+bool Compiler::installLibraries() {
+    std::string command = ARDUINO_CLI_PATH + " lib list > \"" + (sketchDir / "libs.txt").string() + "\"";
+    std::system(command.c_str());
+
+    std::unordered_set<std::string> installLibs = getInstalledLibraries();
+
+    bool hasMissingLibraries = false;
+
+    for (const auto& installedLib : installLibs) {
+        installedLibraries.insert(installedLib);
+    }
+
+    for (const auto& lib : includedLibraries) {
+        if (!installedLibraries.contains(lib)) {
+            hasMissingLibraries = true;
+            break;
+        }
+    }
+
+    if (!hasMissingLibraries) {
+        return true;
+    }
+
+    std::cout << "Checking and installing required libraries...\n" << std::flush;
     
     for (const auto& lib : includedLibraries) {
         if (installedLibraries.contains(lib)) {
@@ -134,7 +171,7 @@ bool Compiler::compileCode() {
 }
 
 bool Compiler::uploadCode() {
-    std::cout << "Searching for connected Arduino boards..." << "\n";
+    std::cout << "Searching for connected Arduino boards...\n" << std::flush;
     std::filesystem::path portsFilePath = std::filesystem::temp_directory_path() / "ports.txt";
     std::string listCommand = ARDUINO_CLI_PATH + " board list --format json > \"" + portsFilePath.string() + "\"";
     system(listCommand.c_str());
@@ -376,7 +413,9 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
 
     // to here
 
-    installLibraries();
+    if (!includedLibraries.empty()) {
+        installLibraries();
+    }
 
     bool isUpload = false;
     bool isCompileCode = true;

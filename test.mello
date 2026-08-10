@@ -5,7 +5,7 @@ buttonPin = 18
 
 trafficState = 0
 
-number = 1
+myServo = Servo()
 
 start:
     serial.start(115200)
@@ -16,9 +16,6 @@ loop:
         turn_off(greenLEDPin)
         turn_on(redLEDPin)
         serial.println("MOVE")
-
-    if number == 1:
-        pass
 
     every 1s:
         turn_off(redLEDPin)
