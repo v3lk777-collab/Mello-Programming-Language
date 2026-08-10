@@ -5,8 +5,6 @@ buttonPin = 18
 
 trafficState = 0
 
-myServo = Servo()
-
 start:
     serial.start(115200)
 
