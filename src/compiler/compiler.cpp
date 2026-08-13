@@ -87,7 +87,7 @@ bool Compiler::installLibraries() {
 
     std::unordered_set<std::string> installedLibraries;
 
-    std::ifstream file("libs.txt");
+    std::ifstream file(sketchDir / "libs.txt");
     std::string line;
 
     while (std::getline(file, line)) {
@@ -374,19 +374,13 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         std::cerr << "Warning: clang-format not found locally, skipping formatting" << "\n";
     }
 
-    // Delete when u finish from here
     // But wait, why are u reaing my code
     // yk, if u steal it, i will kill u
     // so btw, dont steal it
 
-    printSketchFileCode(inoFilePath);
-
-    // to here
-
-    installLibraries();
-
     bool isUpload = false;
     bool isCompileCode = true;
+    bool printOutputCode = false;
     bool isShouldDeleteCache = false;
     bool isSaveSketchCodeDir = false;
 
@@ -397,6 +391,8 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
             boardType = arg;
         } else if (arg == "--upload") {
             isUpload = true;
+        } else if (arg == "--no-output") {
+            printOutputCode = true;
         } else if (arg == "--save-code") {
             isSaveSketchCodeDir = true;
         } else if (arg == "--no-compile") {
@@ -407,6 +403,12 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
             std::cerr << "Warning: There is not arg called '" << arg << "'\n";
         }
     }
+
+    if (printOutputCode) {
+        printSketchFileCode(inoFilePath);
+    }
+
+    installLibraries();
 
     bool compiledSuccessfully = isCompileCode ? compileCode() : false;
 

@@ -2,6 +2,8 @@ servo = Servo()
 lcd = LiquidCrystal_I2C(0x27, 16, 2)
 
 start:
+    serial.print("Starting")
+
     servo.attach(9)
 
     lcd.init()
