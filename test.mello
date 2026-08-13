@@ -30,7 +30,6 @@ loop:
             serial.println("YELLOW")
             trafficState = 2
 
-
         elif trafficState == 2:
             turn_on(greenLEDPin)
             serial.println("GREEN")

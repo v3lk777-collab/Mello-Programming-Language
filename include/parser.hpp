@@ -42,12 +42,13 @@ private:
 
 private:
     std::unique_ptr<ASTNode> parseArrayLiteral(const std::string& name);
-    std::unique_ptr<ASTNode> parserArrayAccess();
     std::unique_ptr<ASTNode> parseArrayAssignment(const std::string& name);
 
 private:
-    std::unique_ptr<ASTNode> parseFunctionCall(const std::string& func_name);
-    std::unique_ptr<ASTNode> parseAssignment(const std::string& var_name);
+    std::unique_ptr<ASTNode> parseFunctionCall(const std::string& funcName);
+    std::unique_ptr<ASTNode> parseSerialFunctionsCall(const std::string& funcName);
+    std::unique_ptr<ASTNode> parseBuiltInFunctionCall(const std::string& funcName);
+    std::unique_ptr<ASTNode> parseAssignment(const std::string& varName);
     std::unique_ptr<ASTNode> parseFunctionDefinition(const std::string& keyword);
     std::unique_ptr<ASTNode> parseKeywordFunctionCall(const std::string& keyword);
     std::unique_ptr<ASTNode> parseIfStatement();

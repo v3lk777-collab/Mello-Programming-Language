@@ -21,6 +21,11 @@ inline const std::unordered_set<std::string> keywordsList = {
     "sleep", "pass"
 };
 
+inline const std::unordered_set<std::string> serialKeywordsList = {
+    "start", "print", "println", "read", "write", "available", "availableForWrite", "end",
+    "find", "findUntil", "waitUntilSend", "parseFloat", "parseInt", "peek"
+};
+
 class Lexer {
 private:
     char current;

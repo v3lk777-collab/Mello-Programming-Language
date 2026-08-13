@@ -12,6 +12,7 @@
 
 enum class TokenType {
     KEYWORD,
+    SERIAL_KEYWORD,
     SYMBOL,
     NUMBER,
     STRING,

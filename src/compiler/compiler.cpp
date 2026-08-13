@@ -121,7 +121,7 @@ bool Compiler::compileCode() {
 
     std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:" + boardType  + " --build-path \"" + sketchDir.string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + sketchDir.string() + "\"";
     int compileStatus = system(compileCommand.c_str());
-    
+
     if (compileStatus == 0) {
         std::cout << "Compilation successful!" << "\n";
 
@@ -336,7 +336,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
             std::vector<std::unique_ptr<ExpressionNode>> beginArgs;
 
             beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "9600", 0)));
-            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), 0, 0, ""));
+            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs)));
         }
 
         FunctionNode autoSetup("setup", std::move(setupBody), 0, 0, "");
@@ -379,7 +379,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     // yk, if u steal it, i will kill u
     // so btw, dont steal it
 
-    // printSketchFileCode(inoFilePath);
+    printSketchFileCode(inoFilePath);
 
     // to here
 

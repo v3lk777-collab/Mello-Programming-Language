@@ -195,11 +195,18 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
                 consume(TokenType::RPAREN, "Expected ')' after method arguments");
 
-                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args), current.line, current.column, this->source);
-                
+                std::unique_ptr<ASTNode> methodCall;
+
+                if (name == "serial") {
+                    methodCall = std::make_unique<SerialFunctionsCallNode>(methodName, std::move(args), current.line, current.column, this->source);
+                } else {
+                    methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args));
+                }
+
                 return std::make_unique<MethodCallNode>(name, std::move(methodCall));
             } else {
-                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>(), current.line, current.column, this->source);
+                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>());
+
                 return std::make_unique<MethodCallNode>(name, std::move(methodCall));
             }
         }
@@ -226,13 +233,18 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
                 while (current.type == TokenType::COMMA) {
                     advance();
+
                     args.push_back(parseExpression());
                 }
             }
 
             consume(TokenType::RPAREN, "Expected ')' after function arguments");
 
-            return std::make_unique<FunctionCallNode>(name, std::move(args), current.line, current.column, this->source);
+            if (keywordsList.count(name)) {
+                return std::make_unique<BuiltInFunctionCallNode>(name, std::move(args), current.line, current.column, this->source);
+            } else {
+                return std::make_unique<FunctionCallNode>(name, std::move(args));
+            }
         }
 
         return std::make_unique<LiteralNode>(t);
@@ -339,14 +351,26 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
 
                 if (current.type == TokenType::DOT) {
                     advance();
+
                     std::string methodName = current.value;
 
                     advance();
-                    auto methodCall = parseFunctionCall(methodName);
+
+                    std::unique_ptr<ASTNode> methodCall;
+            
+                    if (keyword == "serial") {
+                        methodCall = parseSerialFunctionsCall(methodName);
+                    } else {
+                        methodCall = parseFunctionCall(methodName);
+                    }
                     
                     body.push_back(std::make_unique<MethodCallNode>(keyword, std::move(methodCall)));
                 } else if (current.type == TokenType::LPAREN) {
-                    body.push_back(parseFunctionCall(keyword));
+                    if (keywordsList.count(keyword)) {
+                        body.push_back(parseBuiltInFunctionCall(keyword));
+                    } else {
+                        body.push_back(parseFunctionCall(keyword));
+                    }
                 }
             }
         } else {
@@ -357,8 +381,38 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
     return body;
 }
 
-std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name) {
-    consume(TokenType::LPAREN, "Expected '(' after " + func_name);
+std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& funcName) {
+    consume(TokenType::LPAREN, "Expected '(' after " + funcName);
+    
+    std::vector<std::unique_ptr<ExpressionNode>> args;
+    
+    while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
+        if (current.type == TokenType::COMMA) {
+            advance();
+            
+            if (current.type == TokenType::RPAREN) {
+                ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, current.column, this->source);
+            }
+        }
+
+        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+            args.push_back(parseExpression());
+        } else {
+            ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
+
+            advance();
+
+            continue;
+        }
+    }
+    
+    consume(TokenType::RPAREN, "Expected ')' after arguments in " + funcName);
+    
+    return std::make_unique<FunctionCallNode>(funcName, std::move(args));
+}
+
+std::unique_ptr<ASTNode> Parser::parseBuiltInFunctionCall(const std::string& funcName) {
+    consume(TokenType::LPAREN, "Expected '(' after " + funcName);
     
     std::vector<std::unique_ptr<ExpressionNode>> args;
     
@@ -381,25 +435,54 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& func_name)
         }
     }
     
-    consume(TokenType::RPAREN, "Expected ')' after arguments in " + func_name);
+    consume(TokenType::RPAREN, "Expected ')' after arguments in " + funcName);
     
-    return std::make_unique<FunctionCallNode>(func_name, std::move(args), current.line, current.column, this->source);
+    return std::make_unique<BuiltInFunctionCallNode>(funcName, std::move(args), current.line, current.column, this->source);
 }
 
-std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
+std::unique_ptr<ASTNode> Parser::parseSerialFunctionsCall(const std::string& funcName) {
+    consume(TokenType::LPAREN, "Expected '(' after " + funcName);
+    
+    std::vector<std::unique_ptr<ExpressionNode>> args;
+    
+    while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
+        if (current.type == TokenType::COMMA) {
+            advance();
+            
+            if (current.type == TokenType::RPAREN) {
+                ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, current.column, this->source);
+            }
+        }
+
+        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+            args.push_back(parseExpression());
+        } else {
+            ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
+
+            advance();
+            continue;
+        }
+    }
+    
+    consume(TokenType::RPAREN, "Expected ')' after arguments in " + funcName);
+    
+    return std::make_unique<SerialFunctionsCallNode>(funcName, std::move(args), current.line, current.column, this->source);
+}
+
+std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
     advance();
 
     if (current.type == TokenType::LBRACKET) {
-        if (!arraysNamesList.count(var_name)) {
-            arraysNamesList.insert(var_name);
+        if (!arraysNamesList.count(varName)) {
+            arraysNamesList.insert(varName);
         }
 
-        auto listNode = parseArrayLiteral(var_name);
+        auto listNode = parseArrayLiteral(varName);
 
-        if (parsedVariables.count(var_name)) {
-            reassignedVariables.insert(var_name);
+        if (parsedVariables.count(varName)) {
+            reassignedVariables.insert(varName);
         } else {
-            parsedVariables.insert(var_name);
+            parsedVariables.insert(varName);
         }
 
         if (current.type == TokenType::NEWLINE) {
@@ -413,16 +496,16 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
     TokenType type_of_value = current.type;
 
     bool isConstantVar = false;
-    bool isAllUpercase = std::all_of(var_name.begin(), var_name.end(), [] (unsigned char c) {
+    bool isAllUpercase = std::all_of(varName.begin(), varName.end(), [] (unsigned char c) {
         return std::isupper(c) || c == '_';
     });
 
     auto expr_value = parseExpression();
 
-    if (parsedVariables.count(var_name)) {
-        reassignedVariables.insert(var_name);
+    if (parsedVariables.count(varName)) {
+        reassignedVariables.insert(varName);
     } else {
-        parsedVariables.insert(var_name);
+        parsedVariables.insert(varName);
     }
 
     if (isAllUpercase) {
@@ -433,7 +516,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& var_name) {
         advance();
     }
 
-    return std::make_unique<VarAssignNode>(var_name, std::move(expr_value), raw, type_of_value, isConstantVar, this->current.line, this->current.column, this->source);
+    return std::make_unique<VarAssignNode>(varName, std::move(expr_value), raw, type_of_value, isConstantVar, this->current.line, this->current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
@@ -519,7 +602,7 @@ std::unique_ptr<ASTNode> Parser::parseKeywordFunctionCall(const std::string& key
 
     consume(TokenType::RPAREN, "Expected ')' after arguments in '" + keyword + "'");
 
-    return std::make_unique<FunctionCallNode>(keyword, std::move(args), current.line, current.column, this->source);
+    return std::make_unique<FunctionCallNode>(keyword, std::move(args));
 }
 
 std::unique_ptr<ASTNode> Parser::parseIfStatement() {

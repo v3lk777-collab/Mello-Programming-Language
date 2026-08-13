@@ -369,11 +369,6 @@ private:
     std::vector<std::unique_ptr<ExpressionNode>> arguments;
 
 private:
-    int currentLine;
-    int currentColumn;
-    std::string source;
-
-private:
     bool isNumber(const std::string &str) {
         if (str.empty()) {
             return false;
@@ -391,7 +386,39 @@ private:
     }
 
 public:
-    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args, int currentLine, int currentColumn, std::string source)
+    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> arguments)
+        : funcName(std::move(name)), arguments(std::move(arguments)) {}
+
+public:
+    std::string toCpp() override {
+        std::vector<std::string> argsStr;
+
+        for (const auto& arg : arguments) {
+            argsStr.push_back(arg->toCpp());
+        }
+
+        std::string fallbackArgs = "";
+
+        for (size_t i = 0; i < argsStr.size(); ++i) {
+            fallbackArgs += argsStr[i] + (i < argsStr.size() - 1 ? ", " : "");
+        }
+        
+        return funcName + "(" + fallbackArgs + ");";
+    }
+};
+
+class BuiltInFunctionCallNode : public ExpressionNode {
+private:
+    std::string funcName;
+    std::vector<std::unique_ptr<ExpressionNode>> arguments;
+
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+public:
+    BuiltInFunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args, int currentLine, int currentColumn, std::string source)
         : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {
 
         if (!arguments.empty()) {
@@ -447,6 +474,10 @@ public:
 
 public:
     std::string toCpp() override {
+        if (!keywordsList.count(funcName)) {
+            ErrorHandler::report("'" + funcName + "' is not a known built-in command", funcName, currentLine, currentColumn, source);
+        }
+
         std::vector<std::string> argsStr;
 
         for (const auto& arg : arguments) {
@@ -471,33 +502,23 @@ public:
         }
 
         if (funcName == "write") {
-            if (argsStr.size() >= 2) {
-                std::string pin = argsStr[0];
-                std::string value = argsStr[1];
+            std::string pin = argsStr[0];
+            std::string value = argsStr[1];
 
-                if (value == "0" || value == "1" || value == "HIGH" || value == "LOW") {
-                    return "digitalWrite(" + pin + ", " + value + ");";
-                } else {
-                    return "analogWrite(" + pin + ", " + value + ");";
-                }
-            } else if (argsStr.size() >= 1) {
-                std::string value = argsStr[0];
-
-                return "Serial.write(" + value + ");";
+            if (value == "0" || value == "1" || value == "HIGH" || value == "LOW") {
+                return "digitalWrite(" + pin + ", " + value + ");";
+            } else {
+                return "analogWrite(" + pin + ", " + value + ");";
             }
         }
 
         if (funcName == "read") {
-            if (argsStr.size() >= 1) {
-                std::string pin = argsStr[0];
+            std::string pin = argsStr[0];
 
-                if (pin.length() >= 2 && pin[0] == 'A' && isdigit(pin[1])) {
-                    return "analogRead(" + pin + ")";
-                } else {
-                    return "digitalRead(" + pin + ")";
-                }
+            if (pin.length() >= 2 && pin[0] == 'A' && isdigit(pin[1])) {
+                return "analogRead(" + pin + ")";
             } else {
-                return "Serial.read();";
+                return "digitalRead(" + pin + ")";
             }
         }
 
@@ -509,86 +530,6 @@ public:
             }
 
             return "delay(" + parseTime(fullArg) + ");";
-        }
-
-        if (funcName == "start" && argsStr.size() >= 1) {
-            return "Serial.begin(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "print" && argsStr.size() >= 1) {
-            auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
-            bool isStringLiteral = literal && literal->token.type == TokenType::STRING;
-
-            if (isStringLiteral) {
-                return "Serial.print(F(" + argsStr[0] + "));";
-            }
-
-            return "Serial.print(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "println" && argsStr.size() >= 1) {
-            auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
-            bool isStringLiteral = literal && literal->token.type == TokenType::STRING;
-
-            if (isStringLiteral) {
-                return "Serial.println(F(" + argsStr[0] + "));";
-            }
-
-            return "Serial.println(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "available") {
-            return "Serial.available()";
-        }
-
-        if (funcName == "availableForWrite") {
-            return "Serial.availableForWrite()";
-        }
-
-        if (funcName == "end") {
-            return "Serial.end()";
-        }
-
-        if (funcName == "find" && argsStr.size() >= 2) {
-            std::string target = argsStr[0];
-            std::string length = argsStr[1];
-
-            return "Serial.find(" + target + ", " + length + ")";
-        }
-
-        if (funcName == "findUntil" && argsStr.size() >= 2) {
-            std::string target = argsStr[0];
-            std::string terminal = argsStr[1];
-
-            return "Serial.find(" + target + ", " + terminal + ")";
-        }
-
-        if (funcName == "waitUntilSend") {
-            return "Serial.flush();";
-        }
-
-        if (funcName == "parseFloat") {
-            if (argsStr.size() >= 2) {
-                return "Serial.parseFloat(" + argsStr[0] + ", " + argsStr[1] + ");";
-            } else if (argsStr.size() == 1) {
-                return "Serial.parseFloat(" + argsStr[0] + ");";
-            } else {
-                return "Serial.parseFloat();";
-            }
-        }
-
-        if (funcName == "parseInt") {
-            if (argsStr.size() >= 2) {
-                return "Serial.parseInt(" + argsStr[0] + ", " + argsStr[1] + ");";
-            } else if (argsStr.size() == 1) {
-                return "Serial.parseInt(" + argsStr[0] + ");";
-            } else {
-                return "Serial.parseInt();";
-            }
-        }
-
-        if (funcName == "peek") {
-            return "Serial.peek();";
         }
 
         if (funcName == "scale" && argsStr.size() >= 5) {
@@ -624,13 +565,125 @@ public:
             return result;
         }
 
-        std::string fallbackArgs = "";
+        return "";
+    }
+};
 
-        for (size_t i = 0; i < argsStr.size(); ++i) {
-            fallbackArgs += argsStr[i] + (i < argsStr.size() - 1 ? ", " : "");
+class SerialFunctionsCallNode : public ExpressionNode {
+private:
+    std::string funcName;
+    std::vector<std::unique_ptr<ExpressionNode>> arguments;
+
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+public:
+    SerialFunctionsCallNode(std::string funcName, std::vector<std::unique_ptr<ExpressionNode>> arguments, int currentLine, int currentColumn, std::string source)
+        : funcName(std::move(funcName)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+
+public:
+    std::string toCpp() override {
+        if (!serialKeywordsList.count(funcName)) {
+            ErrorHandler::report("'" + funcName + "' is not a known serial command", funcName, currentLine, currentColumn, source);
         }
-        
-        return funcName + "(" + fallbackArgs + ");";
+
+        std::vector<std::string> argsStr;
+
+        for (const auto& arg : arguments) {
+            argsStr.push_back(arg->toCpp());
+        }
+
+        if (funcName == "start" && argsStr.size() >= 1) {
+            return "Serial.begin(" + argsStr[0] + ");";
+        }
+
+        if (funcName == "print" && argsStr.size() >= 1) {
+            auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
+            bool isStringLiteral = literal && literal->token.type == TokenType::STRING;
+
+            if (isStringLiteral) {
+                return "Serial.print(F(" + argsStr[0] + "));";
+            }
+
+            return "Serial.print(" + argsStr[0] + ");";
+        }
+
+        if (funcName == "println" && argsStr.size() >= 1) {
+            auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
+            bool isStringLiteral = literal && literal->token.type == TokenType::STRING;
+
+            if (isStringLiteral) {
+                return "Serial.println(F(" + argsStr[0] + "));";
+            }
+
+            return "Serial.println(" + argsStr[0] + ");";
+        }
+
+        if (funcName == "read") {
+            return "Serial.read();";
+        }
+
+        if (funcName == "write" && argsStr.size() >= 1) {
+            return "Serial.write(" + argsStr[0] + ");";
+        }
+
+        if (funcName == "available") {
+            return "Serial.available()";
+        }
+
+        if (funcName == "availableForWrite") {
+            return "Serial.availableForWrite()";
+        }
+
+        if (funcName == "end") {
+            return "Serial.end()";
+        }
+
+        if (funcName == "find" && argsStr.size() >= 2) {
+            std::string target = argsStr[0];
+            std::string length = argsStr[1];
+
+            return "Serial.find(" + target + ", " + length + ")";
+        }
+
+        if (funcName == "findUntil" && argsStr.size() >= 2) {
+            std::string target = argsStr[0];
+            std::string terminal = argsStr[1];
+
+            return "Serial.findUntil(" + target + ", " + terminal + ")";
+        }
+
+        if (funcName == "waitUntilSend") {
+            return "Serial.flush();";
+        }
+
+        if (funcName == "parseFloat") {
+            if (argsStr.size() >= 2) {
+                return "Serial.parseFloat(" + argsStr[0] + ", " + argsStr[1] + ");";
+            } else if (argsStr.size() == 1) {
+                return "Serial.parseFloat(" + argsStr[0] + ");";
+            } else {
+                return "Serial.parseFloat();";
+            }
+        }
+
+        if (funcName == "parseInt") {
+            if (argsStr.size() >= 2) {
+                return "Serial.parseInt(" + argsStr[0] + ", " + argsStr[1] + ");";
+            } else if (argsStr.size() == 1) {
+                return "Serial.parseInt(" + argsStr[0] + ");";
+            } else {
+                return "Serial.parseInt();";
+            }
+        }
+
+        if (funcName == "peek") {
+            return "Serial.peek();";
+        }
+
+        return "";
     }
 };
 
