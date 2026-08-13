@@ -130,19 +130,34 @@ std::vector<Token> Lexer::tokenize() {
             std::string number;
             bool hasDot = false;
 
-            while (isdigit(current) || (current == '.' && !hasDot)) {
-                if (current == '.') {
-                    hasDot = true;
+            if (current == '0' && (peek() == 'x' || peek() == 'X')) {
+                number += current;
+
+                advance();
+
+                number += current;
+
+                advance();
+
+                while (std::isxdigit(current)) {
+                    number += current;
+                    advance();
                 }
-                
-                number += current;
-                advance();
-            }
+            } else {
+                while (isdigit(current) || (current == '.' && !hasDot)) {
+                    if (current == '.') {
+                        hasDot = true;
+                    }
+                    
+                    number += current;
+                    advance();
+                }
 
 
-            if (current == 's' || current == 'm' || current == 'h') {
-                number += current;
-                advance();
+                if (current == 's' || current == 'm' || current == 'h') {
+                    number += current;
+                    advance();
+                }
             }
 
             tokens.push_back({TokenType::NUMBER, number, currentLine, currentColumn});

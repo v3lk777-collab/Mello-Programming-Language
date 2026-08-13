@@ -1,36 +1,13 @@
-redLEDPin = 5
-greenLEDPin = 2
-yellowLEDPin = 12
-buttonPin = 18
-
-trafficState = 0
+servo = Servo()
+lcd = LiquidCrystal_I2C(0x27, 16, 2)
 
 start:
-    serial.start(115200)
+    servo.attach(9)
+
+    lcd.init()
+    lcd.backlight()
 
 loop:
-    on_press buttonPin:
-        turn_off(yellowLEDPin)
-        turn_off(greenLEDPin)
-        turn_on(redLEDPin)
-        serial.println("MOVE")
-
-    every 1s:
-        turn_off(redLEDPin)
-        turn_off(yellowLEDPin)
-        turn_off(greenLEDPin)
-
-        if trafficState == 0:
-            turn_on(redLEDPin)
-            serial.println("RED")
-            trafficState = 1
-
-        elif trafficState == 1:
-            turn_on(yellowLEDPin)
-            serial.println("YELLOW")
-            trafficState = 2
-
-        elif trafficState == 2:
-            turn_on(greenLEDPin)
-            serial.println("GREEN")
-            trafficState = 0
+    servo.write(90)
+    lcd.print("Hello Mello!")
+    wait(1s)
