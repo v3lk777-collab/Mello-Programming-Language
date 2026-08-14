@@ -380,7 +380,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
 
     bool isUpload = false;
     bool isCompileCode = true;
-    bool printOutputCode = false;
+    bool printOutputCode = true;
     bool isShouldDeleteCache = false;
     bool isSaveSketchCodeDir = false;
 
@@ -392,7 +392,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         } else if (arg == "--upload") {
             isUpload = true;
         } else if (arg == "--no-output") {
-            printOutputCode = true;
+            printOutputCode = false;
         } else if (arg == "--save-code") {
             isSaveSketchCodeDir = true;
         } else if (arg == "--no-compile") {

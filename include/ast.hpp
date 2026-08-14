@@ -30,187 +30,6 @@ public:
     };
 };
 
-class VarAssignNode : public ASTNode {
-public:
-    std::string name;
-    bool isConstantVar;
-    TokenType val_type;
-    std::string raw_value;
-    std::unique_ptr<ASTNode> value;
-
-private:
-    int currentLine;
-    int currentColumn;
-    std::string source;
-
-private:
-    bool isNumeric(const std::string& str) const noexcept {
-        if (str.empty()) {
-            return false;
-        }
-        
-        size_t start = 0;
-        bool hasDecimal = false;
-        
-        if (str[0] == '-' || str[0] == '+') {
-            if (str.size() == 1) {
-                return false;
-            }
-
-            start = 1;
-        }
-
-        for (size_t i = start; i < str.size(); ++i) {
-            if (str[i] == '.') {
-                if (hasDecimal) {
-                    return false;
-                }
-                
-                hasDecimal = true;
-            } else if (!std::isdigit(str[i])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    std::string inferIntegerType(std::string value) const {
-        std::string type;
-        long long number = std::stoll(value);
-
-        if (number >= 0 && number <= 255) {
-            type = "uint8_t";
-        } else if (number >= -32768 && number <= 32767) {
-            type = "int16_t";
-        } else if (number >= 0 && number <= 65535) {
-            type = "uint16_t";
-        } else if (number >= -2147483648LL && number <= 2147483647LL) {
-            type = "int32_t";
-        } else if (number >= 0 && number <= 4294967295LL) {
-            type = "uint32_t";
-        } else {
-            type = "int32_t";
-        }
-
-        return type;
-    }
-
-public:
-    VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar, int currentLine, int currentColumn, std::string source) 
-        : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
-
-public:
-    std::string toCpp() override {
-        std::string type = "";
-        std::string final_value = value->toCpp();
-
-        while (!final_value.empty() && (final_value.back() == ';' || final_value.back() == '\n' || final_value.back() == ' ')) {
-            final_value.pop_back();
-        }
-
-        if (declaredVariables.count(name)) {
-            bool wasString = stringVariables.count(name) > 0;
-            bool wasFloat = floatVariables.count(name) > 0;
-            bool wasInt = integerVariables.count(name) > 0;
-
-            bool isNowString = (val_type == TokenType::STRING) || final_value.find("\"") != std::string::npos;
-            bool isNowFloat = !isNowString && final_value.find('.') != std::string::npos && isNumeric(final_value);
-            bool isNowInt = !isNowString && !isNowFloat && isNumeric(final_value);
-
-            bool mismatch = (wasString && !isNowString && (isNowInt || isNowFloat)) || ((wasFloat || wasInt) && isNowString);
-        
-            if (mismatch) {
-                ErrorHandler::report("Type mismatch: cannot reassign variable:", name, currentLine, currentColumn, source);
-            }
-
-            return name + " = " + final_value + ";";
-        }
-
-        auto containsStringVariable = [&](const std::string& expr) {
-            for (const auto& stringVariable : stringVariables) {
-                if (expr.find(stringVariable) != std::string::npos) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        auto containsFloatVariable = [&](const std::string& expr) {
-            for (const auto& floatVariable : floatVariables) {
-                if (expr.find(floatVariable) != std::string::npos) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        if (final_value.find("Serial.read()") != std::string::npos) {
-            type = "char";
-            final_value = "Serial.read()";
-        } else if (val_type == TokenType::SYMBOL && final_value.find("(") != std::string::npos && final_value.back() == ')') {
-            std::string className = final_value.substr(0, final_value.find("("));
-            std::string args = final_value.substr(final_value.find("("));
-
-            declaredVariables.insert(name);
-            includedLibraries.insert(className);
-
-            if (args == "()") {
-                return className + " " + name + ";\n";
-            } else {
-                return className + " " + name + args + ";\n";
-            }
-        } else if (val_type == TokenType::STRING || final_value.find("\"") != std::string::npos || containsStringVariable(final_value)) {
-            if (final_value.find("+") != std::string::npos) {
-                type = "String";
-                final_value = "String(\"\") + " + final_value; 
-            } else {
-                type = "const char*";
-            }
-
-            stringVariables.insert(name);
-        } else if (final_value == "true" || final_value == "false") {
-            type = "bool";
-        } else if ((final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumeric(final_value)) {
-            type = "float";
-            floatVariables.insert(name);
-        } else if (final_value.length() == 1 && !isdigit(final_value[0])) {
-            type = "char";
-            final_value = "'" + final_value + "'";
-        } else if (isNumeric(final_value)) {
-            type = inferIntegerType(final_value);
-            integerVariables.insert(name);
-        } else {
-            if (containsFloatVariable(final_value)) {
-                type = "float";
-                floatVariables.insert(name);
-            } else {
-                type = "int";
-                integerVariables.insert(name);
-            }
-        }
-        
-        declaredVariables.insert(name);
-
-        bool isReassigned = reassignedVariables.count(name) > 0;
-        bool hasConst = type.find("constexpr") != std::string::npos;
-        bool isKeyword = keywordsList.count(raw_value) > 0;
-        bool isArrayAccess = final_value.find('[') != std::string::npos;
-
-        if (isArrayAccess) {
-            return type + " " + name + " = " + final_value + ";\n";
-        }
-
-        if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar) {
-            return "constexpr " + type + " " + name + " = " + final_value + ";\n";
-        }
-
-        return type + " " + name + " = " + final_value + ";\n";
-    }
-};
-
 class ArrayNode : public ASTNode {
 private:
     std::string arrayName;
@@ -580,6 +399,11 @@ private:
     std::string source;
 
 public:
+    std::string getFunctionName() {
+        return funcName;
+    }
+
+public:
     SerialFunctionsCallNode(std::string funcName, std::vector<std::unique_ptr<ExpressionNode>> arguments, int currentLine, int currentColumn, std::string source)
         : funcName(std::move(funcName)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
@@ -641,6 +465,10 @@ public:
             return "Serial.end()";
         }
 
+        if (funcName == "readStringUntil" && argsStr.size() >= 1) {
+            return "Serial.readStringUntil(" + argsStr[0] + ");";
+        }
+
         if (funcName == "find" && argsStr.size() >= 2) {
             std::string target = argsStr[0];
             std::string length = argsStr[1];
@@ -684,6 +512,240 @@ public:
         }
 
         return "";
+    }
+};
+
+class MethodCallNode : public ExpressionNode {
+private:
+    std::string objectName;
+    std::unique_ptr<ASTNode> methodCall;
+
+public:
+    ASTNode* getMethodCall() {
+        return methodCall.get();
+    }
+
+public:
+    MethodCallNode(std::string object, std::unique_ptr<ASTNode> method)
+        : objectName(std::move(object)), methodCall(std::move(method)) {}
+
+public:
+    std::string toCpp() override {
+        std::string methodStr = methodCall->toCpp();
+
+        if (methodStr.find("Serial.") == 0) {
+            methodStr = methodStr.substr(7);
+        }
+
+        std::string finalObjectName = objectName;
+
+        if (objectName == "serial") {
+            finalObjectName = "Serial";
+        }
+
+        return finalObjectName + "." + methodStr;
+    }
+};
+
+class VarAssignNode : public ASTNode {
+public:
+    std::string name;
+    bool isConstantVar;
+    TokenType val_type;
+    std::string raw_value;
+    std::unique_ptr<ASTNode> value;
+
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+private:
+    bool isNumeric(const std::string& str) const noexcept {
+        if (str.empty()) {
+            return false;
+        }
+        
+        size_t start = 0;
+        bool hasDecimal = false;
+        
+        if (str[0] == '-' || str[0] == '+') {
+            if (str.size() == 1) {
+                return false;
+            }
+
+            start = 1;
+        }
+
+        for (size_t i = start; i < str.size(); ++i) {
+            if (str[i] == '.') {
+                if (hasDecimal) {
+                    return false;
+                }
+                
+                hasDecimal = true;
+            } else if (!std::isdigit(str[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    std::string inferIntegerType(std::string value) const {
+        std::string type;
+        long long number = std::stoll(value);
+
+        if (number >= 0 && number <= 255) {
+            type = "uint8_t";
+        } else if (number >= -32768 && number <= 32767) {
+            type = "int16_t";
+        } else if (number >= 0 && number <= 65535) {
+            type = "uint16_t";
+        } else if (number >= -2147483648LL && number <= 2147483647LL) {
+            type = "int32_t";
+        } else if (number >= 0 && number <= 4294967295LL) {
+            type = "uint32_t";
+        } else {
+            type = "int32_t";
+        }
+
+        return type;
+    }
+
+public:
+    VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar, int currentLine, int currentColumn, std::string source) 
+        : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+
+public:
+    std::string toCpp() override {
+        std::string type = "";
+        std::string final_value = value->toCpp();
+
+        while (!final_value.empty() && (final_value.back() == ';' || final_value.back() == '\n' || final_value.back() == ' ')) {
+            final_value.pop_back();
+        }
+
+        if (declaredVariables.count(name)) {
+            bool wasString = stringVariables.count(name) > 0;
+            bool wasFloat = floatVariables.count(name) > 0;
+            bool wasInt = integerVariables.count(name) > 0;
+
+            bool isNowString = (val_type == TokenType::STRING) || final_value.find("\"") != std::string::npos;
+            bool isNowFloat = !isNowString && final_value.find('.') != std::string::npos && isNumeric(final_value);
+            bool isNowInt = !isNowString && !isNowFloat && isNumeric(final_value);
+
+            bool mismatch = (wasString && !isNowString && (isNowInt || isNowFloat)) || ((wasFloat || wasInt) && isNowString);
+        
+            if (mismatch) {
+                ErrorHandler::report("Type mismatch: cannot reassign variable:", name, currentLine, currentColumn, source);
+            }
+
+            return name + " = " + final_value + ";";
+        }
+
+        auto containsStringVariable = [&](const std::string& expr) {
+            for (const auto& stringVariable : stringVariables) {
+                if (expr.find(stringVariable) != std::string::npos) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        auto containsFloatVariable = [&](const std::string& expr) {
+            for (const auto& floatVariable : floatVariables) {
+                if (expr.find(floatVariable) != std::string::npos) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        SerialFunctionsCallNode* funcCall = dynamic_cast<SerialFunctionsCallNode*>(value.get());
+
+        if (!funcCall) {
+            if (auto methodNode = dynamic_cast<MethodCallNode*>(value.get())) {
+                funcCall = dynamic_cast<SerialFunctionsCallNode*>(methodNode->getMethodCall());
+            }
+        }
+
+        if (funcCall) {
+            if (funcCall->getFunctionName() == "read") {
+                type = "char";
+                final_value = funcCall->toCpp();
+
+                while (!final_value.empty() && final_value.back() == ';') {
+                    final_value.pop_back();
+                }
+            } else if (funcCall->getFunctionName() == "readStringUntil") {
+                type = "String";
+                final_value = funcCall->toCpp();
+
+                while (!final_value.empty() && final_value.back() == ';') {
+                    final_value.pop_back();
+                }
+            }
+        } else if (val_type == TokenType::SYMBOL && final_value.find("(") != std::string::npos && final_value.back() == ')') {
+            std::string className = final_value.substr(0, final_value.find("("));
+            std::string args = final_value.substr(final_value.find("("));
+
+            declaredVariables.insert(name);
+            includedLibraries.insert(className);
+
+            if (args == "()") {
+                return className + " " + name + ";\n";
+            } else {
+                return className + " " + name + args + ";\n";
+            }
+        } else if (val_type == TokenType::STRING || final_value.find("\"") != std::string::npos || containsStringVariable(final_value)) {
+            if (final_value.find("+") != std::string::npos) {
+                type = "String";
+                final_value = "String(\"\") + " + final_value; 
+            } else {
+                type = "const char*";
+            }
+
+            stringVariables.insert(name);
+        } else if (final_value == "true" || final_value == "false") {
+            type = "bool";
+        } else if ((final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumeric(final_value)) {
+            type = "float";
+            floatVariables.insert(name);
+        } else if (final_value.length() == 1 && !isdigit(final_value[0])) {
+            type = "char";
+            final_value = "'" + final_value + "'";
+        } else if (isNumeric(final_value)) {
+            type = inferIntegerType(final_value);
+            integerVariables.insert(name);
+        } else {
+            if (containsFloatVariable(final_value)) {
+                type = "float";
+                floatVariables.insert(name);
+            } else {
+                type = "int";
+                integerVariables.insert(name);
+            }
+        }
+        
+        declaredVariables.insert(name);
+
+        bool isReassigned = reassignedVariables.count(name) > 0;
+        bool hasConst = type.find("constexpr") != std::string::npos;
+        bool isKeyword = keywordsList.count(raw_value) > 0;
+        bool isArrayAccess = final_value.find('[') != std::string::npos;
+
+        if (isArrayAccess) {
+            return type + " " + name + " = " + final_value + ";\n";
+        }
+
+        if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar) {
+            return "constexpr " + type + " " + name + " = " + final_value + ";\n";
+        }
+
+        return type + " " + name + " = " + final_value + ";\n";
     }
 };
 
@@ -1067,33 +1129,6 @@ public:
         code += lastVar + " = " + currVar + ";";
 
         return code;
-    }
-};
-
-class MethodCallNode : public ExpressionNode {
-private:
-    std::string objectName;
-    std::unique_ptr<ASTNode> methodCall;
-
-public:
-    MethodCallNode(std::string object, std::unique_ptr<ASTNode> method)
-        : objectName(std::move(object)), methodCall(std::move(method)) {}
-
-public:
-    std::string toCpp() override {
-        std::string methodStr = methodCall->toCpp();
-
-        if (methodStr.find("Serial.") == 0) {
-            methodStr = methodStr.substr(7);
-        }
-
-        std::string finalObjectName = objectName;
-
-        if (objectName == "serial") {
-            finalObjectName = "Serial";
-        }
-
-        return finalObjectName + "." + methodStr;
     }
 };
 

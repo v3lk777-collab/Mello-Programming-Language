@@ -1,15 +1,21 @@
-servo = Servo()
-lcd = LiquidCrystal_I2C(0x27, 16, 2)
+# Just a blink code btw
+
+pin = 13
 
 start:
-    serial.print("Starting")
-
-    servo.attach(9)
-
-    lcd.init()
-    lcd.backlight()
+    serial.println("BOOTING...")
 
 loop:
-    servo.write(90)
-    lcd.print("Hello Mello!")
-    wait(1s)
+    if serial.available() > 0:
+        cmd = serial.readStringUntil("\n")
+
+        if cmd == "open":
+            turn_on(pin)
+            serial.println("Open LED")
+
+        elif cmd == "close":
+            turn_off(pin)
+            serial.println("Close LED")
+
+        else:
+            serial.println("Enter "open" or "close" only")
