@@ -6,6 +6,8 @@ start:
     serial.println("BOOTING...")
 
 loop:
+    pinStr = str(pin)
+
     if serial.available() > 0:
         cmd = serial.readStringUntil("\n")
 

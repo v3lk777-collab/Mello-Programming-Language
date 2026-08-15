@@ -187,8 +187,10 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
                 if (current.type != TokenType::RPAREN) {
                     args.push_back(parseExpression());
+
                     while (current.type == TokenType::COMMA) {
                         advance();
+
                         args.push_back(parseExpression());
                     }
                 }
@@ -215,6 +217,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
             advance();
 
             auto indexExpression = parseExpression();
+
             consume(TokenType::RBRACKET, "Expected ']' after array index");
 
             if (!arraysNamesList.count(name)) {
@@ -226,6 +229,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
         if (current.type == TokenType::LPAREN) {
             advance();
+
             std::vector<std::unique_ptr<ExpressionNode>> args;
 
             if (current.type != TokenType::RPAREN) {
@@ -241,7 +245,11 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
             consume(TokenType::RPAREN, "Expected ')' after function arguments");
 
             if (keywordsList.count(name)) {
-                return std::make_unique<BuiltInFunctionCallNode>(name, std::move(args), current.line, current.column, this->source);
+                if (name == "int" || name == "str" || name == "float") {
+                    return std::make_unique<TypeConversionCallNode>(name, std::move(args), current.line, current.column, this->source);
+                } else {
+                    return std::make_unique<BuiltInFunctionCallNode>(name, std::move(args), current.line, current.column, this->source);
+                }
             } else {
                 return std::make_unique<FunctionCallNode>(name, std::move(args));
             }
@@ -324,7 +332,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
 
                 advance();
                 auto methodCall = parseFunctionCall(methodName);
-                
+
                 body.push_back(std::make_unique<MethodCallNode>(name, std::move(methodCall)));
             }
         } else if (current.type == TokenType::KEYWORD) {
@@ -346,6 +354,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 body.push_back(parseOnPressStatement());
             } else if (keyword == "break" || keyword == "continue") {
                 body.push_back(parseControlTransferStatements(keyword));
+            } else if (keyword == "int" || keyword == "str" || keyword == "float") {
+                body.push_back(parseTypeConversionCall(keyword));
             } else {
                 advance();
 
@@ -357,7 +367,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                     advance();
 
                     std::unique_ptr<ASTNode> methodCall;
-            
+
                     if (keyword == "serial") {
                         methodCall = parseSerialFunctionsCall(methodName);
                     } else {
@@ -383,7 +393,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
 
 std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& funcName) {
     consume(TokenType::LPAREN, "Expected '(' after " + funcName);
-    
+
     std::vector<std::unique_ptr<ExpressionNode>> args;
     
     while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
@@ -734,7 +744,9 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
 
 std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
     advance();
+
     std::string value = current.value;
+
     advance();
 
     return std::make_unique<ReturnNode>(value);
@@ -859,6 +871,36 @@ std::unique_ptr<ASTNode> Parser::parseRepeatStatement() {
     return std::make_unique<RepeatNode>(count, std::move(body));
 }
 
+std::unique_ptr<ASTNode> Parser::parseTypeConversionCall(const std::string& funcName) {
+    consume(TokenType::LPAREN, "Expected '(' after " + funcName);
+
+    std::vector<std::unique_ptr<ExpressionNode>> args;
+    
+    while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
+        if (current.type == TokenType::COMMA) {
+            advance();
+            
+            if (current.type == TokenType::RPAREN) {
+                ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, current.column, this->source);
+            }
+        }
+
+        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+            args.push_back(parseExpression());
+        } else {
+            ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
+
+            advance();
+
+            continue;
+        }
+    }
+    
+    consume(TokenType::RPAREN, "Expected ')' after arguments in " + funcName);
+
+    return std::make_unique<TypeConversionCallNode>(funcName, std::move(args), current.line, current.column, this->source);
+}
+
 std::unique_ptr<ASTNode> Parser::parseOnPressStatement() {
     advance();
 
@@ -919,6 +961,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
                 program.push_back(parseOnPressStatement());
             } else if (keyword == "break" || keyword == "continue") {
                 program.push_back(parseControlTransferStatements(keyword));
+            } else if (keyword == "int" || keyword == "str" || keyword == "float") {
+                program.push_back(parseTypeConversionCall(keyword));
             } else if (keyword == "pass") {
                 advance();
             } else if (keywordsList.count(keyword)) {

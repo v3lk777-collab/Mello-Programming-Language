@@ -60,6 +60,7 @@ private:
     std::unique_ptr<ASTNode> parseForStatement();
     std::unique_ptr<ASTNode> parseRepeatStatement();
     std::unique_ptr<ASTNode> parseOnPressStatement();
+    std::unique_ptr<ASTNode> parseTypeConversionCall(const std::string& funcName);
     std::unique_ptr<ASTNode> parseControlTransferStatements(const std::string& statement);
 
 public:

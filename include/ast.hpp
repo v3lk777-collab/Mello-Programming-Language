@@ -700,8 +700,10 @@ public:
             } else {
                 return className + " " + name + args + ";\n";
             }
-        } else if (val_type == TokenType::STRING || final_value.find("\"") != std::string::npos || containsStringVariable(final_value)) {
-            if (final_value.find("+") != std::string::npos) {
+        } else if (val_type == TokenType::STRING || final_value.find("\"") != std::string::npos || containsStringVariable(final_value) || final_value.find("String(") != std::string::npos) {
+            if (final_value.find("String(") != std::string::npos) {
+                type = "String";
+            } else if (final_value.find("+") != std::string::npos) {
                 type = "String";
                 final_value = "String(\"\") + " + final_value; 
             } else {
@@ -721,7 +723,7 @@ public:
             type = inferIntegerType(final_value);
             integerVariables.insert(name);
         } else {
-            if (containsFloatVariable(final_value)) {
+            if (containsFloatVariable(final_value) || final_value.find("(float)") != std::string::npos || final_value.find("atof(") != std::string::npos) {
                 type = "float";
                 floatVariables.insert(name);
             } else {
@@ -729,7 +731,7 @@ public:
                 integerVariables.insert(name);
             }
         }
-        
+
         declaredVariables.insert(name);
 
         bool isReassigned = reassignedVariables.count(name) > 0;
@@ -742,6 +744,14 @@ public:
         }
 
         if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar) {
+            if (type == "String") {
+                if (isConstantVar) {
+                    return "const " + type + " " + name + " = " + final_value + ";\n";
+                } else {
+                    return type + " " + name + " = " + final_value + ";\n";
+                }
+            }
+
             return "constexpr " + type + " " + name + " = " + final_value + ";\n";
         }
 
@@ -1147,6 +1157,57 @@ public:
         } else if (statement == "continue") {
             return "continue;";
         }
+
+        return "";
+    }
+};
+
+class TypeConversionCallNode : public ExpressionNode {
+private:
+    std::string funcName;
+    std::vector<std::unique_ptr<ExpressionNode>> arguments;
+
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+public:
+    TypeConversionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args, int currentLine, int currentColumn, std::string source)
+        : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+
+public:
+    std::string toCpp() override {
+        if (arguments.empty()) {
+            ErrorHandler::report("'" + funcName + "' requires exactly one argument", funcName, currentLine, currentColumn, source);
+        }
+
+        std::string value = arguments[0]->toCpp();
+
+        auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
+        bool isStringArg = literal && literal->token.type == TokenType::STRING;
+
+        if (funcName == "int") {
+            if (isStringArg) {
+                return "atoi(" + value + ")";
+            }
+
+            return "(int)(" + value + ")";
+        }
+
+        if (funcName == "float") {
+            if (isStringArg) {
+                return "atof(" + value + ")";
+            }
+
+            return "(float)(" + value + ")";
+        }
+
+        if (funcName == "str") {
+            return "String(" + value + ")";
+        }
+
+        ErrorHandler::report("'" + funcName + "' is not a known type conversion", funcName, currentLine, currentColumn, source);
 
         return "";
     }
