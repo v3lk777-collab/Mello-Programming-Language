@@ -1,23 +1,8 @@
-# Just a blink code btw
+sensorPin = 14
+pinStr = str(sensorPin)
 
-pin = 13
+kp_text = "2.5"
+kp = float(kp_text)
 
-start:
-    serial.println("BOOTING...")
-
-loop:
-    pinStr = str(pin)
-
-    if serial.available() > 0:
-        cmd = serial.readStringUntil("\n")
-
-        if cmd == "open":
-            turn_on(pin)
-            serial.println("Open LED")
-
-        elif cmd == "close":
-            turn_off(pin)
-            serial.println("Close LED")
-
-        else:
-            serial.println("Enter open or close only")
+speed_text = "150"
+base_speed = int(speed_text)

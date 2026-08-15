@@ -688,6 +688,12 @@ public:
                     final_value.pop_back();
                 }
             }
+        } else if (final_value.find("atof(") != std::string::npos || final_value.find("(float)") != std::string::npos) {
+            type = "float";
+            floatVariables.insert(name);
+        } else if (final_value.find("atoi(") != std::string::npos || final_value.find("(int)") != std::string::npos) {
+            type = "int";
+            integerVariables.insert(name);
         } else if (val_type == TokenType::SYMBOL && final_value.find("(") != std::string::npos && final_value.back() == ')') {
             std::string className = final_value.substr(0, final_value.find("("));
             std::string args = final_value.substr(final_value.find("("));
@@ -726,6 +732,9 @@ public:
             if (containsFloatVariable(final_value) || final_value.find("(float)") != std::string::npos || final_value.find("atof(") != std::string::npos) {
                 type = "float";
                 floatVariables.insert(name);
+            } else if (final_value.find("(int)") != std::string::npos || final_value.find("atoi(") != std::string::npos) {
+                type = "int";
+                integerVariables.insert(name);
             } else {
                 type = "int";
                 integerVariables.insert(name);
@@ -1188,7 +1197,7 @@ public:
         bool isStringArg = literal && literal->token.type == TokenType::STRING;
 
         if (funcName == "int") {
-            if (isStringArg) {
+        if (isStringArg || stringVariables.count(value) > 0) {
                 return "atoi(" + value + ")";
             }
 
@@ -1196,7 +1205,7 @@ public:
         }
 
         if (funcName == "float") {
-            if (isStringArg) {
+            if (isStringArg || stringVariables.count(value) > 0) {
                 return "atof(" + value + ")";
             }
 
