@@ -18,4 +18,4 @@ loop:
             serial.println("Close LED")
 
         else:
-            serial.println("Enter "open" or "close" only")
+            serial.println("Enter open or close only")
