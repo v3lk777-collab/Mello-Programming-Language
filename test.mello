@@ -1,8 +1,3 @@
-sensorPin = 14
-pinStr = str(sensorPin)
-
-kp_text = "2.5"
-kp = float(kp_text)
-
-speed_text = "150"
-base_speed = int(speed_text)
+start:
+    save_memory(0, 15.5)
+    k_val = read_memory(0)

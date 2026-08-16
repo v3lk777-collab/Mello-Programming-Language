@@ -101,7 +101,7 @@ bool Compiler::installLibraries() {
             continue;
         }
 
-        if (!lib.starts_with("avr")) {
+        if (!lib.starts_with("avr") && lib != "EEPROM") {
             std::string installLibrariesCommand = ARDUINO_CLI_PATH + " lib install \"" + lib + "\"";
         
             int status = system(installLibrariesCommand.c_str());

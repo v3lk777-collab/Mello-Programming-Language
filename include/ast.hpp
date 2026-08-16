@@ -384,6 +384,27 @@ public:
             return result;
         }
 
+        if (funcName == "save_memory") {
+            if (!includedLibraries.count("EEPROM")) {
+                includedLibraries.insert("EEPROM");
+            }
+
+            std::string address = argsStr[0];
+            std::string value = argsStr[1];
+
+            return "EEPROM.put(" + address + ", " + value + ");\n";
+        }
+
+        if (funcName == "read_memory") {
+            if (!includedLibraries.count("EEPROM")) {
+                includedLibraries.insert("EEPROM");
+            }
+
+            std::string address = argsStr[0];
+
+            return "({ float val; EEPROM.get(" + address + ", val); val; })";
+        }
+
         return "";
     }
 };
@@ -687,6 +708,9 @@ public:
                 while (!final_value.empty() && final_value.back() == ';') {
                     final_value.pop_back();
                 }
+            } else if (funcCall->getVariableName() == "read_memory") {
+                type = "float"; 
+                floatVariables.insert(name);
             }
         } else if (final_value.find("atof(") != std::string::npos || final_value.find("(float)") != std::string::npos) {
             type = "float";
