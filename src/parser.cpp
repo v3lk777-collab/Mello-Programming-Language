@@ -732,11 +732,9 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
 std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
     advance();
 
-    std::string value = current.value;
+    auto value = parseExpression();
 
-    advance();
-
-    return std::make_unique<ReturnNode>(value);
+    return std::make_unique<ReturnNode>(std::move(value));
 }
 
 std::unique_ptr<ASTNode> Parser::parseEveryStatement() {

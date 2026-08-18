@@ -1,3 +1,6 @@
+fn add(a, b):
+    return a + b
+
 fn blink(pin):
     turn_on(pin)
     wait(1s)
@@ -9,3 +12,4 @@ fn start():
 
 fn loop():
     blink(13)
+    add(5, 3)

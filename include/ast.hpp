@@ -968,15 +968,15 @@ public:
 
 class ReturnNode : public ASTNode {
 private:
-    std::string value;
+    std::unique_ptr<ASTNode> value;
 
 public:
-    ReturnNode(const std::string& val)
-        : value(val) {}
+    ReturnNode(std::unique_ptr<ASTNode> val)
+        : value(std::move(val)) {}
 
 public:
     std::string toCpp() override {
-        return "return " + value + ";";
+        return "return " + value->toCpp() + ";";
     }
 };
 
@@ -988,7 +988,7 @@ private:
 
 public:
     EveryNode(std::string interval, std::vector<std::unique_ptr<ASTNode>> body)
-        : interval(interval), body(std::move(body)) {
+        : interval(std::move(interval)), body(std::move(body)) {
 
         static int counter = 0;
         id = counter++;
