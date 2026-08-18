@@ -35,6 +35,8 @@ inline std::set<std::string> reassignedVariables;
 
 inline std::set<std::string> arraysNamesList;
 
+inline std::set<std::string> userDefinedFunctionNames;
+
 inline std::string currentParsingUserFunc = "";
 inline std::vector<std::string> currentFuncParamNames;
 inline std::map<std::string, std::vector<bool>> userFuncInputParams;

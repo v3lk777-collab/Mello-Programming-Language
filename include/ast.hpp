@@ -718,7 +718,7 @@ public:
         } else if (final_value.find("atoi(") != std::string::npos || final_value.find("(int)") != std::string::npos) {
             type = "int";
             integerVariables.insert(name);
-        } else if (val_type == TokenType::SYMBOL && final_value.find("(") != std::string::npos && final_value.back() == ')') {
+        } else if (val_type == TokenType::SYMBOL && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionNames.count(final_value.substr(0, final_value.find("(")))) {
             std::string className = final_value.substr(0, final_value.find("("));
             std::string args = final_value.substr(final_value.find("("));
 
@@ -772,12 +772,22 @@ public:
         bool isKeyword = keywordsList.count(raw_value) > 0;
         bool isArrayAccess = final_value.find('[') != std::string::npos;
 
+        bool isFunctionCall = dynamic_cast<FunctionCallNode*>(value.get()) != nullptr || dynamic_cast<BuiltInFunctionCallNode*>(value.get()) != nullptr|| funcCall != nullptr;
+
         if (isArrayAccess) {
             return type + " " + name + " = " + final_value + ";\n";
         }
 
         if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar) {
             if (type == "String") {
+                if (isConstantVar) {
+                    return "const " + type + " " + name + " = " + final_value + ";\n";
+                } else {
+                    return type + " " + name + " = " + final_value + ";\n";
+                }
+            }
+
+            if (isFunctionCall) {
                 if (isConstantVar) {
                     return "const " + type + " " + name + " = " + final_value + ";\n";
                 } else {
@@ -936,11 +946,50 @@ public:
     }
 };
 
+class ReturnNode : public ASTNode {
+private:
+    std::unique_ptr<ASTNode> value;
+
+public:
+    ReturnNode(std::unique_ptr<ASTNode> val)
+        : value(std::move(val)) {}
+
+public:
+    std::string toCpp() override {
+        return "return " + value->toCpp() + ";";
+    }
+};
+
 class UserFuncNode : public ASTNode {
 private:
     std::string funcName;
     std::vector<std::string> params;
     std::vector<std::unique_ptr<ASTNode>> body;
+
+private:
+    std::string inferReturnType() {
+        for (const auto& node : body) {
+            if (auto returnNode = dynamic_cast<ReturnNode*>(node.get())) {
+                std::string value = returnNode->toCpp();
+
+                if (value.find("\"") != std::string::npos || value.find("String(") != std::string::npos) {
+                    return "String";
+                }
+
+                if (value.find('.') != std::string::npos || value.find("atof(") != std::string::npos) {
+                    return "float";
+                }
+
+                if (value.find("true") != std::string::npos || value.find("false") != std::string::npos) {
+                    return "bool";
+                }
+
+                return "int";
+            }
+        }
+
+        return "void";
+    }
 
 public:
     UserFuncNode(const std::string& name, std::vector<std::string> params, std::vector<std::unique_ptr<ASTNode>> body)
@@ -948,7 +997,7 @@ public:
 
 public:
     std::string toCpp() override {
-        std::string result = "void " + funcName + "(";
+        std::string result = inferReturnType() + " " + funcName + "(";
 
         for (size_t i = 0; i < params.size(); i++) {
             result += "int " + params[i] + (i < params.size() - 1 ? ", " : "");
@@ -963,20 +1012,6 @@ public:
         result += "}\n";
 
         return result;
-    }
-};
-
-class ReturnNode : public ASTNode {
-private:
-    std::unique_ptr<ASTNode> value;
-
-public:
-    ReturnNode(std::unique_ptr<ASTNode> val)
-        : value(std::move(val)) {}
-
-public:
-    std::string toCpp() override {
-        return "return " + value->toCpp() + ";";
     }
 };
 

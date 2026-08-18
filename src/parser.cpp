@@ -725,6 +725,8 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     if (funcName == "loop" || funcName == "start") {
         return std::make_unique<FunctionNode>(funcName, std::move(body), current.line, current.column, this->source);
     } else {
+        userDefinedFunctionNames.insert(funcName);
+
         return std::make_unique<UserFuncNode>(funcName, std::move(params), std::move(body));
     }
 }

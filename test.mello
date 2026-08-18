@@ -1,15 +1,5 @@
-fn add(a, b):
-    return a + b
-
-fn blink(pin):
-    turn_on(pin)
-    wait(1s)
-    turn_off(pin)
-    wait(1s)
-
-fn start():
-    serial.print("Hello, from Mello")
+fn add_one(x):
+    return x + 1
 
 fn loop():
-    blink(13)
-    add(5, 3)
+    result = add_one(5)
