@@ -1,3 +1,11 @@
-start:
-    save_memory(0, 15.5)
-    k_val = read_memory(0)
+fn blink(pin):
+    turn_on(pin)
+    wait(1s)
+    turn_off(pin)
+    wait(1s)
+
+fn start():
+    serial.print("Hello, from Mello")
+
+fn loop():
+    blink(13)

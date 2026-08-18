@@ -129,7 +129,7 @@ public:
         }
 
         std::string result = "void " + funcName + "() {\n";
-        
+
         if (funcName == "setup") {
             for (const auto& pin : inputPins) {
                 result += "pinMode(" + pin + ", INPUT);\n";

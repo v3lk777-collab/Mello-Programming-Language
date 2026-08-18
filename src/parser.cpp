@@ -577,24 +577,6 @@ std::unique_ptr<ASTNode> Parser::parseArrayAssignment(const std::string& name) {
     return std::make_unique<ArrayAssignNode>(name, std::move(indexExpression), std::move(valueExpression));
 }
 
-std::unique_ptr<ASTNode> Parser::parseFunctionDefinition(const std::string& keyword) {
-    advance();
-
-    consume(TokenType::COLON, "Expected ':' to start function body");
-
-    if (current.type == TokenType::NEWLINE && current.type != TokenType::EndOfFile && current.type != TokenType::DEDENT) {
-        advance();
-    }
-
-    consume(TokenType::INDENT, "Expected indentation after function definition");
-
-    auto body = parseBlock();
-
-    consume(TokenType::DEDENT, "Expected dedent at the end of function body");
-
-    return std::make_unique<FunctionNode>(keyword, std::move(body), current.line, current.column, this->source);
-}
-
 std::unique_ptr<ASTNode> Parser::parseKeywordFunctionCall(const std::string& keyword) {
     advance();
     consume(TokenType::LPAREN, "Expected '(' after '" + keyword + "'");
@@ -705,6 +687,7 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     consume(TokenType::LPAREN, "Expected '(' after function name");
 
     std::vector<std::string> params;
+
     while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
         if (current.type == TokenType::COMMA) {
             advance();
@@ -728,18 +711,22 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
         funcParams.insert(p);
     }
 
-    consume(TokenType::INDENT, "Expected indentation after func");
+    consume(TokenType::INDENT, "Expected indentation after function");
 
     auto body = parseBlock();
 
-    consume(TokenType::DEDENT, "Expected dedent at end of func body");
+    consume(TokenType::DEDENT, "Expected dedent at end of function body");
 
     currentParsingUserFunc = "";
 
     currentFuncParamNames.clear();
     funcParams.clear();
 
-    return std::make_unique<UserFuncNode>(funcName, std::move(params), std::move(body));
+    if (funcName == "loop" || funcName == "start") {
+        return std::make_unique<FunctionNode>(funcName, std::move(body), current.line, current.column, this->source);
+    } else {
+        return std::make_unique<UserFuncNode>(funcName, std::move(params), std::move(body));
+    }
 }
 
 std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
@@ -943,11 +930,9 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
         if (current.type == TokenType::KEYWORD) {
             std::string keyword = current.value;
 
-            if (keyword == "start" || keyword == "loop") {
-                program.push_back(parseFunctionDefinition(keyword));
-            } else if (keyword == "if") {
+            if (keyword == "if") {
                 program.push_back(parseIfStatement());
-            } else if (keyword == "func") {
+            } else if (keyword == "fn") {
                 program.push_back(parseUserFuncDefinition());
             } else if (keyword == "every") {
                 program.push_back(parseEveryStatement());
