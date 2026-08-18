@@ -52,7 +52,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 The Mello compiler is built from scratch in C++23 and CMake 3.25, operates in five sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
-The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 30 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `func`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `serial.*` family.
+The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 30 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `fn`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `serial.*` family.
 
 ### Phase B: Syntax Analysis (Parser)
 The `Parser` consumes the token stream and validates it against Mello's grammar using recursive-descent parsing, constructing a full Abstract Syntax Tree (AST) with properly nested logical blocks.
@@ -90,10 +90,10 @@ array = [0, 1, 3, 4]   # Array
 Every hardware program requires a starting point and a continuous loop.
 
 ```python
-start:
+fn start():
     serial.println("System Initialized and Ready.")
 
-loop:
+fn loop():
     # Your continuous logic goes here
 ```
 
@@ -104,7 +104,7 @@ Interacting with pins is simplified to natural-language commands.
 pin = 13
 sensorPin = A0
 
-loop:
+fn loop():
     turn_on(pin)                # -> digitalWrite(pin, HIGH);
     wait(1s)                    # -> delay(1000);
     turn_off(pin)               # -> digitalWrite(pin, LOW);
@@ -118,7 +118,7 @@ Or use the built-in `toggle` function to blink a pin — it keeps its own intern
 ```python
 PIN = 13                        # Create a constant var
 
-loop:
+fn loop():
     toggle(pin)                 # Flips HIGH/LOW every call via its own static flag
     wait(1s)
 ```
@@ -130,7 +130,7 @@ pin = 13
 character = 'A'
 value = 50
 
-start:
+fn start():
     write(pin, HIGH)                # 0/1/HIGH/LOW -> digitalWrite(); any other value -> analogWrite()
     serial.write(character)         # Single argument -> Serial.write()
     scale(value, 0, 1023, 0, 255)   # -> map(value, 0, 1023, 0, 255)
@@ -144,7 +144,7 @@ Mello shines in handling hardware events without blocking the CPU execution thre
 ```python
 pin = 13
 
-loop:
+fn loop():
     every 1s:
         turn_on(pin)
         serial.println("1 second passed, and the CPU wasn't blocked!")
@@ -155,7 +155,7 @@ loop:
 ```python
 buttonPin = 2
 
-loop:
+fn loop():
     on_press buttonPin:
         serial.println("Button on Pin 2 was pressed safely without bouncing.")
 ```
@@ -167,7 +167,7 @@ Standard logical operators and three loop constructs are fully supported.
 LED_PIN = 13
 sensorPin = A0
 
-loop:
+fn loop():
     sensor_value = read(sensorPin)
 
     if sensor_value > 50:
@@ -203,7 +203,7 @@ func blink_fast(pin_num):
     toggle(pin_num)
     wait(100)
 
-loop:
+fn loop():
     blink_fast(pin)
 ```
 
@@ -213,7 +213,7 @@ Use `break` and `continue` in while / for loops
 ```python
 counter = 0
 
-start:
+fn start():
     while counter <= 100:
         if counter == 50:
             break
@@ -234,10 +234,10 @@ lightPin = 13
 tempSensor = A0
 systemActive = true
 
-start:
+fn start():
     serial.println("Smart Room OS Booting...")
 
-loop:
+fn loop():
     # Read temperature every 5 seconds without blocking the button
     every 5s:
         temp = read(tempSensor)
@@ -304,13 +304,17 @@ If you only want to transpile without running the compiler backend
 mello.exe path\to\main.mello --no-compile
 ```
 
-If you want to keep the generated C++ sketch file after compilation
+If you want to keep the generated C++ sketch file after compilation use
 
 ```bash
 mello.exe path\to\main.mello --save-code
 ```
 
+If you don't want to see the generated C++ code use
 
+```bash
+mello.exe path\to\main.mello --no-output
+```
 
 > Prefer a dedicated editor? See [The Mello IDE](#-8-the-mello-ide) below.
 
