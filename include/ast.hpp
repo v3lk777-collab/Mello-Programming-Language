@@ -1310,7 +1310,7 @@ public:
         bool isStringArg = literal && literal->token.type == TokenType::STRING;
 
         if (funcName == "int") {
-        if (isStringArg || stringVariables.count(value) > 0) {
+            if (isStringArg || stringVariables.count(value) > 0) {
                 return "atoi(" + value + ")";
             }
 
