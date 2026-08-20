@@ -14,6 +14,11 @@
 
 class ASTNode {
 public:
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+        return {};
+    }
+
+public:
     virtual ~ASTNode() = default;
 
 public:
@@ -918,6 +923,11 @@ public:
     }
 
 public:
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+        return { &thenBody, &elseBody };
+    }
+
+public:
     std::string toCpp() override {
         std::string code = "if (" + condition->toCpp() + ") {\n";
         
@@ -967,28 +977,42 @@ private:
     std::vector<std::unique_ptr<ASTNode>> body;
 
 private:
-    std::string inferReturnType() {
-        for (const auto& node : body) {
-            if (auto returnNode = dynamic_cast<ReturnNode*>(node.get())) {
-                std::string value = returnNode->toCpp();
+    std::string typeFromReturnValue(const std::string& value) const {
+        if (value.find("\"") != std::string::npos || value.find("String(") != std::string::npos) {
+            return "String";
+        }
+    
+        if (value.find('.') != std::string::npos || value.find("atof(") != std::string::npos) {
+            return "float";
+        }
+    
+        if (value.find("true") != std::string::npos || value.find("false") != std::string::npos) {
+            return "bool";
+        }
+    
+        return "int";
+    }
 
-                if (value.find("\"") != std::string::npos || value.find("String(") != std::string::npos) {
-                    return "String";
+    std::string findReturnTypeIn(const std::vector<std::unique_ptr<ASTNode>>& nodes) const {
+        for (const auto& node : nodes) {
+            if (auto* returnNode = dynamic_cast<ReturnNode*>(node.get())) {
+                return typeFromReturnValue(returnNode->toCpp());
+            }
+
+            for (const auto* childBody : node->getChildBodies()) {
+                std::string result = findReturnTypeIn(*childBody);
+    
+                if (result != "void") {
+                    return result;
                 }
-
-                if (value.find('.') != std::string::npos || value.find("atof(") != std::string::npos) {
-                    return "float";
-                }
-
-                if (value.find("true") != std::string::npos || value.find("false") != std::string::npos) {
-                    return "bool";
-                }
-
-                return "int";
             }
         }
 
         return "void";
+    }
+
+    std::string inferReturnType() const {
+        return findReturnTypeIn(body);
     }
 
 public:
@@ -1030,6 +1054,11 @@ public:
     }
 
 public:
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+        return { &body };
+    }
+
+public:
     std::string toCpp() override {
         interval = parseTime(interval);
 
@@ -1059,6 +1088,11 @@ public:
         : condition(std::move(cond)), body(std::move(b)) {}
 
 public:
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+        return { &body };
+    }
+
+public:
     std::string toCpp() override {
         std::string result = "while (" + condition->toCpp() + ") {\n";
 
@@ -1080,6 +1114,11 @@ private:
 public:
     ForNode(std::unique_ptr<ExpressionNode> cond, std::vector<std::unique_ptr<ASTNode>> body)
         : condition(std::move(cond)), body(std::move(body)) {}
+
+public:
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+        return { &body };
+    }
 
 public:
     std::string toCpp() override {
@@ -1115,6 +1154,11 @@ public:
         : varName(std::move(varName)), start(std::move(start)), stop(std::move(stop)), step(std::move(step)), body(std::move(body)) {}
 
 public:
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+        return { &body };
+    }
+
+public:
     std::string toCpp() override {
         std::string result = "for (uint32_t " + varName + " = " + start->toCpp() + "; " + varName + " < " + stop->toCpp() + "; " + varName + " += " + step->toCpp() + ") {";
 
@@ -1140,6 +1184,11 @@ public:
 
         static int counter = 0;
         id = counter++;
+    }
+
+public:
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+        return { &body };
     }
 
 public:
@@ -1185,6 +1234,11 @@ public:
         id = counter++;
 
         inputPullUpPins.insert(pin);
+    }
+
+public:
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+        return { &body };
     }
 
 public:

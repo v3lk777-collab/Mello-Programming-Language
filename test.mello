@@ -1,4 +1,7 @@
 fn add_one(x):
+    if x == 5:
+        return 10
+
     return x + 1
 
 fn loop():
