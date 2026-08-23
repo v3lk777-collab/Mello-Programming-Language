@@ -15,6 +15,7 @@ set(SOURCES
     src/parser.cpp
     src/compiler/compiler.cpp
     src/errors/error_handler.cpp
+    src/semantic/semantic_analyzer.cpp
 )
 
 add_executable(mello ${SOURCES})
@@ -24,6 +25,7 @@ target_include_directories(mello PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/include/errors
     ${CMAKE_CURRENT_SOURCE_DIR}/include/compiler
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/semantic
 )
 
 if (MINGW)

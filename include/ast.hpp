@@ -128,6 +128,11 @@ public:
         : funcName(std::move(name)), body(std::move(funcBody)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+        return body;
+    }
+
+public:
     std::string toCpp() override {
         if (funcName == "start") {
             funcName = "setup";
@@ -214,6 +219,15 @@ public:
         : funcName(std::move(name)), arguments(std::move(arguments)) {}
 
 public:
+    std::string getFuncName() const {
+        return funcName;
+    }
+
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const { 
+        return arguments; 
+    }
+
+public:
     std::string toCpp() override {
         std::vector<std::string> argsStr;
 
@@ -294,6 +308,11 @@ public:
                 }
             }
         }
+    }
+
+public:
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const {
+        return arguments;
     }
 
 public:
@@ -434,6 +453,11 @@ public:
         : funcName(std::move(funcName)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const {
+        return arguments;
+    }
+
+public:
     std::string toCpp() override {
         if (!serialKeywordsList.count(funcName)) {
             ErrorHandler::report("'" + funcName + "' is not a known serial command", funcName, currentLine, currentColumn, source);
@@ -547,13 +571,13 @@ private:
     std::unique_ptr<ASTNode> methodCall;
 
 public:
+    MethodCallNode(std::string object, std::unique_ptr<ASTNode> method)
+        : objectName(std::move(object)), methodCall(std::move(method)) {}
+
+public:
     ASTNode* getMethodCall() {
         return methodCall.get();
     }
-
-public:
-    MethodCallNode(std::string object, std::unique_ptr<ASTNode> method)
-        : objectName(std::move(object)), methodCall(std::move(method)) {}
 
 public:
     std::string toCpp() override {
@@ -576,6 +600,7 @@ public:
 class VarAssignNode : public ASTNode {
 public:
     std::string name;
+    std::string type;
     bool isConstantVar;
     TokenType val_type;
     std::string raw_value;
@@ -644,8 +669,17 @@ public:
         : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    int getCurrentDeclaredLine() const {
+        return currentLine;
+    }
+
+    std::string getSource() const {
+        return source;
+    }
+
+public:
     std::string toCpp() override {
-        std::string type = "";
+        type = "";
         std::string final_value = value->toCpp();
 
         while (!final_value.empty() && (final_value.back() == ';' || final_value.back() == '\n' || final_value.back() == ' ')) {
@@ -817,6 +851,11 @@ public:
         : op(op), right(std::move(right)) {}
 
 public:
+    ExpressionNode* getRight() const { 
+        return right.get(); 
+    }
+
+public:
     std::string toCpp() override {
         std::string opStr = op.value;
 
@@ -840,6 +879,19 @@ private:
 public:
     BinaryOpNode(std::unique_ptr<ExpressionNode> left, Token op, std::unique_ptr<ExpressionNode> right)
         : left(std::move(left)), op(op), right(std::move(right)) {}
+
+public:
+    ExpressionNode* getLeft() const { 
+        return left.get();
+    }
+
+    ExpressionNode* getRight() const { 
+        return right.get(); 
+    }
+
+    Token getOp() const { 
+        return op; 
+    }
 
 public:
     std::string getVariableName() override {
@@ -923,6 +975,18 @@ public:
     }
 
 public:
+    const std::unique_ptr<ASTNode> &getCondition() const {
+        return condition;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>> &getThenBody() const {
+        return thenBody;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>> &getElseBody() const {
+        return elseBody;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &thenBody, &elseBody };
     }
@@ -1020,6 +1084,19 @@ public:
         : funcName(name), params(std::move(params)), body(std::move(body)) {}
 
 public:
+    std::string getFuncName() const {
+        return funcName;
+    }
+
+    std::vector<std::string> getFuncParams() const {
+        return params;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>> &getFuncBody() const {
+        return body;
+    }
+
+public:
     std::string toCpp() override {
         std::string result = inferReturnType() + " " + funcName + "(";
 
@@ -1088,6 +1165,10 @@ public:
         : condition(std::move(cond)), body(std::move(b)) {}
 
 public:
+    const std::unique_ptr<ExpressionNode> &getCondition() const {
+        return condition;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &body };
     }
@@ -1116,6 +1197,10 @@ public:
         : condition(std::move(cond)), body(std::move(body)) {}
 
 public:
+    const std::unique_ptr<ExpressionNode> &getCondition() const {
+        return condition;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &body };
     }
@@ -1213,6 +1298,12 @@ public:
 public:
     GroupNode(std::unique_ptr<ASTNode> expression)
         : expression(std::move(expression)) {}
+
+
+public:
+    ExpressionNode* getExpression() const {
+        return dynamic_cast<ExpressionNode*>(expression.get());
+    }
 
 public:
     std::string toCpp() override {

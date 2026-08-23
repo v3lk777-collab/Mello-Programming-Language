@@ -19,7 +19,7 @@ Lexer::Lexer(std::string source) {
     this->currentLine = 1;
     this->currentColumn = 0;
 
-    this->indent_stack.push_back(0);
+    this->indentStack.push_back(0);
     this->isStartOfLine = true;
 }
 
@@ -99,18 +99,18 @@ std::vector<Token> Lexer::tokenize() {
                 continue;
             }
 
-            int last_indent = indent_stack.back();
+            int last_indent = indentStack.back();
 
             if (current_indent > last_indent) {
-                indent_stack.push_back(current_indent);
+                indentStack.push_back(current_indent);
                 tokens.push_back({TokenType::INDENT, std::to_string(current_indent), currentLine, currentColumn});
             } else if (current_indent < last_indent) {
-                while (!indent_stack.empty() && indent_stack.back() > current_indent) {
-                    indent_stack.pop_back();
+                while (!indentStack.empty() && indentStack.back() > current_indent) {
+                    indentStack.pop_back();
                     tokens.push_back({TokenType::DEDENT, "", currentLine, currentColumn});
                 }
                 
-                if (indent_stack.empty() || indent_stack.back() != current_indent) {
+                if (indentStack.empty() || indentStack.back() != current_indent) {
                     std::cerr << "Indentation Error: Unindent does not match any outer level\n";
                     exit(1);
                 }
@@ -314,8 +314,8 @@ std::vector<Token> Lexer::tokenize() {
         }
     }
 
-    while (indent_stack.size() > 1) {
-        indent_stack.pop_back();
+    while (indentStack.size() > 1) {
+        indentStack.pop_back();
         tokens.push_back({TokenType::DEDENT, "", currentLine, currentColumn});
     }
 

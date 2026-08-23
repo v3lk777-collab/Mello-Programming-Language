@@ -7,6 +7,7 @@
 // explicit written permission from the author.
 
 #pragma once
+
 #include "token.hpp"
 
 #include <set>
@@ -36,7 +37,7 @@ private:
     std::string source;
 
     bool isStartOfLine;
-    std::vector<int> indent_stack;
+    std::vector<int> indentStack;
 
 private:
     char peek();
