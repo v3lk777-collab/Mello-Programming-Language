@@ -15,6 +15,7 @@ set(SOURCES
     src/parser.cpp
     src/compiler/compiler.cpp
     src/errors/error_handler.cpp
+    src/semantic/symbol_table.cpp
     src/semantic/semantic_analyzer.cpp
 )
 

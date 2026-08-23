@@ -198,6 +198,11 @@ private:
     std::vector<std::unique_ptr<ExpressionNode>> arguments;
 
 private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+private:
     bool isNumber(const std::string &str) {
         if (str.empty()) {
             return false;
@@ -215,8 +220,8 @@ private:
     }
 
 public:
-    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> arguments)
-        : funcName(std::move(name)), arguments(std::move(arguments)) {}
+    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> arguments, int currentLine, int currentColumn, std::string source)
+        : funcName(std::move(name)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     std::string getFuncName() const {
@@ -225,6 +230,18 @@ public:
 
     const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const { 
         return arguments; 
+    }
+
+    std::string getSource() const {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const {
+        return currentColumn;
     }
 
 public:
@@ -669,12 +686,16 @@ public:
         : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    std::string getSource() const {
+        return source;
+    }
+
     int getCurrentDeclaredLine() const {
         return currentLine;
     }
 
-    std::string getSource() const {
-        return source;
+    int getCurrentDeclaredColumn() const {
+        return currentColumn;
     }
 
 public:
@@ -1041,6 +1062,11 @@ private:
     std::vector<std::unique_ptr<ASTNode>> body;
 
 private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+private:
     std::string typeFromReturnValue(const std::string& value) const {
         if (value.find("\"") != std::string::npos || value.find("String(") != std::string::npos) {
             return "String";
@@ -1080,8 +1106,8 @@ private:
     }
 
 public:
-    UserFuncNode(const std::string& name, std::vector<std::string> params, std::vector<std::unique_ptr<ASTNode>> body)
-        : funcName(name), params(std::move(params)), body(std::move(body)) {}
+    UserFuncNode(const std::string& name, std::vector<std::string> params, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
+        : funcName(name), params(std::move(params)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     std::string getFuncName() const {
@@ -1094,6 +1120,18 @@ public:
 
     const std::vector<std::unique_ptr<ASTNode>> &getFuncBody() const {
         return body;
+    }
+
+    std::string getSource() const {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const {
+        return currentColumn;
     }
 
 public:

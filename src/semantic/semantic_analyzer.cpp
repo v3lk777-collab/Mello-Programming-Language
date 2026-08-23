@@ -37,9 +37,11 @@ void SemanticAnalyzer::analyzeAssignment(VarAssignNode* varNode) {
     symbol.declaredLine = varNode->getCurrentDeclaredLine();
 
     std::string source = varNode->getSource();
+    int currentLine = varNode->getCurrentDeclaredLine();
+    int currentColumn = varNode->getCurrentDeclaredColumn();
 
     if (!symbolTable.declareVariable(symbol)) {
-        ErrorHandler::report("This variable has already been declared:", symbol.name, symbol.declaredLine, 0, source);
+        ErrorHandler::report("This variable has already been declared:", symbol.name, currentLine, currentColumn, source);
     }
 }
 
@@ -64,6 +66,10 @@ void SemanticAnalyzer::analyzeIfStatment(IfNode* ifNode) {
 void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
     symbolTable.enterScope();
 
+    std::string source = userFuncNode->getSource();
+    int currentLine = userFuncNode->getCurrentDeclaredLine();
+    int currentColumn = userFuncNode->getCurrentDeclaredColumn();
+
     for (const auto& paramName : userFuncNode->getFuncParams()) {
         VariableSymbol paramSymbol;
 
@@ -73,7 +79,7 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
         paramSymbol.declaredLine = 0;
 
         if (!symbolTable.declareVariable(paramSymbol)) {
-            ErrorHandler::report("Duplicate parameter name:", paramName, 0, 0, "");
+            ErrorHandler::report("Duplicate parameter name:", paramName, currentLine, currentColumn, source);
         }
     }
 
@@ -179,7 +185,7 @@ void SemanticAnalyzer::analyzeLiteral(LiteralNode* literalNode) {
         const VariableSymbol* var = symbolTable.lookupVariable(literalNode->token.value);
 
         if (!var) {
-            ErrorHandler::report("Use of undeclared variable:", literalNode->token.value, literalNode->token.line, literalNode->token.column, "");
+            ErrorHandler::report("Use of undeclared variable:", literalNode->token.value, literalNode->token.line, literalNode->token.column, literalNode->token.value);
         }
     }
 }
@@ -209,9 +215,13 @@ void SemanticAnalyzer::analyzeGroup(GroupNode* groupNode) {
 void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
     std::string funcName = functionCallNode->getFuncName();
     const FunctionSymbol* func = symbolTable.lookupFunction(funcName);
+
+    std::string source = functionCallNode->getSource();
+    int currentLine = functionCallNode->getCurrentDeclaredLine();
+    int currentColumn = functionCallNode->getCurrentDeclaredColumn();
     
     if (!func) {
-        ErrorHandler::report("Call to undeclared function:", funcName, 0, 0, "");
+        ErrorHandler::report("Call to undeclared function:", funcName, currentLine, currentColumn, source);
     }
 
     for (const auto& arg : functionCallNode->getArguments()) {

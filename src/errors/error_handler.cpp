@@ -27,8 +27,7 @@ void ErrorHandler::report(const std::string &message, const std::string &tokenVa
     }
 
     while (std::getline(ss, currentLineContent, '\n')) {
-        if (!currentLineContent.empty() && currentLineContent.back() == '\r')
-        {
+        if (!currentLineContent.empty() && currentLineContent.back() == '\r') {
             currentLineContent.pop_back();
         }
 
@@ -45,8 +44,7 @@ void ErrorHandler::report(const std::string &message, const std::string &tokenVa
         std::cerr << prefix << lineContent << "\n";
         std::cerr << std::string(prefix.length(), ' ');
 
-        for (int i = 1; i < columnNumber; i++)
-        {
+        for (int i = 1; i < columnNumber; i++) {
             std::cerr << ' ';
         }
 

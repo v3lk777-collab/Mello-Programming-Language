@@ -23,16 +23,16 @@
 #include <unordered_set>
 
 #ifdef _WIN32
-#define ARDUINO_CLI_DEFAULT  "..\\bin\\win32\\arduino-cli.exe"
-#define CLANG_FORMAT_DEFAULT "..\\bin\\win32\\clang-format.exe"
+    #define ARDUINO_CLI_DEFAULT  "..\\bin\\win32\\arduino-cli.exe"
+    #define CLANG_FORMAT_DEFAULT "..\\bin\\win32\\clang-format.exe"
 
 #elif defined(__APPLE__)
-#define ARDUINO_CLI_DEFAULT  "../bin/mac/arduino-cli"
-#define CLANG_FORMAT_DEFAULT "../bin/mac/clang-format"
+    #define ARDUINO_CLI_DEFAULT  "../bin/mac/arduino-cli"
+    #define CLANG_FORMAT_DEFAULT "../bin/mac/clang-format"
 
 #else
-#define ARDUINO_CLI_DEFAULT  "../bin/linux/arduino-cli"
-#define CLANG_FORMAT_DEFAULT "../bin/linux/clang-format"
+    #define ARDUINO_CLI_DEFAULT  "../bin/linux/arduino-cli"
+    #define CLANG_FORMAT_DEFAULT "../bin/linux/clang-format"
 
 #endif
 
@@ -344,7 +344,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
             std::vector<std::unique_ptr<ExpressionNode>> beginArgs;
 
             beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "9600", 0)));
-            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs)));
+            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), 0, 0, ""));
         }
 
         FunctionNode autoSetup("setup", std::move(setupBody), 0, 0, "");

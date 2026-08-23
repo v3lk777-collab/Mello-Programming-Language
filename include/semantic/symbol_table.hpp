@@ -18,60 +18,17 @@ private:
     std::vector<std::map<std::string, VariableSymbol>> variableScopes;
 
 public:
-    SymbolTable() {
-        variableScopes.push_back({});
-    }
+    SymbolTable();
 
 public:
-    void enterScope() {
-        variableScopes.push_back({});
-    }
-
-    void exitScope() {
-        variableScopes.pop_back();
-    }
+    void enterScope();
+    void exitScope();
 
 public:
-    bool declareVariable(const VariableSymbol& symbol) {
-        auto& currentScope = variableScopes.back();
-
-        if (currentScope.count(symbol.name)) {
-            return false;
-        }
-
-        currentScope[symbol.name] = symbol;
-        return true;
-    }
-
-    bool declareFunction(const FunctionSymbol& function) {
-        if (functions.count(function.name)) {
-            return false;
-        }
-
-        functions[function.name] = function;
-        return true;
-    }
+    bool declareVariable(const VariableSymbol& symbol);
+    bool declareFunction(const FunctionSymbol& function);
 
 public:
-    const VariableSymbol* lookupVariable(const std::string& name) const {
-        for (auto it = variableScopes.rbegin(); it != variableScopes.rend(); ++it) {
-            auto found = it->find(name);
- 
-            if (found != it->end()) {
-                return &found->second;
-            }
-        }
- 
-        return nullptr;
-    }
-
-    const FunctionSymbol* lookupFunction(const std::string& name) const {
-        auto found = functions.find(name);
- 
-        if (found == functions.end()) {
-            return nullptr;
-        }
- 
-        return &found->second;
-    }
+    const VariableSymbol* lookupVariable(const std::string& name) const;
+    const FunctionSymbol* lookupFunction(const std::string& name) const;
 };
