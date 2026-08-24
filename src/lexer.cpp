@@ -95,7 +95,8 @@ std::vector<Token> Lexer::tokenize() {
                 if (current == '\n') {
                     advance();
                 }
-                
+
+                isStartOfLine = true;
                 continue;
             }
 
@@ -103,13 +104,15 @@ std::vector<Token> Lexer::tokenize() {
 
             if (current_indent > last_indent) {
                 indentStack.push_back(current_indent);
+
                 tokens.push_back({TokenType::INDENT, std::to_string(current_indent), currentLine, currentColumn});
             } else if (current_indent < last_indent) {
                 while (!indentStack.empty() && indentStack.back() > current_indent) {
                     indentStack.pop_back();
+
                     tokens.push_back({TokenType::DEDENT, "", currentLine, currentColumn});
                 }
-                
+
                 if (indentStack.empty() || indentStack.back() != current_indent) {
                     std::cerr << "Indentation Error: Unindent does not match any outer level\n";
                     exit(1);
@@ -141,6 +144,7 @@ std::vector<Token> Lexer::tokenize() {
 
                 while (std::isxdigit(current)) {
                     number += current;
+
                     advance();
                 }
             } else {

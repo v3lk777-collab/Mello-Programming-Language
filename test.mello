@@ -5,4 +5,5 @@ fn add_one(x):
     return x + 1
 
 fn loop():
+    # Nothing
     result = add_one(5)
