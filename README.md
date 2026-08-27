@@ -74,7 +74,7 @@ Mello is designed to be intuitive and highly readable.
 ### Variables, Arrays & Data Handling
 Variables are dynamically inferred at transpile time but become strictly typed, native C++ in the output.
 
-```mello
+```python
 name = "Mohammed"      # String variable
 sensor_pin = 5         # Integer variable
 threshold = 10.5       # Float variable
