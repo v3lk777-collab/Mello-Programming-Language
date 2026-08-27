@@ -219,7 +219,7 @@ void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
     std::string source = functionCallNode->getSource();
     int currentLine = functionCallNode->getCurrentDeclaredLine();
     int currentColumn = functionCallNode->getCurrentDeclaredColumn();
-    
+
     if (!func) {
         ErrorHandler::report("Call to undeclared function:", funcName, currentLine, currentColumn, source);
     }
@@ -230,7 +230,28 @@ void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
 }
 
 void SemanticAnalyzer::analyzeMethodCall(MethodCallNode* methodCallNode) {
+    std::string objectName = methodCallNode->getObjectName();
     ASTNode* inner = methodCallNode->getMethodCall();
+
+    if (!objectName.empty()) {
+        if (objectName != "Serial") {
+            const VariableSymbol* objVar = symbolTable.lookupVariable(objectName);
+
+            if (!objVar) {
+                std::string source = methodCallNode->getSource();
+                int currentLine = methodCallNode->getCurrentDeclaredLine();
+                int currentColumn = methodCallNode->getCurrentDeclaredColumn();
+
+                ErrorHandler::report("Use of undeclared object:", objectName, currentLine, currentColumn, source);
+
+                return;
+            }
+        }
+
+        if (auto functionCallNode = dynamic_cast<FunctionCallNode*>(inner)) {
+            return;
+        }
+    }
 
     if (auto serialCallNode = dynamic_cast<SerialFunctionsCallNode*>(inner)) {
         analyzeSerialCall(serialCallNode);

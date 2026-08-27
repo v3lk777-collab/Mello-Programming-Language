@@ -35,6 +35,22 @@ public:
     };
 };
 
+class UseNode : public ASTNode {
+private:
+    std::string libName;
+
+public:
+    UseNode(std::string libName)
+        : libName(std::move(libName)) {}
+
+public:
+    std::string toCpp() override {
+        includedLibraries.insert(libName);
+
+        return "";
+    }
+};
+
 class ArrayNode : public ASTNode {
 private:
     std::string arrayName;
@@ -587,13 +603,34 @@ private:
     std::string objectName;
     std::unique_ptr<ASTNode> methodCall;
 
-public:
-    MethodCallNode(std::string object, std::unique_ptr<ASTNode> method)
-        : objectName(std::move(object)), methodCall(std::move(method)) {}
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
 
 public:
+    MethodCallNode(std::string object, std::unique_ptr<ASTNode> method, int currentLine, int currentColumn, std::string source)
+        : objectName(std::move(object)), methodCall(std::move(method)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+
+public:
+    std::string getObjectName() const {
+        return objectName;
+    }
+
     ASTNode* getMethodCall() {
         return methodCall.get();
+    }
+
+    std::string getSource() const {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const {
+        return currentColumn;
     }
 
 public:
@@ -780,10 +817,14 @@ public:
             integerVariables.insert(name);
         } else if (val_type == TokenType::SYMBOL && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionNames.count(final_value.substr(0, final_value.find("(")))) {
             std::string className = final_value.substr(0, final_value.find("("));
+
+            if (includedLibraries.count(className) < 0) {
+                ErrorHandler::report("Must import this libarary first:", className, currentLine, currentColumn, source);
+            }
+
             std::string args = final_value.substr(final_value.find("("));
 
             declaredVariables.insert(name);
-            includedLibraries.insert(className);
 
             if (args == "()") {
                 return className + " " + name + ";\n";

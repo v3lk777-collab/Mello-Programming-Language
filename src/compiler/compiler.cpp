@@ -25,15 +25,12 @@
 #ifdef _WIN32
     #define ARDUINO_CLI_DEFAULT  "..\\bin\\win32\\arduino-cli.exe"
     #define CLANG_FORMAT_DEFAULT "..\\bin\\win32\\clang-format.exe"
-
 #elif defined(__APPLE__)
     #define ARDUINO_CLI_DEFAULT  "../bin/mac/arduino-cli"
     #define CLANG_FORMAT_DEFAULT "../bin/mac/clang-format"
-
 #else
     #define ARDUINO_CLI_DEFAULT  "../bin/linux/arduino-cli"
     #define CLANG_FORMAT_DEFAULT "../bin/linux/clang-format"
-
 #endif
 
 const std::string ARDUINO_CLI_PATH = ARDUINO_CLI_DEFAULT;
@@ -294,7 +291,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
             std::string code = varNode->toCpp();
 
             if (code.find(varNode->name + " =") == 0) {
-                std::cerr << "\nSyntax Error: You cannot reassign the variable '" << varNode->name << "' outside of a function.\n" << "Please move '" << varNode->name << " = ...' inside 'func start():' or 'func loop():'.\n" << "\n";
+                std::cerr << "\nSyntax Error: You cannot reassign the variable '" << varNode->name << "' outside of a function.\n" << "Please move '" << varNode->name << " = ...' inside 'fn start():' or 'fn loop():'.\n" << "\n";
                 
                 outputFile.close();
                 

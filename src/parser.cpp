@@ -205,11 +205,11 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
                     methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args), current.line, current.column, this->source);
                 }
 
-                return std::make_unique<MethodCallNode>(name, std::move(methodCall));
+                return std::make_unique<MethodCallNode>(name, std::move(methodCall), current.line, current.column, this->source);
             } else {
                 auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>(), current.line, current.column, this->source);
 
-                return std::make_unique<MethodCallNode>(name, std::move(methodCall));
+                return std::make_unique<MethodCallNode>(name, std::move(methodCall), current.line, current.column, this->source);
             }
         }
 
@@ -333,7 +333,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 advance();
                 auto methodCall = parseFunctionCall(methodName);
 
-                body.push_back(std::make_unique<MethodCallNode>(name, std::move(methodCall)));
+                body.push_back(std::make_unique<MethodCallNode>(name, std::move(methodCall), current.line, current.column, this->source));
             }
         } else if (current.type == TokenType::KEYWORD) {
             std::string keyword = current.value;
@@ -374,7 +374,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                         methodCall = parseFunctionCall(methodName);
                     }
                     
-                    body.push_back(std::make_unique<MethodCallNode>(keyword, std::move(methodCall)));
+                    body.push_back(std::make_unique<MethodCallNode>(keyword, std::move(methodCall), current.line, current.column, this->source));
                 } else if (current.type == TokenType::LPAREN) {
                     if (keywordsList.count(keyword)) {
                         body.push_back(parseBuiltInFunctionCall(keyword));
@@ -389,6 +389,14 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
     }
 
     return body;
+}
+
+std::unique_ptr<ASTNode> Parser::parseUseStatement() {
+    advance();
+
+    std::string libName = current.value;
+
+    return std::make_unique<UseNode>(libName);
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& funcName) {
@@ -930,7 +938,9 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
         if (current.type == TokenType::KEYWORD) {
             std::string keyword = current.value;
 
-            if (keyword == "if") {
+            if (keyword == "use") {
+                program.push_back(parseUseStatement());
+            } else if (keyword == "if") {
                 program.push_back(parseIfStatement());
             } else if (keyword == "fn") {
                 program.push_back(parseUserFuncDefinition());

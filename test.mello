@@ -1,9 +1,18 @@
+use Servo
+
+servo = Servo()
+
 fn add_one(x):
     if x == 5:
         return 10
 
     return x + 1
 
+fn start():
+    servo.attach(9)
+
 fn loop():
     # Nothing
+    servo.write(90)
+
     result = add_one(5)

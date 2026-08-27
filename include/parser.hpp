@@ -45,6 +45,7 @@ private:
     std::unique_ptr<ASTNode> parseArrayAssignment(const std::string& name);
 
 private:
+    std::unique_ptr<ASTNode> parseUseStatement();
     std::unique_ptr<ASTNode> parseFunctionCall(const std::string& funcName);
     std::unique_ptr<ASTNode> parseSerialFunctionsCall(const std::string& funcName);
     std::unique_ptr<ASTNode> parseBuiltInFunctionCall(const std::string& funcName);
