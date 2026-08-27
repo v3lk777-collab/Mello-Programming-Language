@@ -48,10 +48,10 @@ Programming microcontrollers typically forces a choice between two extremes:
 
 ## 3. Under the Hood: Compiler Architecture
 
-The Mello compiler is built from scratch in C++23 and CMake 3.25, operates in five sophisticated phases:
+The Mello compiler, built from scratch in C++23 and CMake 3.25, operates in five sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
-The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 30 core keywords: `start`, `loop`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `fn`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `serial.*` family.
+The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 30 core keywords: `start`, `loop`, `use`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `fn`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `serial.*` family.
 
 ### Phase B: Syntax Analysis (Parser)
 The `Parser` consumes the token stream and validates it against Mello's grammar using recursive-descent parsing, constructing a full Abstract Syntax Tree (AST) with properly nested logical blocks.
@@ -74,13 +74,13 @@ Mello is designed to be intuitive and highly readable.
 ### Variables, Arrays & Data Handling
 Variables are dynamically inferred at transpile time but become strictly typed, native C++ in the output.
 
-```python
+```mello
 name = "Mohammed"      # String variable
-sensor_pin = 5         # Intger variable
+sensor_pin = 5         # Integer variable
 threshold = 10.5       # Float variable
 isAMelloCode = true    # Boolean variable
 character = 'A'        # Char variable (single quotes only)
-PIN = 13               # Constant intger variable
+PIN = 13               # Constant integer variable
 
 array = [0, 1, 3, 4]   # Array
 ```
@@ -193,12 +193,12 @@ fn loop():
 ```
 
 ### Custom Functions
-Define reusable blocks of code easily with the `func` keyword.
+Define reusable blocks of code easily with the `fn` keyword.
 
 ```python
 pin = 13
 
-func blink_fast(pin_num):
+fn blink_fast(pin_num):
     toggle(pin_num)
     wait(100)
 
@@ -250,7 +250,7 @@ fn loop():
             turn_off(lightPin)
             serial.println("System Deactivated")
         else:
-            systemActive = false
+            systemActive = true
             turn_on(lightPin)
             serial.println("System Activated")
 ```
