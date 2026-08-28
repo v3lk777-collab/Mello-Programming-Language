@@ -1,7 +1,7 @@
 # Mello Programming Language
 
 [![C++](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/23)
-[![CMake](https://img.shields.io/badge/CMake-3.25%2B-informational.svg)](https://cmake.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.25-informational.svg)](https://cmake.org/)
 
 **A high-performance, indentation-based programming language and transpiler for streamlining embedded systems and IoT development.**
 
