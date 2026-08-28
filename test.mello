@@ -16,3 +16,4 @@ fn loop():
     servo.write(90)
 
     result = add_one(5)
+    serial.print(result)

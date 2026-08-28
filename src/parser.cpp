@@ -396,6 +396,8 @@ std::unique_ptr<ASTNode> Parser::parseUseStatement() {
 
     std::string libName = current.value;
 
+    advance();
+
     return std::make_unique<UseNode>(libName);
 }
 

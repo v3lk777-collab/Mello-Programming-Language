@@ -234,7 +234,7 @@ void SemanticAnalyzer::analyzeMethodCall(MethodCallNode* methodCallNode) {
     ASTNode* inner = methodCallNode->getMethodCall();
 
     if (!objectName.empty()) {
-        if (objectName != "Serial") {
+        if (objectName != "serial") {
             const VariableSymbol* objVar = symbolTable.lookupVariable(objectName);
 
             if (!objVar) {
@@ -249,6 +249,10 @@ void SemanticAnalyzer::analyzeMethodCall(MethodCallNode* methodCallNode) {
         }
 
         if (auto functionCallNode = dynamic_cast<FunctionCallNode*>(inner)) {
+            for (const auto& arg : functionCallNode->getArguments()) {
+                analyzeExpression(arg.get());
+            }
+
             return;
         }
     }
