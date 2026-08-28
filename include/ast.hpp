@@ -926,6 +926,7 @@ public:
         }
 
         std::string rightStr = right->toCpp();
+
         std::string result = opStr + rightStr;
 
         return result;
@@ -1177,10 +1178,22 @@ public:
 
 public:
     std::string toCpp() override {
-        std::string result = inferReturnType() + " " + funcName + "(";
+        std::string result;
+
+        if (!params.empty()) {
+            result = "template<";
+
+            for (size_t i = 0; i < params.size(); i++) {
+                result += "typename T" + std::to_string(i) + (i < params.size() - 1 ? ", " : "");
+            }
+
+            result += ">\n";
+        }
+
+        result += inferReturnType() + " " + funcName + "(";
 
         for (size_t i = 0; i < params.size(); i++) {
-            result += "int " + params[i] + (i < params.size() - 1 ? ", " : "");
+            result += "T" + std::to_string(i) + " " + params[i] + (i < params.size() - 1 ? ", " : "");
         }
 
         result += ") {\n";
