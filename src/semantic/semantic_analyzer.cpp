@@ -146,6 +146,18 @@ void SemanticAnalyzer::analyzeEveryStatement(EveryNode* everyNode) {
     symbolTable.exitScope();
 }
 
+void SemanticAnalyzer::analyzeUseStatement(UseNode* useNode) {
+    std::string source = useNode->getSource();
+    int currentLine = useNode->getCurrentDeclaredLine();
+    int currentColumn = useNode->getCurrentDeclaredColumn();
+
+    std::string libraryName = useNode->getLibraryName();
+
+    if (!builtInLibraries.contains(libraryName)) {
+        ErrorHandler::report("Unknown library:", libraryName, currentLine, currentColumn, source);
+    }
+}
+
 void SemanticAnalyzer::analyzeRepeatStatement(RepeatNode* repeatNode) {
     symbolTable.enterScope();
 
@@ -295,6 +307,8 @@ void SemanticAnalyzer::analyzeNode(ASTNode* node) {
         analyzeForRangeStatement(forRangeNode);
     } else if (auto everyNode = dynamic_cast<EveryNode*>(node)) {
         analyzeEveryStatement(everyNode);
+    } else if (auto useNode = dynamic_cast<UseNode*>(node)) {
+        analyzeUseStatement(useNode);
     } else if (auto repeatNode = dynamic_cast<RepeatNode*>(node)) {
         analyzeRepeatStatement(repeatNode);
     } else if (auto onPressNode = dynamic_cast<OnPressNode*>(node)) {

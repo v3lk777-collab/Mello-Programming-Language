@@ -11,6 +11,12 @@
 #include "ast.hpp"
 #include "symbol_table.hpp"
 
+#include <unordered_set>
+
+const std::unordered_set<std::string> builtInLibraries = {
+    "Servo", "Wire", "SPI"
+};
+
 class SemanticAnalyzer {
 private:
     SymbolTable symbolTable;
@@ -26,6 +32,7 @@ private:
     void analyzeForStatement(ForNode* forNode);
     void analyzeForRangeStatement(ForRangeNode* forRangeNode);
     void analyzeEveryStatement(EveryNode* everyNode);
+    void analyzeUseStatement(UseNode* useNode);
     void analyzeRepeatStatement(RepeatNode* repeatNode);
     void analyzeOnPressStatement(OnPressNode* onPressNode);
     void analyzeFunctionDefinition(FunctionNode* funcNode);

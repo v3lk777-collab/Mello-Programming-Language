@@ -37,15 +37,37 @@ public:
 
 class UseNode : public ASTNode {
 private:
-    std::string libName;
+    std::string libraryName;
+
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
 
 public:
-    UseNode(std::string libName)
-        : libName(std::move(libName)) {}
+    UseNode(std::string libraryName, int currentLine, int currentColumn, std::string source)
+        : libraryName(std::move(libraryName)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+
+public:
+    std::string getLibraryName() const {
+        return libraryName;
+    }
+
+    std::string getSource() const {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const {
+        return currentColumn;
+    }
 
 public:
     std::string toCpp() override {
-        includedLibraries.insert(libName);
+        includedLibraries.insert(libraryName);
 
         return "";
     }

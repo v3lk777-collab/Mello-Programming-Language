@@ -407,7 +407,7 @@ std::unique_ptr<ASTNode> Parser::parseUseStatement() {
 
     advance();
 
-    return std::make_unique<UseNode>(libName);
+    return std::make_unique<UseNode>(libName, current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& funcName) {
