@@ -11,6 +11,8 @@
 #include <string>
 #include <filesystem>
 
+inline std::string melloSourceFileName;
+
 class Compiler {
 private:
     std::string boardType = "uno";

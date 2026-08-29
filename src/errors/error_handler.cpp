@@ -8,6 +8,8 @@
 
 #include "error_handler.hpp"
 
+#include "compiler.hpp"
+
 #include <vector>
 #include <sstream>
 #include <cstdlib>
@@ -34,7 +36,7 @@ void ErrorHandler::report(const std::string &message, const std::string &tokenVa
         lines.push_back(currentLineContent);
     }
 
-    std::cerr << "[Error] Line " << lineNumber << ": " << message << (displayToken.empty() ? "" : " '" + displayToken + "'") << "\n";
+    std::cerr << "[" << melloSourceFileName << ":" << lineNumber << ":" << columnNumber << "]: " << message << (displayToken.empty() ? "" : " '" + displayToken + "'") << "\n";
 
     if (lineNumber > 0 && lineNumber <= static_cast<int>(lines.size())) {
         std::string lineContent = lines[lineNumber - 1];

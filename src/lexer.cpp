@@ -8,6 +8,8 @@
 
 #include "lexer.hpp"
 
+#include "error_handler.hpp"
+
 #include <iostream>
 
 Lexer::Lexer(std::string source) {
@@ -114,8 +116,7 @@ std::vector<Token> Lexer::tokenize() {
                 }
 
                 if (indentStack.empty() || indentStack.back() != current_indent) {
-                    std::cerr << "Indentation Error: Unindent does not match any outer level\n";
-                    exit(1);
+                    ErrorHandler::report("Indentation Error: Unindent does not match any outer level", "", currentLine, currentColumn, this->source);
                 }
             }
 
@@ -308,13 +309,15 @@ std::vector<Token> Lexer::tokenize() {
                 advance();
             }
 
-            if (keywordsList.find(identifier) != keywordsList.end()) {
+            if (identifier == "true" || identifier == "false") {
+                tokens.push_back({TokenType::BOOLEAN, identifier, currentLine, currentColumn});
+            } else if (keywordsList.find(identifier) != keywordsList.end()) {
                 tokens.push_back({TokenType::KEYWORD, identifier, currentLine, currentColumn});
-            }  else {
+            } else {
                 tokens.push_back({TokenType::SYMBOL, identifier, currentLine, currentColumn});
             }
         } else {
-            advance();
+            ErrorHandler::report("Unexpected character:", std::string(1, current), currentLine, currentColumn, this->source);
         }
     }
 

@@ -19,7 +19,7 @@ inline const std::unordered_set<std::string> keywordsList = {
     "start", "loop", "use", "wait", "turn_on", "turn_off", "if", "elif", "else", "len",
     "write", "read", "serial", "scale", "fn", "return", "and", "or", "not", "range",
     "every", "while", "for", "in", "repeat", "on_press", "toggle", "break", "continue",
-    "sleep", "pass", "int", "str", "float", "save_memory", "read_memory"
+    "sleep", "pass", "int", "str", "float", "true", "false", "save_memory", "read_memory"
 };
 
 inline const std::unordered_set<std::string> serialKeywordsList = {

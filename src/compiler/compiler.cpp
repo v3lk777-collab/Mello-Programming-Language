@@ -221,6 +221,8 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         std::cin >> filePath;
     }
 
+    melloSourceFileName = std::filesystem::path(filePath).filename().string();
+
     std::ifstream file(filePath);
 
     if (!file.is_open()) {

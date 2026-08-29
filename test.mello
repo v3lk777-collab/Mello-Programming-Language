@@ -1,18 +1,8 @@
-fn add_one(x):
-    if x == 5:
-        return 10
+fn start():
+    x = 10
 
-    return x + 1
+    if true:
+        y = 20
+        serial.println(y)
 
-fn add(a, b):
-    return a + b
-
-fn hello():
-    return 10
-
-fn square(x):
-    return x * x
-
-fn loop():
-    result = add_one(5)
-    serial.print(result)
+    serial.println(x)

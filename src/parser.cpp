@@ -176,8 +176,9 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
         if (current.type == TokenType::DOT) {
             advance();
+
             std::string methodName = current.value;
-            
+
             advance();
 
             if (current.type == TokenType::LPAREN) {
@@ -257,10 +258,18 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
         return std::make_unique<LiteralNode>(t);
     }
-    
+
     if (current.type == TokenType::STRING) {
         Token t = current;
         t.value = "\"" + t.value + "\"";
+
+        advance();
+
+        return std::make_unique<LiteralNode>(t);
+    }
+
+    if (current.type == TokenType::BOOLEAN) {
+        Token t = current;
 
         advance();
 

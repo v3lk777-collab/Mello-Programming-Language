@@ -16,6 +16,7 @@ enum class TokenType {
     SYMBOL,
     NUMBER,
     STRING,
+    BOOLEAN,
     EQUAL,
     EQUALITY,
     GREATER,
