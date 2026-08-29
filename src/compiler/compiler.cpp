@@ -117,7 +117,7 @@ bool Compiler::installLibraries() {
 bool Compiler::compileCode() {
     std::cout << "Starting code compilation...\n" << std::flush;
 
-    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:" + boardType  + " --build-path \"" + sketchDir.string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + sketchDir.string() + "\"";
+    std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:" + boardType  + " --build-property \"compiler.cpp.extra_flags=-std=gnu++14\" --build-path \"" + sketchDir.string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + sketchDir.string() + "\"";
     int compileStatus = system(compileCommand.c_str());
 
     if (compileStatus == 0) {

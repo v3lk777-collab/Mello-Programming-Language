@@ -1,4 +1,8 @@
-use OLED
+fn add():
+    return 10
+
+fn add_a_to_b(a, b):
+    return a + b
 
 fn start():
     x = 10

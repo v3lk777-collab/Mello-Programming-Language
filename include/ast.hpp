@@ -1212,7 +1212,8 @@ public:
             result += ">\n";
         }
 
-        result += inferReturnType() + " " + funcName + "(";
+        std::string returnType = params.empty() ? inferReturnType() : "auto";
+        result += returnType + " " + funcName + "(";
 
         for (size_t i = 0; i < params.size(); i++) {
             result += "T" + std::to_string(i) + " " + params[i] + (i < params.size() - 1 ? ", " : "");
