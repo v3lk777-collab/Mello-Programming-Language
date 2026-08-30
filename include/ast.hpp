@@ -10,6 +10,7 @@
 
 #include "utils.hpp"
 #include "lexer.hpp"
+#include "module_loader.hpp"
 #include "error_handler.hpp"
 
 class ASTNode {
@@ -67,8 +68,6 @@ public:
 
 public:
     std::string toCpp() override {
-        includedLibraries.insert(libraryName);
-
         return "";
     }
 };

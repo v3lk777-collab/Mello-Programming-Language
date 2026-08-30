@@ -17,6 +17,7 @@ set(SOURCES
     src/errors/error_handler.cpp
     src/semantic/symbol_table.cpp
     src/semantic/semantic_analyzer.cpp
+    stdlib/module_loader.cpp
 )
 
 add_executable(mello ${SOURCES})
@@ -27,6 +28,7 @@ target_include_directories(mello PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/errors
     ${CMAKE_CURRENT_SOURCE_DIR}/include/compiler
     ${CMAKE_CURRENT_SOURCE_DIR}/include/semantic
+    ${CMAKE_CURRENT_SOURCE_DIR}/stdlib
 )
 
 if (MINGW)

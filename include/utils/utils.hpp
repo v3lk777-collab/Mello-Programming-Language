@@ -16,6 +16,7 @@
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+#include <unordered_set>
 
 inline std::set<std::string> inputPins;
 inline std::set<std::string> outputPins;
@@ -41,6 +42,12 @@ inline std::string currentParsingUserFunc = "";
 inline std::vector<std::string> currentFuncParamNames;
 inline std::map<std::string, std::vector<bool>> userFuncInputParams;
 inline std::map<std::string, std::vector<bool>> userFuncOutputParams;
+
+const std::unordered_set<std::string> stdLibs = {
+    "math"
+};
+
+inline std::set<std::string> includedStdLibs;
 
 inline auto parseTime = [] (std::string timeVal) -> std::string {
     timeVal.erase(std::remove(timeVal.begin(), timeVal.end(), ' '), timeVal.end());

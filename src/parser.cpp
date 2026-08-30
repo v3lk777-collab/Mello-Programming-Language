@@ -407,6 +407,12 @@ std::unique_ptr<ASTNode> Parser::parseUseStatement() {
 
     advance();
 
+    if (stdLibs.contains(libName)) {
+        includedStdLibs.insert(libName);
+    } else {
+        includedLibraries.insert(libName);
+    }
+
     return std::make_unique<UseNode>(libName, current.line, current.column, this->source);
 }
 

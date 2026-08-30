@@ -10,6 +10,7 @@
 
 #include "lexer.hpp"
 #include "parser.hpp"
+#include "module_loader.hpp"
 #include "semantic_analyzer.hpp"
 
 #include <thread>
@@ -243,6 +244,16 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         Parser parser(tokens, sourceCode);
 
         program = parser.parse();
+
+        for (const auto& stdLib : includedStdLibs) {
+            ModuleLoader moduleLoader(stdLib);
+
+            auto moduleNodes = moduleLoader.load();
+
+            for (auto& node : moduleNodes) {
+                program.insert(program.begin(), std::move(node));
+            }
+        }
 
         SemanticAnalyzer analyzer;
 
