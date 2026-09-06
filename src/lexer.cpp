@@ -1,10 +1,13 @@
-// Mello Programming Language
-// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-//
-// This source code is private and protected by intellectual property laws.
-// Unauthorized use, modification, or distribution for any competitive 
-// academic or commercial purpose is strictly prohibited without 
-// explicit written permission from the author.
+/*
+ * Mello Programming Language
+
+ * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
+
+ * This source code is private and protected by intellectual property laws.
+ * Unauthorized use, modification, or distribution for any competitive 
+ * academic or commercial purpose is strictly prohibited without 
+ * explicit written permission from the author.
+*/
 
 #include "lexer.hpp"
 
@@ -18,10 +21,11 @@ Lexer::Lexer(std::string source) {
 
     this->length = this->source.length();
     this->current = (this->length > 0) ? this->source[0] : '\0';
-    this->currentLine = 1;
-    this->currentColumn = 0;
 
-    this->indentStack.push_back(0);
+    this->line = 1;
+    this->column = 0;
+
+    this->indentationStack.push_back(0);
     this->isStartOfLine = true;
 }
 
@@ -34,11 +38,11 @@ char Lexer::peek() {
 }
 
 void Lexer::advance() {
-    currentColumn++;
+    column++;
 
     if (current == '\n') {
-        currentLine++;
-        currentColumn = 0;
+        line++;
+        column = 0;
     }
     
     do {
@@ -79,13 +83,13 @@ std::vector<Token> Lexer::tokenize() {
 
     while (current != '\0') {
         if (isStartOfLine) {
-            int current_indent = 0;
+            int currentIndex = 0;
 
             while (current == ' ' || current == '\t') {
                 if (current == '\t') {
-                    current_indent += 4;
+                    currentIndex += 4;
                 } else {
-                    current_indent += 1;
+                    currentIndex += 1;
                 }
 
                 advance();
@@ -102,231 +106,266 @@ std::vector<Token> Lexer::tokenize() {
                 continue;
             }
 
-            int last_indent = indentStack.back();
+            int lastIndex = indentationStack.back();
 
-            if (current_indent > last_indent) {
-                indentStack.push_back(current_indent);
+            if (currentIndex > lastIndex) {
+                indentationStack.push_back(currentIndex);
 
-                tokens.push_back({TokenType::INDENT, std::to_string(current_indent), currentLine, currentColumn});
-            } else if (current_indent < last_indent) {
-                while (!indentStack.empty() && indentStack.back() > current_indent) {
-                    indentStack.pop_back();
+                tokens.push_back({TokenType::INDENT, "", line, column, source});
+            } else if (currentIndex < lastIndex) {
+                while (!indentationStack.empty() && indentationStack.back() > currentIndex) {
+                    indentationStack.pop_back();
 
-                    tokens.push_back({TokenType::DEDENT, "", currentLine, currentColumn});
+                    tokens.push_back({TokenType::DEDENT, "", line, column, source});
                 }
 
-                if (indentStack.empty() || indentStack.back() != current_indent) {
-                    ErrorHandler::report("Indentation Error: Unindent does not match any outer level", "", currentLine, currentColumn, this->source);
+                if (indentationStack.empty() || indentationStack.back() != currentIndex) {
+                    ErrorHandler::report("Indentation Error: Unindent does not match any outer level", "", line, column, source);
                 }
             }
 
             isStartOfLine = false;
         }
 
-        skipWhitespace();
-        skipComment();
+        if (current == ' ' || current == '\t' || current == '\r') {
+            skipWhitespace();
+            continue;
+        }
+
+        if (current == '#') {
+            skipComment();
+            continue;
+        }
+
+        if (current == '\n') {
+            tokens.push_back({TokenType::NEWLINE, "", line, column, source});
+
+            advance();
+
+            isStartOfLine = true;
+            continue;
+        }
 
         if (fileIsEmpty()) {
             break;
         }
 
-        if (isdigit(current) || (current == '.' && isdigit(peek()))) {
-            std::string number;
-            bool hasDot = false;
-
-            if (current == '0' && (peek() == 'x' || peek() == 'X')) {
-                number += current;
-
-                advance();
-
-                number += current;
-
-                advance();
-
-                while (std::isxdigit(current)) {
-                    number += current;
-
-                    advance();
-                }
-            } else {
-                while (isdigit(current) || (current == '.' && !hasDot)) {
-                    if (current == '.') {
-                        hasDot = true;
-                    }
-                    
-                    number += current;
-                    advance();
-                }
-
-
-                if (current == 's' || current == 'm' || current == 'h') {
-                    number += current;
-                    advance();
-                }
-            }
-
-            tokens.push_back({TokenType::NUMBER, number, currentLine, currentColumn});
-        } else if (current == '\n') {
-            tokens.push_back({TokenType::NEWLINE, "\n", currentLine, currentColumn});
-            advance();
-            
-            isStartOfLine = true;
-        } else if (current == '"') {
-            std::string str;
-            advance();
-
-            while (current != '"' && current != '\0') {
-                str += current;
-                advance();
-            }
-
-            advance();
-            tokens.push_back({TokenType::STRING, str, currentLine, currentColumn});
-        } else if (current == '.') {
-            tokens.push_back({TokenType::DOT, ".", currentLine, currentColumn});
-            advance();
-        } else if (current == ')') {
-            std::string paren(1, current);
-            tokens.push_back({TokenType::RPAREN, paren, currentLine, currentColumn});
-            advance();
-        } else if (current == '(') {
-            std::string paren(1, current);
-            tokens.push_back({TokenType::LPAREN, paren, currentLine, currentColumn});
-            advance();
-        } else if (current == ']') {
-            std::string paren(1, current);
-            tokens.push_back({TokenType::RBRACKET, paren, currentLine, currentColumn});
-            advance();
-        } else if (current == '[') {
-            std::string paren(1, current);
-            tokens.push_back({TokenType::LBRACKET, paren, currentLine, currentColumn});
-            advance();
-        } else if (current == '=') {
-            if (peek() == '=') {
-                advance();
-                advance();
-                tokens.push_back({TokenType::EQUALITY, "==", currentLine, currentColumn});
-            } else {
-                tokens.push_back({TokenType::EQUAL, "=", currentLine, currentColumn});
-                advance();
-            }
-        } else if (current == '+') {
+        switch (current) {
+        case '+':
             if (peek() == '+') {
-                advance();
-                advance();
+                tokens.push_back({TokenType::INCREMENT, "++", line, column, source});
 
-                tokens.push_back({TokenType::PLUS_PLUS, "++", currentLine, currentColumn});
+                advance();
             } else if (peek() == '=') {
-                advance();
-                advance();
+                tokens.push_back({TokenType::PLUS_EQUAL, "+=", line, column, source});
 
-                tokens.push_back({TokenType::PLUS_EQUAL, "+=", currentLine, currentColumn});
-            } else {
-                tokens.push_back({TokenType::PLUS, "+", currentLine, currentColumn});
                 advance();
+            } else {
+                tokens.push_back({TokenType::PLUS, "+", line, column, source});
             }
-        } else if (current == '-') {
+
+            advance();
+            continue;
+
+        case '-':
             if (peek() == '-') {
-                advance();
-                advance();
+                tokens.push_back({TokenType::DECREMENT, "--", line, column, source});
 
-                tokens.push_back({TokenType::MINUS_MINUS, "--", currentLine, currentColumn});
+                advance();
             } else if (peek() == '=') {
-                advance();
-                advance();
-                
-                tokens.push_back({TokenType::MINUS_EQUAL, "-=", currentLine, currentColumn});
-            } else {
-                tokens.push_back({TokenType::MINUS, "-", currentLine, currentColumn});
-                advance();
-            }
-        } else if (current == '*') {
-            std::string symbol(1, current);
-            tokens.push_back({TokenType::MUL, symbol, currentLine, currentColumn});
-            advance();
-        } else if (current == '/') {
-            std::string symbol(1, current);
-            tokens.push_back({TokenType::DIV, symbol, currentLine, currentColumn});
-            advance();
-        } else if (current == ':') {
-            std::string symbol(1, current);
-            tokens.push_back({TokenType::COLON, symbol, currentLine, currentColumn});
-            advance();
-        } else if (current == ',') {
-            std::string symbol(1, current);
-            tokens.push_back({TokenType::COMMA, symbol, currentLine, currentColumn});
-            advance();
-        } else if (current == '>') {
-            if (peek() == '=') {
-                advance();
-                advance();
-                tokens.push_back({TokenType::GREATER_EQUAL, ">=", currentLine, currentColumn});
-            } else {
-                std::string symbol(1, current);
-                tokens.push_back({TokenType::GREATER, ">", currentLine, currentColumn});
-                advance();
-            }
-        } else if (current == '<') {
-            if (peek() == '=') {
-                advance();
-                advance();
-                tokens.push_back({TokenType::LESS_EQUAL, "<=", currentLine, currentColumn});
-            } else {
-                std::string symbol(1, current);
-                tokens.push_back({TokenType::LESS, "<", currentLine, currentColumn});
-                advance();
-            }
-        } else if (current == '!') {
-            if (peek() == '=') {
-                advance();
-                advance();
-                tokens.push_back({TokenType::NOT_EQUAL, "!=", currentLine, currentColumn});
-            } else {
-                tokens.push_back({TokenType::BANG, "!", currentLine, currentColumn});
-                advance();
-            }
-        } else if (current == '&') {
-            if (peek() == '&') {
-                advance();
-                advance();
-                tokens.push_back({TokenType::KEYWORD, "&&", currentLine, currentColumn});
-            } else {
-                advance();
-            }
-        } else if (current == '|') {
-            if (peek() == '|') {
-                advance();
-                advance();
-                tokens.push_back({TokenType::KEYWORD, "||", currentLine, currentColumn});
-            } else {
-                advance();
-            }
-        } else if (isalpha(current) || current == '_') {
-            std::string identifier;
+                tokens.push_back({TokenType::MINUS_EQUAL, "-=", line, column, source});
 
-            while (isalnum(current) || current == '_') {
-                identifier += current;
                 advance();
+            } else {
+                tokens.push_back({TokenType::MINUS, "-", line, column, source});
             }
 
-            if (identifier == "true" || identifier == "false") {
-                tokens.push_back({TokenType::BOOLEAN, identifier, currentLine, currentColumn});
-            } else if (keywordsList.find(identifier) != keywordsList.end()) {
-                tokens.push_back({TokenType::KEYWORD, identifier, currentLine, currentColumn});
-            } else {
-                tokens.push_back({TokenType::SYMBOL, identifier, currentLine, currentColumn});
-            }
-        } else {
-            ErrorHandler::report("Unexpected character:", std::string(1, current), currentLine, currentColumn, this->source);
+            advance();
+            continue;
+
+        case '*':
+            tokens.push_back({TokenType::MULTIPLY, "*", line, column, source});
+
+            advance();
+            continue;
+
+        case '/':
+            tokens.push_back({TokenType::DIVIDE, "/", line, column, source});
+
+            advance();
+            continue;
+
+        case '%':
+            tokens.push_back({TokenType::MODULO, "%", line, column, source});
+
+            advance();
+            continue;
+
+        case '(':
+            tokens.push_back({TokenType::LPAREN, "(", line, column, source});
+
+            advance();
+            continue;
+
+        case ')':
+            tokens.push_back({TokenType::RPAREN, ")", line, column, source});
+
+            advance();
+            continue;
+
+        case '[':
+            tokens.push_back({TokenType::LBRACKET, "[", line, column, source});
+
+            advance();
+            continue;
+
+        case ']':
+            tokens.push_back({TokenType::RBRACKET, "]", line, column, source});
+
+            advance();
+            continue;
+
+        case ',':
+            tokens.push_back({TokenType::COMMA, ",", line, column, source});
+
+            advance();
+            continue;
+
+        case ':':
+            tokens.push_back({TokenType::COLON, ":", line, column, source});
+
+            advance();
+            continue;
+
+        case '.':
+            tokens.push_back({TokenType::DOT, ".", line, column, source});
+
+            advance();
+            continue;
         }
+
+        if (current == '=') {
+            if (peek() == '=') {
+                tokens.push_back({TokenType::EQUALITY, "==", line, column, source});
+
+                advance();
+            } else {
+                tokens.push_back({TokenType::EQUAL, "=", line, column, source});
+            }
+
+            advance();
+            continue;
+        }
+
+        if (current == '>') {
+            if (peek() == '=') {
+                tokens.push_back({TokenType::GREATER_EQUAL, ">=", line, column, source});
+
+                advance();
+            } else {
+                tokens.push_back({TokenType::GREATER, ">", line, column, source});
+            }
+
+            advance();
+            continue;
+        }
+
+        if (current == '<') {
+            if (peek() == '=') {
+                tokens.push_back({TokenType::LESS_EQUAL, "<=", line, column, source});
+
+                advance();
+            } else {
+                tokens.push_back({TokenType::LESS, "<", line, column, source});
+            }
+
+            advance();
+            continue;
+        }
+
+        if (isdigit(current)) {
+            std::string number;
+            bool isFloat = false;
+
+            while ((current != '\0' && current != '\n') && (isdigit(current) || current == '.')) {
+                if (current == '.') {
+                    if (!isFloat) {
+                        isFloat = true;
+                    } else {
+                        ErrorHandler::report("Lexical Error: You can't type two dots in the same number", "..", line, column, source);
+                    }
+                }
+
+                number += current;
+
+                advance();
+            }
+
+            if (isFloat) {
+                tokens.push_back({TokenType::FLOAT, number, line, column, source});
+            } else {
+                tokens.push_back({TokenType::INTEGER, number, line, column, source});
+            }
+
+            continue;
+        }
+
+        if (current == '"' || current == '\'') {
+            std::string word;
+            char quoteType = current;
+
+            advance();
+
+            while (current != '\0' && current != '\n' && current != quoteType) {
+                word += current;
+
+                advance();
+            }
+
+            if (current == quoteType) {
+                if (current == '\'' && word.length() == 1) {
+                    tokens.push_back({TokenType::CHARACTER, word, line, column, source});
+                } else {
+                    tokens.push_back({TokenType::STRING, word, line, column, source});
+                }
+
+                advance();
+            } else {
+                ErrorHandler::report("Lexical Error: Unterminated string literal", "", line, column, source);
+            }
+
+            continue;
+        }
+
+        if (isalpha(current) || current == '_') {
+            std::string word;
+
+            while (current != '\0' && (isalnum(current) || current == '_')) {
+                word += current;
+
+                advance();
+            }
+
+            if (keywordsList.count(word) > 0) {
+                tokens.push_back({TokenType::KEYWORD, word, line, column, source});
+            } else {
+                tokens.push_back({TokenType::IDENTIFIER, word, line, column, source});
+            }
+
+            continue;
+        }
+
+        ErrorHandler::report("Lexical Error: Unknown character", std::string(1, current), line, column, source);
+
+        advance(); 
     }
 
-    while (indentStack.size() > 1) {
-        indentStack.pop_back();
-        tokens.push_back({TokenType::DEDENT, "", currentLine, currentColumn});
+    while (indentationStack.size() > 1) {
+        indentationStack.pop_back();
+        tokens.push_back({TokenType::DEDENT, "", line, column, source});
     }
 
-    tokens.push_back({TokenType::EndOfFile, "", currentLine, currentColumn});
+    tokens.push_back({TokenType::EndOfFile, "", line, column, source});
 
     return tokens;
 }

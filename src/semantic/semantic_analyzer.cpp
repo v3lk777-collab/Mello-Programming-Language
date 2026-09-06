@@ -1,10 +1,13 @@
-// Mello Programming Language
-// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-//
-// This source code is private and protected by intellectual property laws.
-// Unauthorized use, modification, or distribution for any competitive 
-// academic or commercial purpose is strictly prohibited without 
-// explicit written permission from the author.
+/*
+ * Mello Programming Language
+
+ * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
+
+ * This source code is private and protected by intellectual property laws.
+ * Unauthorized use, modification, or distribution for any competitive 
+ * academic or commercial purpose is strictly prohibited without 
+ * explicit written permission from the author.
+*/
 
 #include "semantic_analyzer.hpp"
 
@@ -193,7 +196,7 @@ void SemanticAnalyzer::analyzeFunctionDefinition(FunctionNode* funcNode) {
 }
 
 void SemanticAnalyzer::analyzeLiteral(LiteralNode* literalNode) {
-    if (literalNode->token.type == TokenType::SYMBOL) {
+    if (literalNode->token.type == TokenType::IDENTIFIER) {
         const VariableSymbol* var = symbolTable.lookupVariable(literalNode->token.value);
 
         if (!var) {

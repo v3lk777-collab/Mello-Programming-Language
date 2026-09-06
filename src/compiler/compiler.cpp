@@ -1,10 +1,13 @@
-// Mello Programming Language
-// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-//
-// This source code is private and protected by intellectual property laws.
-// Unauthorized use, modification, or distribution for any competitive 
-// academic or commercial purpose is strictly prohibited without 
-// explicit written permission from the author.
+/*
+ * Mello Programming Language
+
+ * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
+
+ * This source code is private and protected by intellectual property laws.
+ * Unauthorized use, modification, or distribution for any competitive 
+ * academic or commercial purpose is strictly prohibited without 
+ * explicit written permission from the author.
+*/
 
 #include "compiler.hpp"
 
@@ -353,7 +356,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         if (!hasSerial && hasSerialCommand) {
             std::vector<std::unique_ptr<ExpressionNode>> beginArgs;
 
-            beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "9600", 0)));
+            beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::INTEGER, "9600", 0, 0, "")));
             setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), 0, 0, ""));
         }
 

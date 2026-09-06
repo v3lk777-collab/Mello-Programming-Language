@@ -1,10 +1,13 @@
-// Mello Programming Language
-// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-//
-// This source code is private and protected by intellectual property laws.
-// Unauthorized use, modification, or distribution for any competitive 
-// academic or commercial purpose is strictly prohibited without 
-// explicit written permission from the author.
+/*
+ * Mello Programming Language
+
+ * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
+
+ * This source code is private and protected by intellectual property laws.
+ * Unauthorized use, modification, or distribution for any competitive 
+ * academic or commercial purpose is strictly prohibited without 
+ * explicit written permission from the author.
+*/
 
 #include "parser.hpp"
 #include "lexer.hpp"
@@ -93,7 +96,7 @@ std::unique_ptr<ExpressionNode> Parser::parseLogicalNot() {
         
         advance();
 
-        auto right = parseLogicalOr();
+        auto right = parseLogicalNot();
         return std::make_unique<UnaryOpNode>(op, std::move(right));
     }
 
@@ -148,7 +151,7 @@ std::unique_ptr<ExpressionNode> Parser::parseTerm() {
 std::unique_ptr<ExpressionNode> Parser::parseFactor() {
     auto left = parsePrimary();
 
-    while (current.type == TokenType::MUL || current.type == TokenType::DIV) {
+    while (current.type == TokenType::MULTIPLY || current.type == TokenType::DIVIDE) {
         Token op = current;
 
         advance();
@@ -161,14 +164,14 @@ std::unique_ptr<ExpressionNode> Parser::parseFactor() {
 }
 
 std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
-    if (current.type == TokenType::NUMBER) {
+    if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT) {
         Token t = current;
         advance();
 
         return std::make_unique<LiteralNode>(t);
     }
 
-    if (current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD) {
+    if (current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD) {
         Token t = current;
         std::string name = current.value;
 
@@ -299,7 +302,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
             continue;
         }
 
-        if (current.type == TokenType::SYMBOL) {
+        if (current.type == TokenType::IDENTIFIER) {
             std::string name = current.value;
             advance();
 
@@ -325,12 +328,12 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 reassignedVariables.insert(name);
 
                 body.push_back(std::make_unique<CompoundAssignNode>(name, "-=", val));
-            } else if (current.type == TokenType::PLUS_PLUS) {
+            } else if (current.type == TokenType::INCREMENT) {
                 advance();
                 reassignedVariables.insert(name);
 
                 body.push_back(std::make_unique<CompoundAssignNode>(name, "++", ""));
-            } else if (current.type == TokenType::MINUS_MINUS) {
+            } else if (current.type == TokenType::DECREMENT) {
                 advance();
                 reassignedVariables.insert(name);
 
@@ -430,7 +433,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& funcName) 
             }
         }
 
-        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
@@ -460,7 +463,7 @@ std::unique_ptr<ASTNode> Parser::parseBuiltInFunctionCall(const std::string& fun
             }
         }
 
-        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
@@ -489,7 +492,7 @@ std::unique_ptr<ASTNode> Parser::parseSerialFunctionsCall(const std::string& fun
             }
         }
 
-        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
@@ -608,7 +611,7 @@ std::unique_ptr<ASTNode> Parser::parseKeywordFunctionCall(const std::string& key
 
     std::vector<std::unique_ptr<ExpressionNode>> args;
     
-    while (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::STRING || current.type == TokenType::KEYWORD) {
+    while (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::STRING || current.type == TokenType::KEYWORD) {
         args.push_back(std::make_unique<LiteralNode>(current));
         advance();
 
@@ -767,7 +770,7 @@ std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
 std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     advance();
 
-    if (current.type != TokenType::NUMBER && current.type != TokenType::SYMBOL) {
+    if (current.type != TokenType::INTEGER || current.type == TokenType::FLOAT && current.type != TokenType::IDENTIFIER) {
         ErrorHandler::report("Expected a number or identifier for interval", current.value, current.line, current.column, this->source);
     }
 
@@ -804,7 +807,7 @@ std::unique_ptr<ASTNode> Parser::parseWhileStatement() {
 std::unique_ptr<ASTNode> Parser::parseForStatement() {
     advance();
 
-    if (current.type == TokenType::SYMBOL) {
+    if (current.type == TokenType::IDENTIFIER) {
         std::string varName = current.value;
 
         advance();
@@ -831,14 +834,14 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
             stopExpression = parseExpression();
         } else {
             stopExpression = std::move(startExpression);
-            startExpression = std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "0", current.line));
+            startExpression = std::make_unique<LiteralNode>(Token(TokenType::INTEGER, "0", current.line));
         }
 
         if (current.type == TokenType::COMMA) {
             advance();
             stepExpression = parseExpression();
         } else {
-            stepExpression = std::make_unique<LiteralNode>(Token(TokenType::NUMBER, "1", current.line));
+            stepExpression = std::make_unique<LiteralNode>(Token(TokenType::INTEGER, "1", current.line));
         }
 
         consume(TokenType::RPAREN, "Expected ')' after range arguments");
@@ -897,7 +900,7 @@ std::unique_ptr<ASTNode> Parser::parseTypeConversionCall(const std::string& func
             }
         }
 
-        if (current.type == TokenType::NUMBER || current.type == TokenType::SYMBOL || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
@@ -941,7 +944,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
             continue;
         }
 
-        if (current.type == TokenType::SYMBOL) {
+        if (current.type == TokenType::IDENTIFIER) {
             std::string name = current.value;
             advance();
 

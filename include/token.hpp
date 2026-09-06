@@ -1,10 +1,13 @@
-// Mello Programming Language
-// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-//
-// This source code is private and protected by intellectual property laws.
-// Unauthorized use, modification, or distribution for any competitive 
-// academic or commercial purpose is strictly prohibited without 
-// explicit written permission from the author.
+/*
+ * Mello Programming Language
+
+ * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
+
+ * This source code is private and protected by intellectual property laws.
+ * Unauthorized use, modification, or distribution for any competitive 
+ * academic or commercial purpose is strictly prohibited without 
+ * explicit written permission from the author.
+*/
 
 #pragma once
 
@@ -13,9 +16,11 @@
 enum class TokenType {
     KEYWORD,
     SERIAL_KEYWORD,
-    SYMBOL,
-    NUMBER,
+    IDENTIFIER,
+    INTEGER,
+    FLOAT,
     STRING,
+    CHARACTER,
     BOOLEAN,
     EQUAL,
     EQUALITY,
@@ -26,13 +31,14 @@ enum class TokenType {
     NOT_EQUAL,
     PLUS_EQUAL,
     MINUS_EQUAL,
-    PLUS_PLUS,
-    MINUS_MINUS,
+    INCREMENT,
+    DECREMENT,
     BANG,
     MINUS,
     PLUS,
-    MUL,
-    DIV,
+    MULTIPLY,
+    DIVIDE,
+    MODULO,
     DOT,
     COLON,
     COMMA,
@@ -51,10 +57,11 @@ struct Token {
     int column;
     TokenType type;
     std::string value;
+    std::string source;
 
     Token()
-        : type(TokenType::EndOfFile), value(""), line(0), column(0) {}
+        : type(TokenType::EndOfFile), value(""), line(0), column(0), source("") {}
 
-    Token(TokenType type, const std::string& value, int line = 0, int column = 0)
-        : type(type), value(value), line(line), column(column) {}
+    Token(TokenType type, const std::string& value, int line = 0, int column = 0, const std::string& source = "")
+        : type(type), value(value), line(line), column(column), source(source) {}
 };

@@ -1,10 +1,13 @@
-// Mello Programming Language
-// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-//
-// This source code is private and protected by intellectual property laws.
-// Unauthorized use, modification, or distribution for any competitive 
-// academic or commercial purpose is strictly prohibited without 
-// explicit written permission from the author.
+/*
+ * Mello Programming Language
+
+ * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
+
+ * This source code is private and protected by intellectual property laws.
+ * Unauthorized use, modification, or distribution for any competitive 
+ * academic or commercial purpose is strictly prohibited without 
+ * explicit written permission from the author.
+*/
 
 #pragma once
 
@@ -836,7 +839,7 @@ public:
         } else if (final_value.find("atoi(") != std::string::npos || final_value.find("(int)") != std::string::npos) {
             type = "int";
             integerVariables.insert(name);
-        } else if (val_type == TokenType::SYMBOL && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionNames.count(final_value.substr(0, final_value.find("(")))) {
+        } else if (val_type == TokenType::IDENTIFIER && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionNames.count(final_value.substr(0, final_value.find("(")))) {
             std::string className = final_value.substr(0, final_value.find("("));
 
             if (includedLibraries.count(className) < 0) {
@@ -980,13 +983,13 @@ public:
 public:
     std::string getVariableName() override {
         if (auto var = dynamic_cast<LiteralNode*>(left.get())) {
-            if (var->token.type == TokenType::SYMBOL) {
+            if (var->token.type == TokenType::IDENTIFIER) {
                 return var->token.value;
             }
         }
         
         if (auto var = dynamic_cast<LiteralNode*>(right.get())) {
-            if (var->token.type == TokenType::SYMBOL) {
+            if (var->token.type == TokenType::IDENTIFIER) {
                 return var->token.value;
             }
         }

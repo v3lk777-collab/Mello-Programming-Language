@@ -1,10 +1,13 @@
-// Mello Programming Language
-// Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-//
-// This source code is private and protected by intellectual property laws.
-// Unauthorized use, modification, or distribution for any competitive 
-// academic or commercial purpose is strictly prohibited without 
-// explicit written permission from the author.
+/*
+ * Mello Programming Language
+
+ * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
+
+ * This source code is private and protected by intellectual property laws.
+ * Unauthorized use, modification, or distribution for any competitive 
+ * academic or commercial purpose is strictly prohibited without 
+ * explicit written permission from the author.
+*/
 
 #pragma once
 
@@ -29,15 +32,15 @@ inline const std::unordered_set<std::string> serialKeywordsList = {
 
 class Lexer {
 private:
+    int line;
+    int column;
     char current;
     size_t length;
     size_t position;
-    int currentLine;
-    int currentColumn;
     std::string source;
 
     bool isStartOfLine;
-    std::vector<int> indentStack;
+    std::vector<int> indentationStack;
 
 private:
     char peek();
