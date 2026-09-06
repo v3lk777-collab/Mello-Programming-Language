@@ -31,6 +31,6 @@ target_include_directories(mello PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/stdlib
 )
 
-if (MINGW)
+if(MINGW)
     target_link_options(mello PRIVATE -static)
 endif()

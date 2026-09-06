@@ -1,0 +1,3 @@
+C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/mello.dir
+C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/edit_cache.dir
+C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/rebuild_cache.dir

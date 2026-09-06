@@ -1,0 +1,10 @@
+# ninja log v6
+187	11219	8104172765928646	CMakeFiles/mello.dir/src/semantic/symbol_table.cpp.obj	b4b998693192e31e
+25	17588	8104172764208660	CMakeFiles/mello.dir/src/lexer.cpp.obj	5a64f6fda86bd2c8
+10	28179	8104172764048622	CMakeFiles/mello.dir/src/main.cpp.obj	24777d64d0b041fc
+50	29243	8104172764508675	CMakeFiles/mello.dir/src/parser.cpp.obj	4a0d135536e4e6bb
+143	29329	8104172765658657	CMakeFiles/mello.dir/src/errors/error_handler.cpp.obj	b899635a4897711a
+11315	33371	8104172878354501	CMakeFiles/mello.dir/src/semantic/semantic_analyzer.cpp.obj	6db3cdd7c8012998
+71	34285	8104172764768671	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	b8b2653131a984fa
+17739	35834	8104172942731742	CMakeFiles/mello.dir/stdlib/module_loader.cpp.obj	333316a26f02217
+35835	41382	8104173122300145	mello.exe	60b6efaf5f3ac735
