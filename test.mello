@@ -1,5 +1,2 @@
-use math
-
 fn start():
-    x = add(10, 5)
-    serial.println(x)
+    serial.print("Mohammed + Hello = Mello")

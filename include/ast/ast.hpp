@@ -1,13 +1,13 @@
 /*
  * Mello Programming Language
-
+ *
  * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-
- * This source code is private and protected by intellectual property laws.
- * Unauthorized use, modification, or distribution for any competitive 
- * academic or commercial purpose is strictly prohibited without 
- * explicit written permission from the author.
-*/
+ *
+ * This source code is proprietary and confidential. Unauthorized copying, 
+ * modification, distribution, or use of this file for any academic, 
+ * commercial, or competitive purpose, via any medium, is strictly 
+ * prohibited without the express written permission of the author.
+ */
 
 #pragma once
 
@@ -15,6 +15,8 @@
 #include "lexer.hpp"
 #include "module_loader.hpp"
 #include "error_handler.hpp"
+
+#include <string_view>
 
 class ASTNode {
 public:
@@ -866,15 +868,14 @@ public:
             }
 
             stringVariables.insert(name);
-        } else if (final_value == "true" || final_value == "false") {
+        } else if (val_type == TokenType::BOOLEAN && final_value == "true" || final_value == "false") {
             type = "bool";
-        } else if ((final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumeric(final_value)) {
+        } else if (val_type == TokenType::FLOAT && (final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumeric(final_value)) {
             type = "float";
             floatVariables.insert(name);
-        } else if (final_value.length() == 1 && !isdigit(final_value[0])) {
+        } else if (val_type == TokenType::CHARACTER && final_value.length() == 1 && !isdigit(final_value[0])) {
             type = "char";
-            final_value = "'" + final_value + "'";
-        } else if (isNumeric(final_value)) {
+        } else if (val_type == TokenType::INTEGER && isNumeric(final_value)) {
             type = inferIntegerType(final_value);
             integerVariables.insert(name);
         } else {
@@ -897,7 +898,7 @@ public:
         bool isKeyword = keywordsList.count(raw_value) > 0;
         bool isArrayAccess = final_value.find('[') != std::string::npos;
 
-        bool isFunctionCall = dynamic_cast<FunctionCallNode*>(value.get()) != nullptr || dynamic_cast<BuiltInFunctionCallNode*>(value.get()) != nullptr|| funcCall != nullptr;
+        bool isFunctionCall = dynamic_cast<FunctionCallNode*>(value.get()) != nullptr || dynamic_cast<BuiltInFunctionCallNode*>(value.get()) != nullptr || funcCall != nullptr;
 
         if (isArrayAccess) {
             return type + " " + name + " = " + final_value + ";\n";
@@ -949,9 +950,7 @@ public:
             opStr = "!";
         }
 
-        std::string rightStr = right->toCpp();
-
-        std::string result = opStr + rightStr;
+        std::string result = "(" + opStr + right->toCpp() + ")";
 
         return result;
     }
@@ -1117,7 +1116,11 @@ public:
 
 public:
     std::string toCpp() override {
-        return "return " + value->toCpp() + ";";
+        std::string result = value->toCpp();
+
+        std::erase(result, ';');
+
+        return "return " + result + ";";
     }
 };
 

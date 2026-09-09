@@ -1,15 +1,16 @@
 /*
  * Mello Programming Language
-
+ *
  * Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab. All Rights Reserved.
-
- * This source code is private and protected by intellectual property laws.
- * Unauthorized use, modification, or distribution for any competitive 
- * academic or commercial purpose is strictly prohibited without 
- * explicit written permission from the author.
-*/
+ *
+ * This source code is proprietary and confidential. Unauthorized copying, 
+ * modification, distribution, or use of this file for any academic, 
+ * commercial, or competitive purpose, via any medium, is strictly 
+ * prohibited without the express written permission of the author.
+ */
 
 #include "parser.hpp"
+
 #include "lexer.hpp"
 #include "error_handler.hpp"
 
@@ -97,6 +98,7 @@ std::unique_ptr<ExpressionNode> Parser::parseLogicalNot() {
         advance();
 
         auto right = parseLogicalNot();
+
         return std::make_unique<UnaryOpNode>(op, std::move(right));
     }
 
@@ -110,6 +112,7 @@ std::unique_ptr<ExpressionNode> Parser::parseEquality() {
         Token op = current;
 
         advance();
+
         auto right = parseComparison();
 
         left = std::make_unique<BinaryOpNode>(std::move(left), op, std::move(right));
@@ -149,18 +152,32 @@ std::unique_ptr<ExpressionNode> Parser::parseTerm() {
 }
 
 std::unique_ptr<ExpressionNode> Parser::parseFactor() {
-    auto left = parsePrimary();
+    auto left = parseUnary();
 
     while (current.type == TokenType::MULTIPLY || current.type == TokenType::DIVIDE) {
         Token op = current;
 
         advance();
-        auto right = parsePrimary();
+        auto right = parseUnary();
 
         left = std::make_unique<BinaryOpNode>(std::move(left), op, std::move(right));
     }
 
     return left;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseUnary() {
+    if ((current.type == TokenType::MINUS || current.type == TokenType::PLUS) && (current.value == "-" || current.value == "+")) {
+        Token op = current;
+
+        advance();
+
+        auto right = parseUnary();
+
+        return std::make_unique<UnaryOpNode>(std::move(op), std::move(right));
+    }
+
+    return parsePrimary();
 }
 
 std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
