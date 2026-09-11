@@ -33,12 +33,12 @@ public:
 
 class ExpressionNode : public ASTNode {
 public:
-    virtual ~ExpressionNode() = default;
-
-public:
     virtual std::string getVariableName() {
         return "";
     };
+
+public:
+    virtual ~ExpressionNode() = default;
 };
 
 class UseNode : public ASTNode {
@@ -134,6 +134,15 @@ public:
         : arrayName(std::move(arrayName)), indexExpression(std::move(indexExpression)) {}
 
 public:
+    const std::string& getArrayName() const {
+        return arrayName;
+    }
+
+    const std::unique_ptr<ExpressionNode>& getIndexExpression() const {
+        return indexExpression;
+    }
+
+public:
     std::string toCpp() override {
         return arrayName + "[" + indexExpression->toCpp() + "]";
     }
@@ -148,6 +157,19 @@ private:
 public:
     ArrayAssignNode(std::string arrayName, std::unique_ptr<ExpressionNode> indexExpression, std::unique_ptr<ExpressionNode> valueExpression)
         : arrayName(std::move(arrayName)), indexExpression(std::move(indexExpression)), valueExpression(std::move(valueExpression)) {}
+
+public:
+    const std::string& getArrayName() const {
+        return arrayName;
+    }
+
+    const std::unique_ptr<ExpressionNode>& getIndexExpression() const {
+        return indexExpression;
+    }
+
+    const std::unique_ptr<ExpressionNode>& getValueExpression() const {
+        return valueExpression;
+    }
 
 public:
     std::string toCpp() override {
@@ -170,6 +192,10 @@ public:
         : funcName(std::move(name)), body(std::move(funcBody)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    const std::string& getFunctionName() const {
+        return funcName;
+    }
+
     const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
         return body;
     }
@@ -222,13 +248,19 @@ public:
 };
 
 class LiteralNode : public ExpressionNode {
-public:
+private:
     Token token;
 
 public:
     LiteralNode(Token token)
         : token(token) {}
 
+public:
+    const Token& getToken() const {
+        return token;
+    }
+
+public:
     std::string toCpp() override {
         return token.value;
     }
@@ -534,7 +566,7 @@ public:
 
         if (funcName == "print" && argsStr.size() >= 1) {
             auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
-            bool isStringLiteral = literal && literal->token.type == TokenType::STRING;
+            bool isStringLiteral = literal && literal->getToken().type == TokenType::STRING;
 
             if (isStringLiteral) {
                 return "Serial.print(F(" + argsStr[0] + "));";
@@ -545,7 +577,7 @@ public:
 
         if (funcName == "println" && argsStr.size() >= 1) {
             auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
-            bool isStringLiteral = literal && literal->token.type == TokenType::STRING;
+            bool isStringLiteral = literal && literal->getToken().type == TokenType::STRING;
 
             if (isStringLiteral) {
                 return "Serial.println(F(" + argsStr[0] + "));";
@@ -1359,6 +1391,22 @@ public:
         : varName(std::move(varName)), start(std::move(start)), stop(std::move(stop)), step(std::move(step)), body(std::move(body)) {}
 
 public:
+    const std::string& getVarName() const {
+        return varName;
+    }
+
+    const std::unique_ptr<ExpressionNode>& getStart() const {
+        return start;
+    }
+
+    const std::unique_ptr<ExpressionNode>& getStop() const {
+        return stop;
+    }
+
+    const std::unique_ptr<ExpressionNode>& getStep() const {
+        return step;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &body };
     }
@@ -1392,6 +1440,14 @@ public:
     }
 
 public:
+    int getId() const {
+        return id;
+    }
+
+    const std::string& getCount() const {
+        return count;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &body };
     }
@@ -1448,6 +1504,14 @@ public:
     }
 
 public:
+    int getId() const {
+        return id;
+    }
+
+    const std::string& getPin() const {
+        return pin;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &body };
     }
@@ -1484,6 +1548,11 @@ public:
         : statement(std::move(statement)) {}
 
 public:
+    const std::string& getStatement() const {
+        return statement;
+    }
+
+public:
     std::string toCpp() override {
         if (statement == "break") {
             return "break;";
@@ -1510,6 +1579,15 @@ public:
         : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    const std::string& getFunctionName() const {
+        return funcName;
+    }
+
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const {
+        return arguments;
+    }
+
+public:
     std::string toCpp() override {
         if (arguments.empty()) {
             ErrorHandler::report("'" + funcName + "' requires exactly one argument", funcName, currentLine, currentColumn, source);
@@ -1518,7 +1596,7 @@ public:
         std::string value = arguments[0]->toCpp();
 
         auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
-        bool isStringArg = literal && literal->token.type == TokenType::STRING;
+        bool isStringArg = literal && literal->getToken().type == TokenType::STRING;
 
         if (funcName == "int") {
             if (isStringArg || stringVariables.count(value) > 0) {

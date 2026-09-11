@@ -69,5 +69,7 @@ private:
 
 public:
     Parser(const std::vector<Token>& tokens, const std::string& source);
+
+public:
     std::vector<std::unique_ptr<ASTNode>> parse();
 };
