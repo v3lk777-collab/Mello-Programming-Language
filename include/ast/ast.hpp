@@ -106,6 +106,15 @@ public:
         : arrayName(std::move(name)), arrayMembers(std::move(arrayMembers)) {}
 
 public:
+    const std::string& getArrayName() const {
+        return arrayName;
+    }
+
+    const std::vector<std::string>& getArrayMembers() const {
+        return arrayMembers;
+    }
+
+public:
     std::string toCpp() override {
         std::string type = inferElementType();
         std::string result = type + " " + arrayName + "[" + std::to_string(arrayMembers.size()) + "] = {";
@@ -544,6 +553,10 @@ public:
         : funcName(std::move(funcName)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    const std::string& getFunctionName() const {
+        return funcName;
+    }
+
     const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const {
         return arguments;
     }
@@ -781,7 +794,19 @@ public:
         : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    std::string getSource() const {
+    const std::string& getName() const {
+        return name;
+    }
+
+    ASTNode* getValue() const {
+        return value;
+    }
+
+    bool getIsConstantVar() const {
+        return isConstantVar;
+    }
+
+    const std::string& getSource() const {
         return source;
     }
 
@@ -970,6 +995,10 @@ public:
         : op(op), right(std::move(right)) {}
 
 public:
+    const Token& getOp() const {
+        return op;
+    }
+
     ExpressionNode* getRight() const { 
         return right.get(); 
     }
@@ -999,16 +1028,16 @@ public:
         : left(std::move(left)), op(op), right(std::move(right)) {}
 
 public:
+    Token getOp() const { 
+        return op; 
+    }
+
     ExpressionNode* getLeft() const { 
         return left.get();
     }
 
     ExpressionNode* getRight() const { 
         return right.get(); 
-    }
-
-    Token getOp() const { 
-        return op; 
     }
 
 public:
@@ -1062,6 +1091,19 @@ private:
 public:
     CompoundAssignNode(std::string name, std::string op, std::string value)
         : name(std::move(name)), op(std::move(op)), value(std::move(value)) {}
+
+public:
+    const std::string& getOp() const {
+        return op;
+    }
+
+    const std::string& getName() const {
+        return name;
+    }
+
+    const std::string& getValue() const {
+        return value;
+    }
 
 public:
     std::string toCpp() override {
@@ -1147,6 +1189,11 @@ public:
         : value(std::move(val)) {}
 
 public:
+    ASTNode* getValue() const {
+        return value;
+    }
+
+public:
     std::string toCpp() override {
         std::string result = value->toCpp();
 
@@ -1211,7 +1258,7 @@ public:
         : funcName(name), params(std::move(params)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    std::string getFuncName() const {
+    const std::string& getFuncName() const {
         return funcName;
     }
 
@@ -1283,6 +1330,18 @@ public:
     }
 
 public:
+    int getID() const {
+        return id;
+    }
+
+    const std::string& getInterval() {
+        return interval;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+        return body;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &body };
     }
@@ -1321,6 +1380,10 @@ public:
         return condition;
     }
 
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+        return body;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &body };
     }
@@ -1351,6 +1414,10 @@ public:
 public:
     const std::unique_ptr<ExpressionNode> &getCondition() const {
         return condition;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+        return body;
     }
 
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
@@ -1407,6 +1474,10 @@ public:
         return step;
     }
 
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+        return body;
+    }
+
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
         return { &body };
     }
@@ -1440,12 +1511,16 @@ public:
     }
 
 public:
-    int getId() const {
+    int getID() const {
         return id;
     }
 
     const std::string& getCount() const {
         return count;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+        return body;
     }
 
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
@@ -1504,12 +1579,16 @@ public:
     }
 
 public:
-    int getId() const {
+    int getID() const {
         return id;
     }
 
     const std::string& getPin() const {
         return pin;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+        return body;
     }
 
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {

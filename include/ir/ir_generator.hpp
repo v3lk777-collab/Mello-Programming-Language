@@ -13,9 +13,14 @@
 
 #include "ir.hpp"
 #include "ast.hpp"
+#include "token.hpp"
 
 class IRGenerator {
-public:
+private:
+    IROp mapTokenTypeToIROp(Token op);
+    IRLiteralType mapTokenTypeToIRLiteralType(Token token);
+
+private:
     std::unique_ptr<IRNode> generateUseStatement(UseNode* useNode);
     std::unique_ptr<IRNode> generateArrayLiteral(ArrayNode* arrayNode);
     std::unique_ptr<IRNode> generateArrayIndex(ArrayIndexNode* arrayIndexNode);
@@ -26,7 +31,7 @@ public:
     std::unique_ptr<IRNode> generateBuiltInFunctionCall(BuiltInFunctionCallNode* builtInFunctionCallNode);
     std::unique_ptr<IRNode> generateSerialFunctionsCallNode(SerialFunctionsCallNode* serialFunctionsCallNode);
     std::unique_ptr<IRNode> generateMethodCall(MethodCallNode* methodCallNode);
-    std::unique_ptr<IRNode> generateVarAssign(VarAssignNode* verAssignNode);
+    std::unique_ptr<IRNode> generateVarAssign(VarAssignNode* varAssignNode);
     std::unique_ptr<IRNode> generateUnaryOp(UnaryOpNode* unaryOpNode);
     std::unique_ptr<IRNode> generateBinaryOp(BinaryOpNode* binaryOpNode);
     std::unique_ptr<IRNode> generateCompoundAssign(CompoundAssignNode* compoundAssignNode);

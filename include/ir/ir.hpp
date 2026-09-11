@@ -28,7 +28,16 @@ enum class IROp {
     PLUS,
     MULTIPLY,
     DIVIDE,
-    MODULO
+    MODULO,
+    EQUALITY,
+    NOT_EQUAL,
+    GREATER,
+    LESS,
+    GREATER_EQUAL,
+    LESS_EQUAL,
+    LOGICAL_NOT,
+    INCREMENT,
+    DECREMENT
 };
 
 class IRNode {
