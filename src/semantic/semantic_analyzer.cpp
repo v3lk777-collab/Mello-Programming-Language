@@ -196,11 +196,11 @@ void SemanticAnalyzer::analyzeFunctionDefinition(FunctionNode* funcNode) {
 }
 
 void SemanticAnalyzer::analyzeLiteral(LiteralNode* literalNode) {
-    if (literalNode->token.type == TokenType::IDENTIFIER) {
-        const VariableSymbol* var = symbolTable.lookupVariable(literalNode->token.value);
+    if (literalNode->getToken().type == TokenType::IDENTIFIER) {
+        const VariableSymbol* var = symbolTable.lookupVariable(literalNode->getToken().value);
 
         if (!var) {
-            ErrorHandler::report("Use of undeclared variable:", literalNode->token.value, literalNode->token.line, literalNode->token.column, literalNode->token.value);
+            ErrorHandler::report("Use of undeclared variable:", literalNode->getToken().value, literalNode->getToken().line, literalNode->getToken().column, literalNode->getToken().value);
         }
     }
 }

@@ -1,10 +1,11 @@
 # ninja log v6
-183	5449	8106222840838285	CMakeFiles/mello.dir/src/semantic/symbol_table.cpp.obj	7615684612faacaa
-23	7516	8106222839228274	CMakeFiles/mello.dir/src/lexer/lexer.cpp.obj	64ff9ae13b9d6af7
-40	10158	8106222839458281	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	dfd531ba0370cd88
-93	8573	8106222991452017	CMakeFiles/mello.dir/src/semantic/semantic_analyzer.cpp.obj	7fe40948ac55b4b9
-115	8932	8106222991672014	CMakeFiles/mello.dir/stdlib/module_loader.cpp.obj	a78368ddfaa95d0b
-33	8748	8106223437152199	CMakeFiles/mello.dir/src/main.cpp.obj	507393325709ca8
-66	8960	8106223437542246	CMakeFiles/mello.dir/src/errors/error_handler.cpp.obj	5135cddc91f8b507
-46	11700	8106223437292266	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	71b26225662ad974
-11702	14738	8106223553842236	mello.exe	b024145ba684f83
+26	9250	8110327523109083	CMakeFiles/mello.dir/src/lexer/lexer.cpp.obj	a90343e3f05ad38a
+62	13857	8110327523479087	CMakeFiles/mello.dir/src/ir/ir_generator.cpp.obj	624d199c44481cfd
+42	14248	8110327523309082	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	2258bb74ce6bf9ad
+11	14777	8110327522959089	CMakeFiles/mello.dir/src/main.cpp.obj	beb6e42f43187fc
+98	15012	8110327523829077	CMakeFiles/mello.dir/src/errors/error_handler.cpp.obj	94b08094cf9eefe8
+9283	15878	8110327616919072	CMakeFiles/mello.dir/src/semantic/symbol_table.cpp.obj	479aa38295bf121b
+81	18306	8110327523659097	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	2382560cc7ebf738
+13904	21676	8110327662149122	CMakeFiles/mello.dir/src/semantic/semantic_analyzer.cpp.obj	7cf14ce2b33ee918
+14288	21931	8110327666069085	CMakeFiles/mello.dir/stdlib/module_loader.cpp.obj	2c81077e1e00fb18
+21932	27225	8110327742169111	mello.exe	565667fd4e562430

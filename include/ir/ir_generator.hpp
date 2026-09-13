@@ -25,6 +25,8 @@ private:
     std::unique_ptr<IRNode> generateArrayLiteral(ArrayNode* arrayNode);
     std::unique_ptr<IRNode> generateArrayIndex(ArrayIndexNode* arrayIndexNode);
     std::unique_ptr<IRNode> generateArrayAssign(ArrayAssignNode* arrayAssignNode);
+
+private:
     std::unique_ptr<IRNode> generateFunction(FunctionNode* functionNode);
     std::unique_ptr<IRNode> generateLiteral(LiteralNode* literalNode);
     std::unique_ptr<IRNode> generateFunctionCall(FunctionCallNode* functionCallNode);
@@ -32,9 +34,13 @@ private:
     std::unique_ptr<IRNode> generateSerialFunctionsCallNode(SerialFunctionsCallNode* serialFunctionsCallNode);
     std::unique_ptr<IRNode> generateMethodCall(MethodCallNode* methodCallNode);
     std::unique_ptr<IRNode> generateVarAssign(VarAssignNode* varAssignNode);
+
+private:
     std::unique_ptr<IRNode> generateUnaryOp(UnaryOpNode* unaryOpNode);
     std::unique_ptr<IRNode> generateBinaryOp(BinaryOpNode* binaryOpNode);
     std::unique_ptr<IRNode> generateCompoundAssign(CompoundAssignNode* compoundAssignNode);
+
+private:
     std::unique_ptr<IRNode> generateIfStatment(IfNode* ifNode);
     std::unique_ptr<IRNode> generateReturnStatement(ReturnNode* returnNode);
     std::unique_ptr<IRNode> generateUserFunc(UserFuncNode* userFuncNode);
@@ -43,12 +49,14 @@ private:
     std::unique_ptr<IRNode> generateForStatement(ForNode* forNode);
     std::unique_ptr<IRNode> generateForRangeStatement(ForRangeNode* forRangeNode);
     std::unique_ptr<IRNode> generateRepeatStatement(RepeatNode* repeatNode);
+
+private:
     std::unique_ptr<IRNode> generateGroupStatement(GroupNode* groupNode);
     std::unique_ptr<IRNode> generateOnPressStatement(OnPressNode* onPressNode);
     std::unique_ptr<IRNode> generateControlTransferStatements(ControlTransferStatementsNode* controlTransferStatementsNode);
     std::unique_ptr<IRNode> generateTypeConversionCall(TypeConversionCallNode* typeConversionCallNode);
 
 public:
-    std::unique_ptr<IRNode> generateSingle(ASTNode* node);
+    std::unique_ptr<IRNode> generateNode(ASTNode* node);
     std::vector<std::unique_ptr<IRNode>> generate(ASTNode* node);
 };

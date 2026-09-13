@@ -11,36 +11,36 @@
 
 #include "ir_generator.hpp"
 
-IROp IRGenerator::mapTokenTypeToIROp(Token op) {
-    std::string opValue = op.value;
+IROp IRGenerator::mapTokenTypeToIROp(Token token) {
+    TokenType op = token.type;
 
     IROp type;
 
-    if (opValue == "+" || opValue == "+=") {
+    if (op == TokenType::PLUS) {
         type = IROp::PLUS;
     }
 
-    if (opValue == "-" || opValue == "-=") {
+    if (op == TokenType::MINUS) {
         type = IROp::MINUS;
     }
 
-    if (opValue == "*" || opValue == "*=") {
+    if (op == TokenType::MULTIPLY) {
         type = IROp::MULTIPLY;
     }
 
-    if (opValue == "/" || opValue == "/=") {
+    if (op == TokenType::DIVIDE) {
         type = IROp::DIVIDE;
     }
 
-    if (opValue == "%" || opValue == "%=") {
+    if (op == TokenType::MODULO) {
         type = IROp::MODULO;
     }
 
-    if (opValue == "++") {
+    if (op == TokenType::INCREMENT) {
         type = IROp::INCREMENT;
     }
 
-    if (opValue == "--") {
+    if (op == TokenType::DECREMENT) {
         type = IROp::DECREMENT;
     }
 
@@ -90,15 +90,15 @@ std::unique_ptr<IRNode> IRGenerator::generateArrayLiteral(ArrayNode* arrayNode) 
 
 std::unique_ptr<IRNode> IRGenerator::generateArrayIndex(ArrayIndexNode* arrayIndexNode) {
     std::string arrayName = arrayIndexNode->getArrayName();
-    std::unique_ptr<IRNode> indexExpression = generateSingle(arrayIndexNode->getIndexExpression().get());
+    std::unique_ptr<IRNode> indexExpression = generateNode(arrayIndexNode->getIndexExpression().get());
 
     return std::make_unique<IRArrayIndexNode>(std::move(arrayName), std::move(indexExpression));
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateArrayAssign(ArrayAssignNode* arrayAssignNode) {
     std::string arrayName = arrayAssignNode->getArrayName();
-    std::unique_ptr<IRNode> indexExpression = generateSingle(arrayAssignNode->getIndexExpression().get());
-    std::unique_ptr<IRNode> valueExpression = generateSingle(arrayAssignNode->getValueExpression().get());
+    std::unique_ptr<IRNode> indexExpression = generateNode(arrayAssignNode->getIndexExpression().get());
+    std::unique_ptr<IRNode> valueExpression = generateNode(arrayAssignNode->getValueExpression().get());
 
     return std::make_unique<IRArrayAssignNode>(std::move(arrayName), std::move(indexExpression), std::move(valueExpression));
 }
@@ -107,8 +107,9 @@ std::unique_ptr<IRNode> IRGenerator::generateFunction(FunctionNode* functionNode
     std::string functionName = functionNode->getFunctionName();
 
     std::vector<std::unique_ptr<IRNode>> body;
+
     for (const auto& stmt : functionNode->getBody()) {
-        body.push_back(generateSingle(stmt.get()));
+        body.push_back(generateNode(stmt.get()));
     }
 
     return std::make_unique<IRFunctionNode>(std::move(functionName), std::move(body));
@@ -127,19 +128,21 @@ std::unique_ptr<IRNode> IRGenerator::generateFunctionCall(FunctionCallNode* func
     std::string functionName = functionCallNode->getFuncName();
 
     std::vector<std::unique_ptr<IRNode>> arguments;
+
     for (const auto& arg : functionCallNode->getArguments()) {
-        arguments.push_back(generateSingle(arg.get()));
+        arguments.push_back(generateNode(arg.get()));
     }
 
     return std::make_unique<IRFunctionCallNode>(std::move(functionName), std::move(arguments));
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateBuiltInFunctionCall(BuiltInFunctionCallNode* builtInFunctionCallNode) {
-    std::string functionName = builtInFunctionCallNode->getFuncName();
+    std::string functionName = builtInFunctionCallNode->getFunctionName();
 
     std::vector<std::unique_ptr<IRNode>> arguments;
+
     for (const auto& arg : builtInFunctionCallNode->getArguments()) {
-        arguments.push_back(generateSingle(arg.get()));
+        arguments.push_back(generateNode(arg.get()));
     }
 
     return std::make_unique<IRBuiltInFunctionCallNode>(std::move(functionName), std::move(arguments));
@@ -149,8 +152,9 @@ std::unique_ptr<IRNode> IRGenerator::generateSerialFunctionsCallNode(SerialFunct
     std::string functionName = serialFunctionsCallNode->getFunctionName();
 
     std::vector<std::unique_ptr<IRNode>> arguments;
+
     for (const auto& arg : serialFunctionsCallNode->getArguments()) {
-        arguments.push_back(generateSingle(arg.get()));
+        arguments.push_back(generateNode(arg.get()));
     }
 
     return std::make_unique<IRSerialFunctionsCallNode>(std::move(functionName), std::move(arguments));
@@ -158,24 +162,27 @@ std::unique_ptr<IRNode> IRGenerator::generateSerialFunctionsCallNode(SerialFunct
 
 std::unique_ptr<IRNode> IRGenerator::generateMethodCall(MethodCallNode* methodCallNode) {
     std::string methodObjectName = methodCallNode->getObjectName();
-    std::unique_ptr<IRNode> methodCall = generateSingle(methodCallNode->getMethodCall());
+
+    std::unique_ptr<IRNode> methodCall = generateNode(methodCallNode->getMethodCall());
 
     return std::make_unique<IRMethodCallNode>(std::move(methodObjectName), std::move(methodCall));
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateVarAssign(VarAssignNode* varAssignNode) {
-    std::string name = varAssignNode->name;
-    bool isConstantVar = varAssignNode->isConstantVar;
-    std::unique_ptr<IRNode> value = generateSingle(varAssignNode->value.get());
+    std::string name = varAssignNode->getName();
+    IRLiteralType valueType = mapTokenTypeToIRLiteralType(Token({varAssignNode->getValueType(), "", 0, 0, ""}));
+    std::string rawValue = varAssignNode->getRawValue();
+    std::unique_ptr<IRNode> value = generateNode(varAssignNode->getValue());
+    bool isConstantVar = varAssignNode->getIsConstantVar();
 
-    return std::make_unique<IRVarAssignNode>(std::move(name), std::move(value), isConstantVar);
+    return std::make_unique<IRVarAssignNode>(std::move(name), std::move(value), std::move(rawValue), valueType, isConstantVar);
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateUnaryOp(UnaryOpNode* unaryOpNode) {
     const Token& token = unaryOpNode->getOp();
 
     IROp op = mapTokenTypeToIROp(token);
-    std::unique_ptr<IRNode> value = generateSingle(unaryOpNode->getRight());
+    std::unique_ptr<IRNode> value = generateNode(unaryOpNode->getRight());
 
     return std::make_unique<IRUnaryOpNode>(op, std::move(value));
 }
@@ -184,40 +191,68 @@ std::unique_ptr<IRNode> IRGenerator::generateBinaryOp(BinaryOpNode* binaryOpNode
     const Token& token = binaryOpNode->getOp();
 
     IROp op = mapTokenTypeToIROp(token);
-    std::unique_ptr<IRNode> left = generateSingle(binaryOpNode->getLeft());
-    std::unique_ptr<IRNode> right = generateSingle(binaryOpNode->getRight());
+    std::unique_ptr<IRNode> left = generateNode(binaryOpNode->getLeft());
+    std::unique_ptr<IRNode> right = generateNode(binaryOpNode->getRight());
 
     return std::make_unique<IRBinaryOpNode>(std::move(left), op, std::move(right));
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateCompoundAssign(CompoundAssignNode* compoundAssignNode) {
-    std::string opValue = compoundAssignNode->getOp();
     std::string name = compoundAssignNode->getName();
     std::string value = compoundAssignNode->getValue();
 
-    IROp op = mapTokenTypeToIROp(Token{opValue, TokenType::PLUS});
+    std::string opValue = compoundAssignNode->getOp();
+    IROp op = IROp::PLUS;
+
+    if (opValue == "+" || opValue == "+=") {
+        op = IROp::PLUS;
+    }
+
+    if (opValue == "-" || opValue == "-=") {
+        op = IROp::MINUS;
+    }
+
+    if (opValue == "*" || opValue == "*=") {
+        op = IROp::MULTIPLY;
+    }
+
+    if (opValue == "/" || opValue == "/=") {
+        op = IROp::DIVIDE;
+    }
+
+    if (opValue == "%" || opValue == "%=") {
+        op = IROp::MODULO;
+    }
+
+    if (opValue == "++") {
+        op = IROp::INCREMENT;
+    }
+
+    if (opValue == "--") {
+        op = IROp::DECREMENT;
+    }
 
     return std::make_unique<IRCompoundAssignNode>(std::move(name), op, std::move(value));
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateIfStatment(IfNode* ifNode) {
-    std::unique_ptr<IRNode> condition = generateSingle(ifNode->getCondition().get());
+    std::unique_ptr<IRNode> condition = generateNode(ifNode->getCondition().get());
 
     std::vector<std::unique_ptr<IRNode>> thenBody;
     for (const auto& stmt : ifNode->getThenBody()) {
-        thenBody.push_back(generateSingle(stmt.get()));
+        thenBody.push_back(generateNode(stmt.get()));
     }
 
     std::vector<std::unique_ptr<IRNode>> elseBody;
     for (const auto& stmt : ifNode->getElseBody()) {
-        elseBody.push_back(generateSingle(stmt.get()));
+        elseBody.push_back(generateNode(stmt.get()));
     }
 
     return std::make_unique<IRIfNode>(std::move(condition), std::move(thenBody), std::move(elseBody));
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateReturnStatement(ReturnNode* returnNode) {
-    std::unique_ptr<IRNode> value = generateSingle(returnNode->getValue());
+    std::unique_ptr<IRNode> value = generateNode(returnNode->getValue());
 
     return std::make_unique<IRReturnNode>(std::move(value));
 }
@@ -228,20 +263,20 @@ std::unique_ptr<IRNode> IRGenerator::generateUserFunc(UserFuncNode* userFuncNode
 
     std::vector<std::unique_ptr<IRNode>> body;
     for (const auto& stmt : userFuncNode->getFuncBody()) {
-        body.push_back(generateSingle(stmt.get()));
+        body.push_back(generateNode(stmt.get()));
     }
 
     return std::make_unique<IRUserFuncNode>(std::move(funcName), std::move(params), std::move(body));
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateEveryStatement(EveryNode* everyNode) {
-    int id = everyNode->getId();
+    int id = everyNode->getID();
     std::string interval = everyNode->getInterval();
 
     std::vector<std::unique_ptr<IRNode>> body;
     for (const auto* childBody : everyNode->getChildBodies()) {
         for (const auto& stmt : *childBody) {
-            body.push_back(generateSingle(stmt.get()));
+            body.push_back(generateNode(stmt.get()));
         }
     }
 
@@ -249,12 +284,12 @@ std::unique_ptr<IRNode> IRGenerator::generateEveryStatement(EveryNode* everyNode
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateWhileStatement(WhileNode* whileNode) {
-    std::unique_ptr<IRNode> condition = generateSingle(whileNode->getCondition().get());
+    std::unique_ptr<IRNode> condition = generateNode(whileNode->getCondition().get());
 
     std::vector<std::unique_ptr<IRNode>> body;
     for (const auto* childBody : whileNode->getChildBodies()) {
         for (const auto& stmt : *childBody) {
-            body.push_back(generateSingle(stmt.get()));
+            body.push_back(generateNode(stmt.get()));
         }
     }
 
@@ -262,12 +297,12 @@ std::unique_ptr<IRNode> IRGenerator::generateWhileStatement(WhileNode* whileNode
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateForStatement(ForNode* forNode) {
-    std::unique_ptr<IRNode> condition = generateSingle(forNode->getCondition().get());
+    std::unique_ptr<IRNode> condition = generateNode(forNode->getCondition().get());
 
     std::vector<std::unique_ptr<IRNode>> body;
     for (const auto* childBody : forNode->getChildBodies()) {
         for (const auto& stmt : *childBody) {
-            body.push_back(generateSingle(stmt.get()));
+            body.push_back(generateNode(stmt.get()));
         }
     }
 
@@ -276,14 +311,15 @@ std::unique_ptr<IRNode> IRGenerator::generateForStatement(ForNode* forNode) {
 
 std::unique_ptr<IRNode> IRGenerator::generateForRangeStatement(ForRangeNode* forRangeNode) {
     std::string varName = forRangeNode->getVarName();
-    std::unique_ptr<IRNode> start = generateSingle(forRangeNode->getStart().get());
-    std::unique_ptr<IRNode> stop = generateSingle(forRangeNode->getStop().get());
-    std::unique_ptr<IRNode> step = generateSingle(forRangeNode->getStep().get());
+
+    std::unique_ptr<IRNode> start = generateNode(forRangeNode->getStart().get());
+    std::unique_ptr<IRNode> stop = generateNode(forRangeNode->getStop().get());
+    std::unique_ptr<IRNode> step = generateNode(forRangeNode->getStep().get());
 
     std::vector<std::unique_ptr<IRNode>> body;
     for (const auto* childBody : forRangeNode->getChildBodies()) {
         for (const auto& stmt : *childBody) {
-            body.push_back(generateSingle(stmt.get()));
+            body.push_back(generateNode(stmt.get()));
         }
     }
 
@@ -291,13 +327,13 @@ std::unique_ptr<IRNode> IRGenerator::generateForRangeStatement(ForRangeNode* for
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateRepeatStatement(RepeatNode* repeatNode) {
-    int id = repeatNode->getId();
+    int id = repeatNode->getID();
     std::string count = repeatNode->getCount();
 
     std::vector<std::unique_ptr<IRNode>> body;
     for (const auto* childBody : repeatNode->getChildBodies()) {
         for (const auto& stmt : *childBody) {
-            body.push_back(generateSingle(stmt.get()));
+            body.push_back(generateNode(stmt.get()));
         }
     }
 
@@ -305,19 +341,19 @@ std::unique_ptr<IRNode> IRGenerator::generateRepeatStatement(RepeatNode* repeatN
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateGroupStatement(GroupNode* groupNode) {
-    std::unique_ptr<IRNode> expression = generateSingle(groupNode->getExpression());
+    std::unique_ptr<IRNode> expression = generateNode(groupNode->getExpression());
 
     return std::make_unique<IRGroupNode>(std::move(expression));
 }
 
 std::unique_ptr<IRNode> IRGenerator::generateOnPressStatement(OnPressNode* onPressNode) {
-    int id = onPressNode->getId();
+    int id = onPressNode->getID();
     std::string pin = onPressNode->getPin();
 
     std::vector<std::unique_ptr<IRNode>> body;
     for (const auto* childBody : onPressNode->getChildBodies()) {
         for (const auto& stmt : *childBody) {
-            body.push_back(generateSingle(stmt.get()));
+            body.push_back(generateNode(stmt.get()));
         }
     }
 
@@ -335,13 +371,13 @@ std::unique_ptr<IRNode> IRGenerator::generateTypeConversionCall(TypeConversionCa
 
     std::vector<std::unique_ptr<IRNode>> arguments;
     for (const auto& arg : typeConversionCallNode->getArguments()) {
-        arguments.push_back(generateSingle(arg.get()));
+        arguments.push_back(generateNode(arg.get()));
     }
 
     return std::make_unique<IRTypeConversionCallNode>(std::move(funcName), std::move(arguments));
 }
 
-std::unique_ptr<IRNode> IRGenerator::generateSingle(ASTNode* node) {
+std::unique_ptr<IRNode> IRGenerator::generateNode(ASTNode* node) {
     std::vector<std::unique_ptr<IRNode>> nodes = generate(node);
 
     if (nodes.empty()) {

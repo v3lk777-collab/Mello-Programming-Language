@@ -238,8 +238,10 @@ public:
 class IRVarAssignNode : public IRNode {
 private:
     std::string name;
-    std::unique_ptr<IRNode> value;
     bool isConstantVar;
+    std::string rawValue;
+    IRLiteralType valueType;
+    std::unique_ptr<IRNode> value;
 
 public:
     const std::string& getName() const {
@@ -250,13 +252,21 @@ public:
         return value;
     }
 
+    IRLiteralType getValueType() const {
+        return valueType;
+    }
+
+    const std::string& getRawValue() const {
+        return rawValue;
+    }
+
     bool getIsConstantVar() const {
         return isConstantVar;
     }
 
 public:
-    IRVarAssignNode(std::string name, std::unique_ptr<IRNode> value, bool isConstantVar)
-        : name(std::move(name)), value(std::move(value)), isConstantVar(isConstantVar) {}
+    IRVarAssignNode(std::string name, std::unique_ptr<IRNode> value, std::string rawValue, IRLiteralType valueType, bool isConstantVar)
+        : name(std::move(name)), value(std::move(value)), rawValue(std::move(rawValue)), valueType(valueType), isConstantVar(isConstantVar) {}
 };
 
 class IRUnaryOpNode : public IRNode {

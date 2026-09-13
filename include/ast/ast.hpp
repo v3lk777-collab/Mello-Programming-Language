@@ -411,6 +411,10 @@ public:
     }
 
 public:
+    const std::string& getFunctionName() const {
+        return funcName;
+    }
+
     const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const {
         return arguments;
     }
@@ -799,7 +803,15 @@ public:
     }
 
     ASTNode* getValue() const {
-        return value;
+        return value.get();
+    }
+
+    TokenType getValueType() const {
+        return val_type;
+    }
+
+    const std::string& getRawValue() const {
+        return raw_value;
     }
 
     bool getIsConstantVar() const {
@@ -1043,14 +1055,14 @@ public:
 public:
     std::string getVariableName() override {
         if (auto var = dynamic_cast<LiteralNode*>(left.get())) {
-            if (var->token.type == TokenType::IDENTIFIER) {
-                return var->token.value;
+            if (var->getToken().type == TokenType::IDENTIFIER) {
+                return var->getToken().value;
             }
         }
         
         if (auto var = dynamic_cast<LiteralNode*>(right.get())) {
-            if (var->token.type == TokenType::IDENTIFIER) {
-                return var->token.value;
+            if (var->getToken().type == TokenType::IDENTIFIER) {
+                return var->getToken().value;
             }
         }
 
@@ -1190,7 +1202,7 @@ public:
 
 public:
     ASTNode* getValue() const {
-        return value;
+        return value.get();
     }
 
 public:
