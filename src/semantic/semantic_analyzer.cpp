@@ -67,6 +67,13 @@ void SemanticAnalyzer::analyzeIfStatment(IfNode* ifNode) {
 }
 
 void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
+    FunctionSymbol function;
+
+    function.name = userFuncNode->getFunctionName();
+    function.paramNames = userFuncNode->getFuncParams();
+
+    symbolTable.declareFunction(function);
+
     symbolTable.enterScope();
 
     std::string source = userFuncNode->getSource();
@@ -86,7 +93,7 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
         }
     }
 
-    for (const auto& node : userFuncNode->getFuncBody()) {
+    for (const auto& node : userFuncNode->getBody()) {
         analyzeNode(node.get());
     }
 
@@ -186,6 +193,12 @@ void SemanticAnalyzer::analyzeOnPressStatement(OnPressNode* onPressNode) {
 }
 
 void SemanticAnalyzer::analyzeFunctionDefinition(FunctionNode* funcNode) {
+    FunctionSymbol function;
+
+    function.name = funcNode->getFunctionName();
+
+    symbolTable.declareFunction(function);
+
     symbolTable.enterScope();
 
     for (const auto& node : funcNode->getBody()) {
@@ -228,7 +241,7 @@ void SemanticAnalyzer::analyzeGroup(GroupNode* groupNode) {
 }
 
 void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
-    std::string funcName = functionCallNode->getFuncName();
+    std::string funcName = functionCallNode->getFunctionName();
     const FunctionSymbol* func = symbolTable.lookupFunction(funcName);
 
     std::string source = functionCallNode->getSource();

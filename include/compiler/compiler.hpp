@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "ir_generator.hpp"
+
 #include <string>
 #include <filesystem>
 
@@ -27,6 +29,7 @@ private:
 private:
     std::string getComputerCoreNumber();
     std::filesystem::path getTempSketchDir();
+    bool runShellCommand(const std::string& command, const std::string& successMessage, const std::string& failMessage);
 
 private:
     std::string findArduinoBoard();
@@ -40,5 +43,6 @@ private:
 public:
     Compiler() = default;
 
+public:
     bool run(int argc, char* argv[]);
 };

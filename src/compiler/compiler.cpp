@@ -79,6 +79,20 @@ std::filesystem::path Compiler::getTempSketchDir() {
     return std::filesystem::temp_directory_path() / /* uuid */ "output";
 }
 
+bool Compiler::runShellCommand(const std::string& command, const std::string& successMessage, const std::string& failMessage) {
+    int runStatue = std::system(command.c_str());
+
+    if (runStatue == 0) {
+        std::cout << successMessage << "\n";
+
+        return true;
+    } else {
+        std::cout << failMessage << "\n";
+
+        return false;
+    }
+}
+
 bool Compiler::installLibraries() {
     if (includedLibraries.empty()) {
         return true; 
@@ -122,21 +136,13 @@ bool Compiler::compileCode() {
     std::cout << "Starting code compilation...\n" << std::flush;
 
     std::string compileCommand = ARDUINO_CLI_PATH + " compile --fqbn arduino:avr:" + boardType  + " --build-property \"compiler.cpp.extra_flags=-std=gnu++14\" --build-path \"" + sketchDir.string() + "/build_cache\"" + " --jobs " + getComputerCoreNumber() + " --build-property build.extra_flags=\"-O3 -flto\"" + " \"" + sketchDir.string() + "\"";
-    int compileStatus = system(compileCommand.c_str());
 
-    if (compileStatus == 0) {
-        std::cout << "Compilation successful!" << "\n";
-
-        return true;
-    } else {
-        std::cerr << "Compilation failed!" << "\n";
-
-        return false;
-    }
+    return runShellCommand(compileCommand, "Compilation successful!", "Compilation failed!");
 }
 
 std::string Compiler::findArduinoBoard() {
     std::filesystem::path portsFilePath = std::filesystem::temp_directory_path() / "ports.txt";
+
     std::string listCommand = ARDUINO_CLI_PATH + " board list --format json > \"" + portsFilePath.string() + "\"";
     system(listCommand.c_str());
 
@@ -180,15 +186,8 @@ bool Compiler::uploadCode() {
     std::cout << "Uploading code to the board..." << "\n";
 
     std::string uploadCommand = ARDUINO_CLI_PATH + " upload -p " + detectedPort + " --fqbn arduino:avr:" + boardType + " --build-path \"" + sketchDir.string() + "/build_cache\"" + " \"" + sketchDir.string() + "\"";
-    int uploadStatus = system(uploadCommand.c_str());
 
-    if (uploadStatus == 0) {
-        std::cout << "Upload successful!" << "\n";
-        return true;
-    } else {
-        std::cerr << "Upload failed! Check connection." << "\n";
-        return false;
-    }
+    return runShellCommand(uploadCommand, "Upload successful!", "Upload failed! Check connection.");
 }
 
 void Compiler::printSketchFileCode(std::filesystem::path inoFilePath) {
@@ -263,6 +262,14 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         for (const auto& node : program) {
             analyzer.analyzeNode(node.get());
         }
+
+        IRGenerator generator;
+
+        for (const auto& node : program) {
+            generator.generate(node.get());
+        }
+
+        generator.printInstructions();
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << "\n";
 

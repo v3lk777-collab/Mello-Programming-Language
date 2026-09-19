@@ -1,2 +1,17 @@
+pin = 13
+x = 5 + 6
+
+fn print(text):
+    serial.print(text)
+
 fn start():
+    y = 2 * 3
+
+    print("Fuck Everyone and Mello too")
+    serial.print(10 + 5)
     serial.print("Mohammed + Hello = Mello")
+
+fn loop():
+    toggle(pin)
+
+z = 2 + 3

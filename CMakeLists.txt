@@ -26,10 +26,10 @@ add_executable(mello ${SOURCES})
 
 target_include_directories(mello PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ir
     ${CMAKE_CURRENT_SOURCE_DIR}/include/lexer
     ${CMAKE_CURRENT_SOURCE_DIR}/include/parser
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ast
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ir
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/include/errors
     ${CMAKE_CURRENT_SOURCE_DIR}/include/compiler

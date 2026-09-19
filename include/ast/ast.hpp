@@ -307,7 +307,7 @@ public:
         : funcName(std::move(name)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    std::string getFuncName() const {
+    std::string getFunctionName() const {
         return funcName;
     }
 
@@ -546,11 +546,6 @@ private:
     int currentLine;
     int currentColumn;
     std::string source;
-
-public:
-    std::string getFunctionName() {
-        return funcName;
-    }
 
 public:
     SerialFunctionsCallNode(std::string funcName, std::vector<std::unique_ptr<ExpressionNode>> arguments, int currentLine, int currentColumn, std::string source)
@@ -1270,7 +1265,7 @@ public:
         : funcName(name), params(std::move(params)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    const std::string& getFuncName() const {
+    const std::string& getFunctionName() const {
         return funcName;
     }
 
@@ -1278,7 +1273,7 @@ public:
         return params;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>> &getFuncBody() const {
+    const std::vector<std::unique_ptr<ASTNode>> &getBody() const {
         return body;
     }
 
@@ -1309,6 +1304,7 @@ public:
         }
 
         std::string returnType = params.empty() ? inferReturnType() : "auto";
+
         result += returnType + " " + funcName + "(";
 
         for (size_t i = 0; i < params.size(); i++) {
