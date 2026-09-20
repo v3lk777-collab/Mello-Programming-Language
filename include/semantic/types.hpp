@@ -15,12 +15,11 @@
 #include <vector>
 
 enum class DataType {
-    INT,
+    INTEGER,
     STRING,
     FLOAT,
-    BOOL,
-    UNKNOWN,
-    ERROR
+    BOOLEAN,
+    UNKNOWN
 };
 
 struct VariableSymbol {

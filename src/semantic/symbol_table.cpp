@@ -31,6 +31,7 @@ bool SymbolTable::declareVariable(const VariableSymbol& symbol) {
     }
 
     currentScope[symbol.name] = symbol;
+
     return true;
 }
 
@@ -40,6 +41,7 @@ bool SymbolTable::declareFunction(const FunctionSymbol& function) {
     }
 
     functions[function.name] = function;
+
     return true;
 }
 

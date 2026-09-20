@@ -14,6 +14,7 @@
 #include "ir.hpp"
 #include "ast.hpp"
 #include "token.hpp"
+#include "symbol_table.hpp"
 
 #include <iostream>
 
@@ -21,14 +22,18 @@ class IRGenerator {
 private:
     int currentID;
     IRFunction global;
+    const SymbolTable* symbolTable;
     std::vector<IRFunction> functions;
     IRFunction* currentFunction = nullptr;
     std::vector<IRInstruction> instructions;
 
 private:
     int getID() noexcept;
+
+private:
     IRType mapTokenTypeToIRType(TokenType tokenType) noexcept;
-    IRType mapTokanToIRType(Token token) noexcept;
+    IRType mapTokenToIRType(Token token) noexcept;
+    IRType mapDataTypeToIRType(DataType type) noexcept;
     IROpcode mapTokenToIROpcode(Token token) noexcept;
 
 private:
@@ -71,6 +76,10 @@ public:
             std::cout << "CALL";
             break;
 
+        case IROpcode::LOAD:
+            std::cout << "LOAD";
+            break;
+
         default:
             std::cout << "UNKNOWN";
             break;
@@ -92,9 +101,7 @@ public:
             std::cout << name;
         }
 
-        std::cout << '\n';
-
-        std::cout << "------------------------------------------------------\n";
+        std::cout << "\n\n";
     }
 
     void printInstructions() {
@@ -123,9 +130,9 @@ private:
     void generateMethodCallNode(MethodCallNode* methodCallNode);
 
 public:
-    IRGenerator();
+    IRGenerator(const SymbolTable* symbolTable);
 
 public:
     IRValue generateExpression(ASTNode* node);
-    std::vector<IRInstruction> generate(ASTNode* node);
+    void generate(ASTNode* node);
 };

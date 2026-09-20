@@ -53,4 +53,9 @@ private:
 public:
     void analyzeNode(ASTNode* node);
     void analyzeExpression(ExpressionNode* node);
+
+public:
+    const SymbolTable& getSymbolTable() const {
+        return symbolTable;
+    }
 };

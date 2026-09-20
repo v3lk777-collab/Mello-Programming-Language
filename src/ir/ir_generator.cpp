@@ -13,7 +13,7 @@
 
 #include "error_handler.hpp"
 
-IRGenerator::IRGenerator() : currentID(0) {
+IRGenerator::IRGenerator(const SymbolTable* symbolTable) : symbolTable(symbolTable), currentID(0) {
     instructions.clear();
 
     global.name = "global";
@@ -47,7 +47,7 @@ IRType IRGenerator::mapTokenTypeToIRType(TokenType tokenType) noexcept {
     }
 }
 
-IRType IRGenerator::mapTokanToIRType(Token token) noexcept {
+IRType IRGenerator::mapTokenToIRType(Token token) noexcept {
     switch (token.type) {
     case TokenType::INTEGER:
         return IRType::INTEGER;
@@ -62,6 +62,25 @@ IRType IRGenerator::mapTokanToIRType(Token token) noexcept {
         return IRType::CHARACTER;
 
     case TokenType::BOOLEAN:
+        return IRType::BOOLEAN;
+
+    default:
+        return IRType::VOID;
+    }
+}
+
+IRType IRGenerator::mapDataTypeToIRType(DataType type) noexcept {
+    switch (type) {
+    case DataType::INTEGER:
+        return IRType::INTEGER;
+
+    case DataType::FLOAT:
+        return IRType::FLOAT;
+
+    case DataType::STRING:
+        return IRType::STRING;
+
+    case DataType::BOOLEAN:
         return IRType::BOOLEAN;
 
     default:
@@ -89,17 +108,30 @@ IROpcode IRGenerator::mapTokenToIROpcode(Token token) noexcept {
 }
 
 IRValue IRGenerator::generateLiteralNode(LiteralNode* literalNode) {
+    const Token& token = literalNode->getToken();
+
     IRValue result;
-
-    result.id = getID();
-    result.type = mapTokanToIRType(literalNode->getToken());
-    result.value = literalNode->getToken().value;
-    result.isConstant = true;
-
     IRInstruction instruction;
 
-    instruction.result = result;
-    instruction.opcode = IROpcode::CONSTANT;
+    result.id = getID();
+    result.value = token.value;
+
+    if (token.type == TokenType::IDENTIFIER) {
+        const VariableSymbol* var = symbolTable->lookupVariable(token.value);
+
+        result.type = (var != nullptr) ? mapDataTypeToIRType(var->type) : IRType::VOID;
+        result.isConstant = false;
+
+        instruction.result = result;
+        instruction.name = token.value;
+        instruction.opcode = IROpcode::LOAD;
+    } else {
+        result.type = mapTokenToIRType(token);
+        result.isConstant = true;
+
+        instruction.result = result;
+        instruction.opcode = IROpcode::CONSTANT;
+    }
 
     currentFunction->instructions.push_back(instruction);
 
@@ -283,7 +315,7 @@ void IRGenerator::generateFunctionCallNode(FunctionCallNode* functionCallNode) {
     currentFunction->instructions.push_back(instruction);
 }
 
-std::vector<IRInstruction> IRGenerator::generate(ASTNode* node) {
+void IRGenerator::generate(ASTNode* node) {
     if (auto* varAssignNode = dynamic_cast<VarAssignNode*>(node)) {
         generateVarAssignNode(varAssignNode);
     } else if (auto* functionNode = dynamic_cast<FunctionNode*>(node)) {
@@ -297,6 +329,4 @@ std::vector<IRInstruction> IRGenerator::generate(ASTNode* node) {
     } else if (auto* functionCallNode = dynamic_cast<FunctionCallNode*>(node)) {
         generateFunctionCallNode(functionCallNode);
     }
-
-    return instructions;
 }

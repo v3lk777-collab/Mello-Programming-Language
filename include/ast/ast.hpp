@@ -201,12 +201,24 @@ public:
         : funcName(std::move(name)), body(std::move(funcBody)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    const std::string& getFunctionName() const {
+    const std::string& getFunctionName() const noexcept {
         return funcName;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
+    }
+
+    const std::string& getSource() const noexcept {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const noexcept {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const noexcept {
+        return currentColumn;
     }
 
 public:

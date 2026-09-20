@@ -63,8 +63,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/CMakeScratch/TryCompile-qo5h6a"
-      binary: "C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/CMakeScratch/TryCompile-qo5h6a"
+      source: "C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/CMakeScratch/TryCompile-125urr"
+      binary: "C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/CMakeScratch/TryCompile-125urr"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -74,11 +74,11 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/CMakeScratch/TryCompile-qo5h6a'
+        Change Dir: 'C:/Users/ITS/Desktop/Mello/cmake/CMakeFiles/CMakeScratch/TryCompile-125urr'
         
-        Run Build Command(s): C:/mingw64/bin/ninja.exe -v cmTC_dfc7d
-        [1/2] C:\\PROGRA~1\\MIB055~1\\2022\\COMMUN~1\\VC\\Tools\\MSVC\\1444~1.352\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /EHsc  /Ob0 /Od /RTC1 -MDd -Zi /showIncludes /FoCMakeFiles\\cmTC_dfc7d.dir\\CMakeCXXCompilerABI.cpp.obj /FdCMakeFiles\\cmTC_dfc7d.dir\\ /FS -c C:\\mingw64\\share\\cmake-3.30\\Modules\\CMakeCXXCompilerABI.cpp
-        [2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && C:\\mingw64\\bin\\cmake.exe -E vs_link_exe --intdir=CMakeFiles\\cmTC_dfc7d.dir --rc=C:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100261~1.0\\x64\\rc.exe --mt=C:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100261~1.0\\x64\\mt.exe --manifests  -- C:\\PROGRA~1\\MIB055~1\\2022\\COMMUN~1\\VC\\Tools\\MSVC\\1444~1.352\\bin\\Hostx64\\x64\\link.exe /nologo CMakeFiles\\cmTC_dfc7d.dir\\CMakeCXXCompilerABI.cpp.obj  /out:cmTC_dfc7d.exe /implib:cmTC_dfc7d.lib /pdb:cmTC_dfc7d.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+        Run Build Command(s): C:/mingw64/bin/ninja.exe -v cmTC_6cca5
+        [1/2] C:\\PROGRA~1\\MIB055~1\\2022\\COMMUN~1\\VC\\Tools\\MSVC\\1444~1.352\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /EHsc  /Ob0 /Od /RTC1 -MDd -Zi /showIncludes /FoCMakeFiles\\cmTC_6cca5.dir\\CMakeCXXCompilerABI.cpp.obj /FdCMakeFiles\\cmTC_6cca5.dir\\ /FS -c C:\\mingw64\\share\\cmake-3.30\\Modules\\CMakeCXXCompilerABI.cpp
+        [2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && C:\\mingw64\\bin\\cmake.exe -E vs_link_exe --intdir=CMakeFiles\\cmTC_6cca5.dir --rc=C:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100261~1.0\\x64\\rc.exe --mt=C:\\PROGRA~2\\WI3CF2~1\\10\\bin\\100261~1.0\\x64\\mt.exe --manifests  -- C:\\PROGRA~1\\MIB055~1\\2022\\COMMUN~1\\VC\\Tools\\MSVC\\1444~1.352\\bin\\Hostx64\\x64\\link.exe /nologo CMakeFiles\\cmTC_6cca5.dir\\CMakeCXXCompilerABI.cpp.obj  /out:cmTC_6cca5.exe /implib:cmTC_6cca5.lib /pdb:cmTC_6cca5.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
         
       exitCode: 0
   -

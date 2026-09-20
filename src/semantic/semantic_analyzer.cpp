@@ -13,7 +13,7 @@
 
 DataType SemanticAnalyzer::mapStringToDataType(const std::string& typeStr) {
     if (typeStr == "int" || typeStr == "uint8_t" || typeStr == "int16_t" || typeStr == "uint16_t" || typeStr == "int32_t" || typeStr == "uint32_t") {
-        return DataType::INT;
+        return DataType::INTEGER;
     }
 
     if (typeStr == "float") {
@@ -25,7 +25,7 @@ DataType SemanticAnalyzer::mapStringToDataType(const std::string& typeStr) {
     }
 
     if (typeStr == "bool") {
-        return DataType::BOOL;
+        return DataType::BOOLEAN;
     }
 
     return DataType::UNKNOWN;
@@ -72,13 +72,15 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
     function.name = userFuncNode->getFunctionName();
     function.paramNames = userFuncNode->getFuncParams();
 
-    symbolTable.declareFunction(function);
-
-    symbolTable.enterScope();
-
     std::string source = userFuncNode->getSource();
     int currentLine = userFuncNode->getCurrentDeclaredLine();
     int currentColumn = userFuncNode->getCurrentDeclaredColumn();
+
+    if (!symbolTable.declareFunction(function)) {
+        ErrorHandler::report("This function has already been declared:", function.name, currentLine, currentColumn, source);
+    }
+
+    symbolTable.enterScope();
 
     for (const auto& paramName : userFuncNode->getFuncParams()) {
         VariableSymbol paramSymbol;
@@ -197,7 +199,13 @@ void SemanticAnalyzer::analyzeFunctionDefinition(FunctionNode* funcNode) {
 
     function.name = funcNode->getFunctionName();
 
-    symbolTable.declareFunction(function);
+    std::string source = funcNode->getSource();
+    int currentLine = funcNode->getCurrentDeclaredLine();
+    int currentColumn = funcNode->getCurrentDeclaredColumn();
+
+    if (!symbolTable.declareFunction(function)) {
+        ErrorHandler::report("This function has already been declared:", function.name, currentLine, currentColumn, source);
+    }
 
     symbolTable.enterScope();
 
@@ -209,11 +217,13 @@ void SemanticAnalyzer::analyzeFunctionDefinition(FunctionNode* funcNode) {
 }
 
 void SemanticAnalyzer::analyzeLiteral(LiteralNode* literalNode) {
-    if (literalNode->getToken().type == TokenType::IDENTIFIER) {
-        const VariableSymbol* var = symbolTable.lookupVariable(literalNode->getToken().value);
+    const Token& token = literalNode->getToken();
+
+    if (token.type == TokenType::IDENTIFIER) {
+        const VariableSymbol* var = symbolTable.lookupVariable(token.value);
 
         if (!var) {
-            ErrorHandler::report("Use of undeclared variable:", literalNode->getToken().value, literalNode->getToken().line, literalNode->getToken().column, literalNode->getToken().value);
+            ErrorHandler::report("Use of undeclared variable:", token.value, token.line, token.column, token.value);
         }
     }
 }

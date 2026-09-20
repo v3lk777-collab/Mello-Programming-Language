@@ -263,7 +263,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
             analyzer.analyzeNode(node.get());
         }
 
-        IRGenerator generator;
+        IRGenerator generator(&analyzer.getSymbolTable());
 
         for (const auto& node : program) {
             generator.generate(node.get());
