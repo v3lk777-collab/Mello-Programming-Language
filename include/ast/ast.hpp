@@ -16,6 +16,7 @@
 #include "module_loader.hpp"
 #include "error_handler.hpp"
 
+#include <sstream>
 #include <string_view>
 
 class ASTNode {
@@ -182,7 +183,7 @@ public:
 
 public:
     std::string toCpp() override {
-        return arrayName + "[" + indexExpression->toCpp() + "]" + " = " + valueExpression->toCpp() + ";";
+        return arrayName + "[" + indexExpression->toCpp() + "] = " + valueExpression->toCpp() + ";";
     }
 };
 
@@ -341,19 +342,21 @@ public:
 
 public:
     std::string toCpp() override {
-        std::vector<std::string> argsStr;
+        std::ostringstream oss;
 
-        for (const auto& arg : arguments) {
-            argsStr.push_back(arg->toCpp());
+        oss << funcName << "(";
+
+        for (size_t i = 0; i < arguments.size(); ++i) {
+            oss << arguments[i]->toCpp();
+
+            if (i < arguments.size() - 1) {
+                oss << ", ";
+            }
         }
 
-        std::string fallbackArgs = "";
+        oss << ");";
 
-        for (size_t i = 0; i < argsStr.size(); ++i) {
-            fallbackArgs += argsStr[i] + (i < argsStr.size() - 1 ? ", " : "");
-        }
-        
-        return funcName + "(" + fallbackArgs + ");";
+        return oss.str();
     }
 };
 

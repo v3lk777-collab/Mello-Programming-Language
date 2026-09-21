@@ -52,7 +52,7 @@ const std::unordered_set<std::string> stdLibs = {
 
 inline std::set<std::string> includedStdLibs;
 
-inline auto parseTime = [] (std::string timeVal) -> std::string {
+inline auto parseTime = [](std::string timeVal) -> std::string {
     timeVal.erase(std::remove(timeVal.begin(), timeVal.end(), ' '), timeVal.end());
     timeVal.erase(std::remove(timeVal.begin(), timeVal.end(), '\"'), timeVal.end());
 

@@ -24,7 +24,7 @@ class SemanticAnalyzer {
 private:
     SymbolTable symbolTable;
 
-private:
+public:
     DataType mapStringToDataType(const std::string& typeStr);
 
 private:

@@ -27,10 +27,10 @@ private:
     IRFunction* currentFunction = nullptr;
     std::vector<IRInstruction> instructions;
 
-private:
+public:
     int getID() noexcept;
 
-private:
+public:
     IRType mapTokenTypeToIRType(TokenType tokenType) noexcept;
     IRType mapTokenToIRType(Token token) noexcept;
     IRType mapDataTypeToIRType(DataType type) noexcept;
@@ -80,6 +80,10 @@ public:
             std::cout << "LOAD";
             break;
 
+        case IROpcode::RETURN:
+            std::cout << "RETURN";
+            break;
+
         default:
             std::cout << "UNKNOWN";
             break;
@@ -125,9 +129,11 @@ private:
     void generateFunctionNode(FunctionNode* functionNode);
     void generateUserFuncNode(UserFuncNode* userFuncNode);
     void generateSerialFunctionsCallNode(SerialFunctionsCallNode* serialFunctionsCallNode, MethodCallNode* methodCallNode);
-    void generateBuiltInFunctionCallNode(BuiltInFunctionCallNode* builtInFunctionCallNode);
-    void generateFunctionCallNode(FunctionCallNode* functionCallNode);
+    IRValue generateBuiltInFunctionCallNode(BuiltInFunctionCallNode* builtInFunctionCallNode);
+    IRValue generateFunctionCallNode(FunctionCallNode* functionCallNode);
     void generateMethodCallNode(MethodCallNode* methodCallNode);
+    void generateReturnNode(ReturnNode* returnNode);
+    void generateIfNode(IfNode* ifNode);
 
 public:
     IRGenerator(const SymbolTable* symbolTable);

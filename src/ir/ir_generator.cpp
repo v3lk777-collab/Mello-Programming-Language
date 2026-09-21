@@ -21,92 +21,6 @@ IRGenerator::IRGenerator(const SymbolTable* symbolTable) : symbolTable(symbolTab
     currentFunction = &global;
 }
 
-int IRGenerator::getID() noexcept {
-    return currentID++;
-}
-
-IRType IRGenerator::mapTokenTypeToIRType(TokenType tokenType) noexcept {
-    switch (tokenType) {
-    case TokenType::INTEGER:
-        return IRType::INTEGER;
-
-    case TokenType::FLOAT:
-        return IRType::FLOAT;
-
-    case TokenType::STRING:
-        return IRType::STRING;
-
-    case TokenType::CHARACTER:
-        return IRType::CHARACTER;
-
-    case TokenType::BOOLEAN:
-        return IRType::BOOLEAN;
-
-    default:
-        return IRType::VOID;
-    }
-}
-
-IRType IRGenerator::mapTokenToIRType(Token token) noexcept {
-    switch (token.type) {
-    case TokenType::INTEGER:
-        return IRType::INTEGER;
-
-    case TokenType::FLOAT:
-        return IRType::FLOAT;
-
-    case TokenType::STRING:
-        return IRType::STRING;
-
-    case TokenType::CHARACTER:
-        return IRType::CHARACTER;
-
-    case TokenType::BOOLEAN:
-        return IRType::BOOLEAN;
-
-    default:
-        return IRType::VOID;
-    }
-}
-
-IRType IRGenerator::mapDataTypeToIRType(DataType type) noexcept {
-    switch (type) {
-    case DataType::INTEGER:
-        return IRType::INTEGER;
-
-    case DataType::FLOAT:
-        return IRType::FLOAT;
-
-    case DataType::STRING:
-        return IRType::STRING;
-
-    case DataType::BOOLEAN:
-        return IRType::BOOLEAN;
-
-    default:
-        return IRType::VOID;
-    }
-}
-
-IROpcode IRGenerator::mapTokenToIROpcode(Token token) noexcept {
-    switch (token.type) {
-    case TokenType::PLUS:
-        return IROpcode::ADD;
-
-    case TokenType::MINUS:
-        return IROpcode::SUB;
-
-    case TokenType::MULTIPLY:
-        return IROpcode::MUL;
-
-    case TokenType::DIVIDE:
-        return IROpcode::DIV;
-
-    default:
-        return IROpcode::CONSTANT;
-    }
-}
-
 IRValue IRGenerator::generateLiteralNode(LiteralNode* literalNode) {
     const Token& token = literalNode->getToken();
 
@@ -179,10 +93,12 @@ IRValue IRGenerator::generateBinaryOpNode(BinaryOpNode* binaryOpNode) {
 IRValue IRGenerator::generateExpression(ASTNode* node) {
     if (auto* literalNode = dynamic_cast<LiteralNode*>(node)) {
         return generateLiteralNode(literalNode);
-    }
-
-    if (auto* binaryOpNode = dynamic_cast<BinaryOpNode*>(node)) {
+    } else if (auto* binaryOpNode = dynamic_cast<BinaryOpNode*>(node)) {
         return generateBinaryOpNode(binaryOpNode);
+    } else if (auto* builtInFunctionCallNode = dynamic_cast<BuiltInFunctionCallNode*>(node)) {
+        return generateBuiltInFunctionCallNode(builtInFunctionCallNode);
+    } else if (auto* functionCallNode = dynamic_cast<FunctionCallNode*>(node)) {
+        return generateFunctionCallNode(functionCallNode);
     }
 
     return {};
@@ -271,7 +187,7 @@ void IRGenerator::generateMethodCallNode(MethodCallNode* methodCallNode) {
     }
 }
 
-void IRGenerator::generateBuiltInFunctionCallNode(BuiltInFunctionCallNode* builtInFunctionCallNode) {
+IRValue IRGenerator::generateBuiltInFunctionCallNode(BuiltInFunctionCallNode* builtInFunctionCallNode) {
     std::vector<IRValue> arguments;
 
     for (const auto& argument : builtInFunctionCallNode->getArguments()) {
@@ -291,9 +207,11 @@ void IRGenerator::generateBuiltInFunctionCallNode(BuiltInFunctionCallNode* built
     instruction.operands = arguments;
 
     currentFunction->instructions.push_back(instruction);
+
+    return result;
 }
 
-void IRGenerator::generateFunctionCallNode(FunctionCallNode* functionCallNode) {
+IRValue IRGenerator::generateFunctionCallNode(FunctionCallNode* functionCallNode) {
     std::vector<IRValue> arguments;
 
     for (const auto& argument : functionCallNode->getArguments()) {
@@ -313,6 +231,27 @@ void IRGenerator::generateFunctionCallNode(FunctionCallNode* functionCallNode) {
     instruction.operands = arguments;
 
     currentFunction->instructions.push_back(instruction);
+
+    return result;
+}
+
+void IRGenerator::generateReturnNode(ReturnNode* returnNode) {
+    IRValue value = generateExpression(returnNode->getValue());
+
+    IRInstruction instruction;
+
+    instruction.result.id = getID();
+    instruction.result.type = value.type;
+    instruction.result.isConstant = false;
+
+    instruction.opcode = IROpcode::RETURN;
+    instruction.operands = { value };
+
+    currentFunction->instructions.push_back(instruction);
+}
+
+void IRGenerator::generateIfNode(IfNode* ifNode) {
+    // TODO
 }
 
 void IRGenerator::generate(ASTNode* node) {
@@ -328,5 +267,9 @@ void IRGenerator::generate(ASTNode* node) {
         generateBuiltInFunctionCallNode(builtInFunctionCallNode);
     } else if (auto* functionCallNode = dynamic_cast<FunctionCallNode*>(node)) {
         generateFunctionCallNode(functionCallNode);
+    } else if (auto* returnNode = dynamic_cast<ReturnNode*>(node)) {
+        generateReturnNode(returnNode);
+    } else if (auto* ifNode = dynamic_cast<IfNode*>(node)) {
+        generateIfNode(ifNode);
     }
 }

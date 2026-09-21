@@ -73,6 +73,14 @@ build CMakeFiles\mello.dir\src\parser\parser.cpp.obj: CXX_COMPILER__mello_unscan
   TARGET_COMPILE_PDB = CMakeFiles\mello.dir\
   TARGET_PDB = mello.pdb
 
+build CMakeFiles\mello.dir\src\ir\utils.cpp.obj: CXX_COMPILER__mello_unscanned_Debug C$:\Users\ITS\Desktop\Mello\src\ir\utils.cpp || cmake_object_order_depends_target_mello
+  FLAGS = /DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MTd -Zi
+  INCLUDES = -IC:\Users\ITS\Desktop\Mello\include -IC:\Users\ITS\Desktop\Mello\include\lexer -IC:\Users\ITS\Desktop\Mello\include\parser -IC:\Users\ITS\Desktop\Mello\include\ast -IC:\Users\ITS\Desktop\Mello\include\ir -IC:\Users\ITS\Desktop\Mello\include\utils -IC:\Users\ITS\Desktop\Mello\include\errors -IC:\Users\ITS\Desktop\Mello\include\compiler -IC:\Users\ITS\Desktop\Mello\include\semantic -IC:\Users\ITS\Desktop\Mello\stdlib
+  OBJECT_DIR = CMakeFiles\mello.dir
+  OBJECT_FILE_DIR = CMakeFiles\mello.dir\src\ir
+  TARGET_COMPILE_PDB = CMakeFiles\mello.dir\
+  TARGET_PDB = mello.pdb
+
 build CMakeFiles\mello.dir\src\ir\ir_generator.cpp.obj: CXX_COMPILER__mello_unscanned_Debug C$:\Users\ITS\Desktop\Mello\src\ir\ir_generator.cpp || cmake_object_order_depends_target_mello
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MTd -Zi
   INCLUDES = -IC:\Users\ITS\Desktop\Mello\include -IC:\Users\ITS\Desktop\Mello\include\lexer -IC:\Users\ITS\Desktop\Mello\include\parser -IC:\Users\ITS\Desktop\Mello\include\ast -IC:\Users\ITS\Desktop\Mello\include\ir -IC:\Users\ITS\Desktop\Mello\include\utils -IC:\Users\ITS\Desktop\Mello\include\errors -IC:\Users\ITS\Desktop\Mello\include\compiler -IC:\Users\ITS\Desktop\Mello\include\semantic -IC:\Users\ITS\Desktop\Mello\stdlib
@@ -113,6 +121,14 @@ build CMakeFiles\mello.dir\src\semantic\semantic_analyzer.cpp.obj: CXX_COMPILER_
   TARGET_COMPILE_PDB = CMakeFiles\mello.dir\
   TARGET_PDB = mello.pdb
 
+build CMakeFiles\mello.dir\src\semantic\utils.cpp.obj: CXX_COMPILER__mello_unscanned_Debug C$:\Users\ITS\Desktop\Mello\src\semantic\utils.cpp || cmake_object_order_depends_target_mello
+  FLAGS = /DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MTd -Zi
+  INCLUDES = -IC:\Users\ITS\Desktop\Mello\include -IC:\Users\ITS\Desktop\Mello\include\lexer -IC:\Users\ITS\Desktop\Mello\include\parser -IC:\Users\ITS\Desktop\Mello\include\ast -IC:\Users\ITS\Desktop\Mello\include\ir -IC:\Users\ITS\Desktop\Mello\include\utils -IC:\Users\ITS\Desktop\Mello\include\errors -IC:\Users\ITS\Desktop\Mello\include\compiler -IC:\Users\ITS\Desktop\Mello\include\semantic -IC:\Users\ITS\Desktop\Mello\stdlib
+  OBJECT_DIR = CMakeFiles\mello.dir
+  OBJECT_FILE_DIR = CMakeFiles\mello.dir\src\semantic
+  TARGET_COMPILE_PDB = CMakeFiles\mello.dir\
+  TARGET_PDB = mello.pdb
+
 build CMakeFiles\mello.dir\stdlib\module_loader.cpp.obj: CXX_COMPILER__mello_unscanned_Debug C$:\Users\ITS\Desktop\Mello\stdlib\module_loader.cpp || cmake_object_order_depends_target_mello
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MTd -Zi
   INCLUDES = -IC:\Users\ITS\Desktop\Mello\include -IC:\Users\ITS\Desktop\Mello\include\lexer -IC:\Users\ITS\Desktop\Mello\include\parser -IC:\Users\ITS\Desktop\Mello\include\ast -IC:\Users\ITS\Desktop\Mello\include\ir -IC:\Users\ITS\Desktop\Mello\include\utils -IC:\Users\ITS\Desktop\Mello\include\errors -IC:\Users\ITS\Desktop\Mello\include\compiler -IC:\Users\ITS\Desktop\Mello\include\semantic -IC:\Users\ITS\Desktop\Mello\stdlib
@@ -129,7 +145,7 @@ build CMakeFiles\mello.dir\stdlib\module_loader.cpp.obj: CXX_COMPILER__mello_uns
 #############################################
 # Link the executable mello.exe
 
-build mello.exe: CXX_EXECUTABLE_LINKER__mello_Debug CMakeFiles\mello.dir\src\main.cpp.obj CMakeFiles\mello.dir\src\lexer\lexer.cpp.obj CMakeFiles\mello.dir\src\parser\parser.cpp.obj CMakeFiles\mello.dir\src\ir\ir_generator.cpp.obj CMakeFiles\mello.dir\src\compiler\compiler.cpp.obj CMakeFiles\mello.dir\src\errors\error_handler.cpp.obj CMakeFiles\mello.dir\src\semantic\symbol_table.cpp.obj CMakeFiles\mello.dir\src\semantic\semantic_analyzer.cpp.obj CMakeFiles\mello.dir\stdlib\module_loader.cpp.obj
+build mello.exe: CXX_EXECUTABLE_LINKER__mello_Debug CMakeFiles\mello.dir\src\main.cpp.obj CMakeFiles\mello.dir\src\lexer\lexer.cpp.obj CMakeFiles\mello.dir\src\parser\parser.cpp.obj CMakeFiles\mello.dir\src\ir\utils.cpp.obj CMakeFiles\mello.dir\src\ir\ir_generator.cpp.obj CMakeFiles\mello.dir\src\compiler\compiler.cpp.obj CMakeFiles\mello.dir\src\errors\error_handler.cpp.obj CMakeFiles\mello.dir\src\semantic\symbol_table.cpp.obj CMakeFiles\mello.dir\src\semantic\semantic_analyzer.cpp.obj CMakeFiles\mello.dir\src\semantic\utils.cpp.obj CMakeFiles\mello.dir\stdlib\module_loader.cpp.obj
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -MTd -Zi
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib

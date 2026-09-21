@@ -11,25 +11,7 @@
 
 #include "semantic_analyzer.hpp"
 
-DataType SemanticAnalyzer::mapStringToDataType(const std::string& typeStr) {
-    if (typeStr == "int" || typeStr == "uint8_t" || typeStr == "int16_t" || typeStr == "uint16_t" || typeStr == "int32_t" || typeStr == "uint32_t") {
-        return DataType::INTEGER;
-    }
-
-    if (typeStr == "float") {
-        return DataType::FLOAT;
-    }
-
-    if (typeStr == "String" || typeStr == "const char*") {
-        return DataType::STRING;
-    }
-
-    if (typeStr == "bool") {
-        return DataType::BOOLEAN;
-    }
-
-    return DataType::UNKNOWN;
-}
+#include "utils.hpp"
 
 void SemanticAnalyzer::analyzeAssignment(VarAssignNode* varNode) {
     VariableSymbol symbol;
@@ -43,7 +25,7 @@ void SemanticAnalyzer::analyzeAssignment(VarAssignNode* varNode) {
     int currentLine = varNode->getCurrentDeclaredLine();
     int currentColumn = varNode->getCurrentDeclaredColumn();
 
-    if (!symbolTable.declareVariable(symbol)) {
+    if (!symbolTable.declareVariable(symbol) && declaredVariables.contains(symbol.name)) {
         ErrorHandler::report("This variable has already been declared:", symbol.name, currentLine, currentColumn, source);
     }
 }

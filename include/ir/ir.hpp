@@ -34,7 +34,14 @@ enum class IROpcode {
     CALL,
     STORE,
     RETURN,
-    FUNCTION
+    FUNCTION,
+    IF,
+    ELIF,
+    ELSE,
+    WHILE,
+    FOR,
+    EVERY,
+    REPEAT
 };
 
 struct IRValue {
@@ -56,4 +63,9 @@ struct IRFunction {
     IRType returnType;
     std::vector<std::string> parameters;
     std::vector<IRInstruction> instructions;
+};
+
+struct BasicBlock {
+    std::vector<IRInstruction> instructions;
+    IRInstruction terminator;
 };

@@ -14,11 +14,13 @@ set(SOURCES
     src/main.cpp
     src/lexer/lexer.cpp
     src/parser/parser.cpp
+    src/ir/utils.cpp
     src/ir/ir_generator.cpp
     src/compiler/compiler.cpp
     src/errors/error_handler.cpp
     src/semantic/symbol_table.cpp
     src/semantic/semantic_analyzer.cpp
+    src/semantic/utils.cpp
     stdlib/module_loader.cpp
 )
 
