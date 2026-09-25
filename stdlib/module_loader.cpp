@@ -12,6 +12,7 @@
 #include "module_loader.hpp"
 
 #include "ast.hpp"
+#include "utils.hpp"
 #include "lexer.hpp"
 #include "token.hpp"
 #include "parser.hpp"
@@ -22,7 +23,13 @@
 #include <iostream>
 
 std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
-    std::string path = "../stdlib/"+ moduleName + "/" + moduleName + ".mello";
+    std::string path;
+
+    if (stdLibs.contains(moduleName)) {
+        path = "../stdlib/" + moduleName + "/" + moduleName + ".mello";
+    } else {
+        path = sourceDir + "/" + moduleName + ".mello";
+    }
 
     std::ifstream moduleFile(path);
 

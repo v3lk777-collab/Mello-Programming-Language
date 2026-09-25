@@ -23,12 +23,13 @@ private:
     int currentID;
     IRFunction global;
     const SymbolTable* symbolTable;
+    IRBlock* currentBlock = nullptr;
     std::vector<IRFunction> functions;
     IRFunction* currentFunction = nullptr;
-    std::vector<IRInstruction> instructions;
 
 public:
     int getID() noexcept;
+    void setCurrentBlock(IRBlock block);
 
 public:
     IRType mapTokenTypeToIRType(TokenType tokenType) noexcept;
@@ -43,9 +44,9 @@ private:
 // Test
 public:
     void printInstruction(const IRInstruction& instruction) {
-        std::cout << "ID: " << instruction.result.id << '\n';
+        std::cout << "--> ID           : " << instruction.result.id << '\n';
 
-        std::cout << "Opcode: ";
+        std::cout << "--> Opcode       : ";
 
         switch (instruction.opcode) {
         case IROpcode::CONSTANT:
@@ -84,6 +85,42 @@ public:
             std::cout << "RETURN";
             break;
 
+        case IROpcode::BRANCH:
+            std::cout << "BRANCH";
+            break;
+
+        case IROpcode::CONDITIONAL_BRANCH:
+            std::cout << "CONDITIONAL_BRANCH";
+            break;
+
+        case IROpcode::EQUAL:
+            std::cout << "EQUAL";
+            break;
+
+        case IROpcode::EQUALITY:
+            std::cout << "EQUALITY";
+            break;
+
+        case IROpcode::LESS:
+            std::cout << "LESS";
+            break;
+
+        case IROpcode::GREATER:
+            std::cout << "GREATER";
+            break;
+
+        case IROpcode::LESS_EQUAL:
+            std::cout << "LESS_EQUAL";
+            break;
+
+        case IROpcode::GREATER_EQUAL:
+            std::cout << "GREATER_EQUAL";
+            break;
+
+        case IROpcode::NOT_EQUAL:
+            std::cout << "NOT_EQUAL";
+            break;
+
         default:
             std::cout << "UNKNOWN";
             break;
@@ -91,7 +128,7 @@ public:
 
         std::cout << '\n';
 
-        std::cout << "Operands: ";
+        std::cout << "--> Operands     : ";
 
         for (const auto& operand : instruction.operands) {
             std::cout << "%" << operand.id << " ";
@@ -99,33 +136,57 @@ public:
 
         std::cout << '\n';
 
-        std::cout << "Name: ";
+        std::cout << "--> Name         : ";
 
         for (const auto& name : instruction.name) {
             std::cout << name;
+        }
+
+        std::cout << '\n';
+
+        std::cout << "--> Target       : ";
+
+        for (const auto& target : instruction.target) {
+            std::cout << target;
+        }
+
+        std::cout << '\n';
+
+        std::cout << "--> False Target : ";
+
+        for (const auto& falseTarget : instruction.falseTarget) {
+            std::cout << falseTarget;
         }
 
         std::cout << "\n\n";
     }
 
     void printInstructions() {
-        std::cout << "Global:\n";
+        std::cout << "> Global:\n";
 
-        for (const auto& instruction : global.instructions) {
-            printInstruction(instruction);
+        for (const auto& block : global.blocks) {
+            std::cout << "> Block: " << block.name << "\n";
+
+            for (const auto& instruction : block.instructions) {
+                printInstruction(instruction);
+            }
         }
 
         for (const auto& function : functions) {
-            std::cout << "Function: " << function.name << "\n";
+            std::cout << "> Function: " << function.name << "\n";
 
-            for (const auto& instruction : function.instructions) {
-                printInstruction(instruction);
+            for (const auto& block : function.blocks) {
+                std::cout << "> Block: " << block.name << "\n";
+
+                for (const auto& instruction : block.instructions) {
+                    printInstruction(instruction);
+                }
             }
         }
     }
 
 private:
-    IRValue generateVarAssignNode(VarAssignNode* varAssignNode);
+    void generateVarAssignNode(VarAssignNode* varAssignNode);
     void generateFunctionNode(FunctionNode* functionNode);
     void generateUserFuncNode(UserFuncNode* userFuncNode);
     void generateSerialFunctionsCallNode(SerialFunctionsCallNode* serialFunctionsCallNode, MethodCallNode* methodCallNode);
@@ -134,11 +195,17 @@ private:
     void generateMethodCallNode(MethodCallNode* methodCallNode);
     void generateReturnNode(ReturnNode* returnNode);
     void generateIfNode(IfNode* ifNode);
+    void generateWhileNode(WhileNode* whileNode);
+    void generateForNode(ForNode* forNode);
+    IRValue generateVariableLoad(const std::string& name);
+    void generateForRangeNode(ForRangeNode* forRangeNode);
 
 public:
     IRGenerator(const SymbolTable* symbolTable);
 
 public:
     IRValue generateExpression(ASTNode* node);
+
+public:
     void generate(ASTNode* node);
 };

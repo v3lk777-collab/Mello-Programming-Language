@@ -19,11 +19,12 @@ class ASTNode;
 
 class ModuleLoader {
 private:
+    std::string sourceDir;
     std::string moduleName;
 
 public:
-    ModuleLoader(std::string moduleName)
-        : moduleName(std::move(moduleName)) {}
+    ModuleLoader(const std::string& moduleName, const std::string& sourceDir)
+        : moduleName(std::move(moduleName)), sourceDir(std::move(sourceDir)) {}
 
 public:
     std::vector<std::unique_ptr<ASTNode>> load();

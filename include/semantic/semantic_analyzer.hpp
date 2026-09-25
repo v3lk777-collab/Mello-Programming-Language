@@ -16,10 +16,6 @@
 
 #include <unordered_set>
 
-const std::unordered_set<std::string> builtInLibraries = {
-    "Servo", "Wire", "SPI", "math"
-};
-
 class SemanticAnalyzer {
 private:
     SymbolTable symbolTable;

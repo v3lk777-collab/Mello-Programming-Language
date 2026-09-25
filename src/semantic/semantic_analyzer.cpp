@@ -117,6 +117,14 @@ void SemanticAnalyzer::analyzeForStatement(ForNode* forNode) {
 }
 
 void SemanticAnalyzer::analyzeForRangeStatement(ForRangeNode* forRangeNode) {
+    if (!forRangeNode->getVarName().empty()) {
+        VariableSymbol variable;
+
+        variable.name = forRangeNode->getVarName();
+
+        symbolTable.declareVariable(variable);
+    }
+
     symbolTable.enterScope();
 
     for (const auto& body : forRangeNode->getChildBodies()) {
@@ -146,10 +154,6 @@ void SemanticAnalyzer::analyzeUseStatement(UseNode* useNode) {
     int currentColumn = useNode->getCurrentDeclaredColumn();
 
     std::string libraryName = useNode->getLibraryName();
-
-    if (!builtInLibraries.contains(libraryName)) {
-        ErrorHandler::report("Unknown library:", libraryName, currentLine, currentColumn, source);
-    }
 }
 
 void SemanticAnalyzer::analyzeRepeatStatement(RepeatNode* repeatNode) {

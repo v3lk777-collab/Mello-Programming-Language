@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <deque>
 #include <string>
 #include <vector>
 #include <variant>
@@ -30,18 +31,20 @@ enum class IROpcode {
     SUB,
     MUL,
     DIV,
+    EQUAL,
+    EQUALITY,
+    LESS,
+    GREATER,
+    LESS_EQUAL,
+    GREATER_EQUAL,
+    NOT_EQUAL,
     LOAD,
     CALL,
     STORE,
     RETURN,
     FUNCTION,
-    IF,
-    ELIF,
-    ELSE,
-    WHILE,
-    FOR,
-    EVERY,
-    REPEAT
+    BRANCH,
+    CONDITIONAL_BRANCH
 };
 
 struct IRValue {
@@ -55,17 +58,19 @@ struct IRInstruction {
     IRValue result;
     IROpcode opcode;
     std::string name;
+    std::string target;
+    std::string falseTarget;
     std::vector<IRValue> operands;
+};
+
+struct IRBlock {
+    std::string name;
+    std::vector<IRInstruction> instructions;
 };
 
 struct IRFunction {
     std::string name;
     IRType returnType;
+    std::deque<IRBlock> blocks;
     std::vector<std::string> parameters;
-    std::vector<IRInstruction> instructions;
-};
-
-struct BasicBlock {
-    std::vector<IRInstruction> instructions;
-    IRInstruction terminator;
 };

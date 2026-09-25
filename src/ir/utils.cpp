@@ -15,6 +15,12 @@ int IRGenerator::getID() noexcept {
     return currentID++;
 }
 
+void IRGenerator::setCurrentBlock(IRBlock block) {
+    currentFunction->blocks.push_back(std::move(block));
+
+    currentBlock = &currentFunction->blocks.back();
+}
+
 IRType IRGenerator::mapTokenTypeToIRType(TokenType tokenType) noexcept {
     switch (tokenType) {
     case TokenType::INTEGER:
@@ -91,6 +97,27 @@ IROpcode IRGenerator::mapTokenToIROpcode(Token token) noexcept {
 
     case TokenType::DIVIDE:
         return IROpcode::DIV;
+
+    case TokenType::EQUAL:
+        return IROpcode::EQUAL;
+
+    case TokenType::EQUALITY:
+        return IROpcode::EQUALITY;
+
+    case TokenType::LESS:
+        return IROpcode::LESS;
+
+    case TokenType::GREATER:
+        return IROpcode::GREATER;
+
+    case TokenType::LESS_EQUAL:
+        return IROpcode::LESS_EQUAL;
+
+    case TokenType::GREATER_EQUAL:
+        return IROpcode::GREATER_EQUAL;
+
+    case TokenType::NOT_EQUAL:
+        return IROpcode::NOT_EQUAL;
 
     default:
         return IROpcode::CONSTANT;

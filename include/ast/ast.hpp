@@ -21,7 +21,7 @@
 
 class ASTNode {
 public:
-    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return {};
     }
 
@@ -56,19 +56,19 @@ public:
         : libraryName(std::move(libraryName)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    std::string getLibraryName() const {
+    std::string getLibraryName() const noexcept {
         return libraryName;
     }
 
-    std::string getSource() const {
+    std::string getSource() const noexcept {
         return source;
     }
 
-    int getCurrentDeclaredLine() const {
+    int getCurrentDeclaredLine() const noexcept {
         return currentLine;
     }
 
-    int getCurrentDeclaredColumn() const {
+    int getCurrentDeclaredColumn() const noexcept {
         return currentColumn;
     }
 
@@ -84,7 +84,7 @@ private:
     std::vector<std::string> arrayMembers;
 
 private:
-    std::string inferElementType() const {
+    std::string inferElementType() const noexcept {
         if (arrayMembers.empty()) {
             return "int";
         }
@@ -107,11 +107,11 @@ public:
         : arrayName(std::move(name)), arrayMembers(std::move(arrayMembers)) {}
 
 public:
-    const std::string& getArrayName() const {
+    const std::string& getArrayName() const noexcept {
         return arrayName;
     }
 
-    const std::vector<std::string>& getArrayMembers() const {
+    const std::vector<std::string>& getArrayMembers() const noexcept {
         return arrayMembers;
     }
 
@@ -144,11 +144,11 @@ public:
         : arrayName(std::move(arrayName)), indexExpression(std::move(indexExpression)) {}
 
 public:
-    const std::string& getArrayName() const {
+    const std::string& getArrayName() const noexcept {
         return arrayName;
     }
 
-    const std::unique_ptr<ExpressionNode>& getIndexExpression() const {
+    const std::unique_ptr<ExpressionNode>& getIndexExpression() const noexcept {
         return indexExpression;
     }
 
@@ -169,15 +169,15 @@ public:
         : arrayName(std::move(arrayName)), indexExpression(std::move(indexExpression)), valueExpression(std::move(valueExpression)) {}
 
 public:
-    const std::string& getArrayName() const {
+    const std::string& getArrayName() const noexcept {
         return arrayName;
     }
 
-    const std::unique_ptr<ExpressionNode>& getIndexExpression() const {
+    const std::unique_ptr<ExpressionNode>& getIndexExpression() const noexcept {
         return indexExpression;
     }
 
-    const std::unique_ptr<ExpressionNode>& getValueExpression() const {
+    const std::unique_ptr<ExpressionNode>& getValueExpression() const noexcept {
         return valueExpression;
     }
 
@@ -278,7 +278,7 @@ public:
         : token(token) {}
 
 public:
-    const Token& getToken() const {
+    const Token& getToken() const noexcept {
         return token;
     }
 
@@ -320,23 +320,23 @@ public:
         : funcName(std::move(name)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    std::string getFunctionName() const {
+    std::string getFunctionName() const noexcept {
         return funcName;
     }
 
-    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const { 
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const noexcept { 
         return arguments; 
     }
 
-    std::string getSource() const {
+    std::string getSource() const noexcept {
         return source;
     }
 
-    int getCurrentDeclaredLine() const {
+    int getCurrentDeclaredLine() const noexcept {
         return currentLine;
     }
 
-    int getCurrentDeclaredColumn() const {
+    int getCurrentDeclaredColumn() const noexcept {
         return currentColumn;
     }
 
@@ -426,11 +426,11 @@ public:
     }
 
 public:
-    const std::string& getFunctionName() const {
+    const std::string& getFunctionName() const noexcept {
         return funcName;
     }
 
-    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const {
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const noexcept {
         return arguments;
     }
 
@@ -567,11 +567,11 @@ public:
         : funcName(std::move(funcName)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    const std::string& getFunctionName() const {
+    const std::string& getFunctionName() const noexcept {
         return funcName;
     }
 
-    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const {
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const noexcept {
         return arguments;
     }
 
@@ -698,7 +698,7 @@ public:
         : objectName(std::move(object)), methodCall(std::move(method)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    std::string getObjectName() const {
+    std::string getObjectName() const noexcept {
         return objectName;
     }
 
@@ -706,15 +706,15 @@ public:
         return methodCall.get();
     }
 
-    std::string getSource() const {
+    std::string getSource() const noexcept {
         return source;
     }
 
-    int getCurrentDeclaredLine() const {
+    int getCurrentDeclaredLine() const noexcept {
         return currentLine;
     }
 
-    int getCurrentDeclaredColumn() const {
+    int getCurrentDeclaredColumn() const noexcept {
         return currentColumn;
     }
 
@@ -782,7 +782,7 @@ private:
         return true;
     }
 
-    std::string inferIntegerType(std::string value) const {
+    std::string inferIntegerType(std::string value) const noexcept {
         std::string type;
         long long number = std::stoll(value);
 
@@ -808,35 +808,35 @@ public:
         : name(std::move(name)), value(std::move(value)), raw_value(std::move(raw)), val_type(val_type), isConstantVar(isConstantVar), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    const std::string& getName() const {
+    const std::string& getName() const noexcept {
         return name;
     }
 
-    ASTNode* getValue() const {
+    ASTNode* getValue() const noexcept {
         return value.get();
     }
 
-    TokenType getValueType() const {
+    TokenType getValueType() const noexcept {
         return val_type;
     }
 
-    const std::string& getRawValue() const {
+    const std::string& getRawValue() const noexcept {
         return raw_value;
     }
 
-    bool getIsConstantVar() const {
+    bool getIsConstantVar() const noexcept {
         return isConstantVar;
     }
 
-    const std::string& getSource() const {
+    const std::string& getSource() const noexcept {
         return source;
     }
 
-    int getCurrentDeclaredLine() const {
+    int getCurrentDeclaredLine() const noexcept {
         return currentLine;
     }
 
-    int getCurrentDeclaredColumn() const {
+    int getCurrentDeclaredColumn() const noexcept {
         return currentColumn;
     }
 
@@ -1017,11 +1017,11 @@ public:
         : op(op), right(std::move(right)) {}
 
 public:
-    const Token& getOp() const {
+    const Token& getOp() const noexcept {
         return op;
     }
 
-    ExpressionNode* getRight() const { 
+    ExpressionNode* getRight() const noexcept { 
         return right.get(); 
     }
 
@@ -1050,15 +1050,15 @@ public:
         : left(std::move(left)), op(op), right(std::move(right)) {}
 
 public:
-    Token getOp() const { 
+    Token getOp() const noexcept { 
         return op; 
     }
 
-    ExpressionNode* getLeft() const { 
+    ExpressionNode* getLeft() const noexcept { 
         return left.get();
     }
 
-    ExpressionNode* getRight() const { 
+    ExpressionNode* getRight() const noexcept { 
         return right.get(); 
     }
 
@@ -1115,15 +1115,15 @@ public:
         : name(std::move(name)), op(std::move(op)), value(std::move(value)) {}
 
 public:
-    const std::string& getOp() const {
+    const std::string& getOp() const noexcept {
         return op;
     }
 
-    const std::string& getName() const {
+    const std::string& getName() const noexcept {
         return name;
     }
 
-    const std::string& getValue() const {
+    const std::string& getValue() const noexcept {
         return value;
     }
 
@@ -1157,19 +1157,19 @@ public:
     }
 
 public:
-    const std::unique_ptr<ASTNode> &getCondition() const {
+    const std::unique_ptr<ASTNode> &getCondition() const noexcept {
         return condition;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>> &getThenBody() const {
+    const std::vector<std::unique_ptr<ASTNode>> &getThenBody() const noexcept {
         return thenBody;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>> &getElseBody() const {
+    const std::vector<std::unique_ptr<ASTNode>> &getElseBody() const noexcept {
         return elseBody;
     }
 
-    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return { &thenBody, &elseBody };
     }
 
@@ -1211,7 +1211,7 @@ public:
         : value(std::move(val)) {}
 
 public:
-    ASTNode* getValue() const {
+    ASTNode* getValue() const noexcept {
         return value.get();
     }
 
@@ -1237,7 +1237,7 @@ private:
     std::string source;
 
 private:
-    std::string typeFromReturnValue(const std::string& value) const {
+    std::string typeFromReturnValue(const std::string& value) const noexcept {
         if (value.find("\"") != std::string::npos || value.find("String(") != std::string::npos) {
             return "String";
         }
@@ -1253,7 +1253,7 @@ private:
         return "int";
     }
 
-    std::string findReturnTypeIn(const std::vector<std::unique_ptr<ASTNode>>& nodes) const {
+    std::string findReturnTypeIn(const std::vector<std::unique_ptr<ASTNode>>& nodes) const noexcept {
         for (const auto& node : nodes) {
             if (auto* returnNode = dynamic_cast<ReturnNode*>(node.get())) {
                 return typeFromReturnValue(returnNode->toCpp());
@@ -1271,7 +1271,7 @@ private:
         return "void";
     }
 
-    std::string inferReturnType() const {
+    std::string inferReturnType() const noexcept {
         return findReturnTypeIn(body);
     }
 
@@ -1280,27 +1280,27 @@ public:
         : funcName(name), params(std::move(params)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    const std::string& getFunctionName() const {
+    const std::string& getFunctionName() const noexcept {
         return funcName;
     }
 
-    std::vector<std::string> getFuncParams() const {
+    std::vector<std::string> getFuncParams() const noexcept {
         return params;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>> &getBody() const {
+    const std::vector<std::unique_ptr<ASTNode>> &getBody() const noexcept {
         return body;
     }
 
-    std::string getSource() const {
+    std::string getSource() const noexcept {
         return source;
     }
 
-    int getCurrentDeclaredLine() const {
+    int getCurrentDeclaredLine() const noexcept {
         return currentLine;
     }
 
-    int getCurrentDeclaredColumn() const {
+    int getCurrentDeclaredColumn() const noexcept {
         return currentColumn;
     }
 
@@ -1353,7 +1353,7 @@ public:
     }
 
 public:
-    int getID() const {
+    int getID() const noexcept {
         return id;
     }
 
@@ -1361,11 +1361,11 @@ public:
         return interval;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
     }
 
-    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return { &body };
     }
 
@@ -1399,15 +1399,15 @@ public:
         : condition(std::move(cond)), body(std::move(b)) {}
 
 public:
-    const std::unique_ptr<ExpressionNode> &getCondition() const {
+    const std::unique_ptr<ExpressionNode> &getCondition() const noexcept {
         return condition;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
     }
 
-    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return { &body };
     }
 
@@ -1435,15 +1435,15 @@ public:
         : condition(std::move(cond)), body(std::move(body)) {}
 
 public:
-    const std::unique_ptr<ExpressionNode> &getCondition() const {
+    const std::unique_ptr<ExpressionNode> &getCondition() const noexcept {
         return condition;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
     }
 
-    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return { &body };
     }
 
@@ -1481,27 +1481,27 @@ public:
         : varName(std::move(varName)), start(std::move(start)), stop(std::move(stop)), step(std::move(step)), body(std::move(body)) {}
 
 public:
-    const std::string& getVarName() const {
+    const std::string& getVarName() const noexcept {
         return varName;
     }
 
-    const std::unique_ptr<ExpressionNode>& getStart() const {
+    const std::unique_ptr<ExpressionNode>& getStart() const noexcept {
         return start;
     }
 
-    const std::unique_ptr<ExpressionNode>& getStop() const {
+    const std::unique_ptr<ExpressionNode>& getStop() const noexcept {
         return stop;
     }
 
-    const std::unique_ptr<ExpressionNode>& getStep() const {
+    const std::unique_ptr<ExpressionNode>& getStep() const noexcept {
         return step;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
     }
 
-    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return { &body };
     }
 
@@ -1534,19 +1534,19 @@ public:
     }
 
 public:
-    int getID() const {
+    int getID() const noexcept {
         return id;
     }
 
-    const std::string& getCount() const {
+    const std::string& getCount() const noexcept {
         return count;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
     }
 
-    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return { &body };
     }
 
@@ -1575,7 +1575,7 @@ public:
 
 
 public:
-    ExpressionNode* getExpression() const {
+    ExpressionNode* getExpression() const noexcept {
         return dynamic_cast<ExpressionNode*>(expression.get());
     }
 
@@ -1602,19 +1602,19 @@ public:
     }
 
 public:
-    int getID() const {
+    int getID() const noexcept {
         return id;
     }
 
-    const std::string& getPin() const {
+    const std::string& getPin() const noexcept {
         return pin;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>>& getBody() const {
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
     }
 
-    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const {
+    virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return { &body };
     }
 
@@ -1650,7 +1650,7 @@ public:
         : statement(std::move(statement)) {}
 
 public:
-    const std::string& getStatement() const {
+    const std::string& getStatement() const noexcept {
         return statement;
     }
 
@@ -1681,11 +1681,11 @@ public:
         : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    const std::string& getFunctionName() const {
+    const std::string& getFunctionName() const noexcept {
         return funcName;
     }
 
-    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const {
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const noexcept {
         return arguments;
     }
 

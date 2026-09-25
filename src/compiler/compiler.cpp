@@ -121,7 +121,7 @@ bool Compiler::installLibraries() {
             std::string installLibrariesCommand = ARDUINO_CLI_PATH + " lib install \"" + lib + "\"";
         
             int status = system(installLibrariesCommand.c_str());
-            
+
             if (status != 0) {
                 std::cerr << "Warning: Failed to install '" << lib << "'. It might be built-in or the name is incorrect." << "\n";
             }
@@ -238,6 +238,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     file.close();
 
     Lexer lexer(sourceCode);
+
     std::vector<Token> tokens = lexer.tokenize();
     
     std::vector<std::unique_ptr<ASTNode>> program;
@@ -247,8 +248,10 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
 
         program = parser.parse();
 
+        std::string sourceDir = std::filesystem::path(filePath).parent_path().string();
+
         for (const auto& stdLib : includedStdLibs) {
-            ModuleLoader moduleLoader(stdLib);
+            ModuleLoader moduleLoader(stdLib, sourceDir);
 
             auto moduleNodes = moduleLoader.load();
 
@@ -404,7 +407,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
 
     // But wait, why are u reaing my code
     // yk, if u steal it, i will kill u
-    // so btw, dont steal it
+    // so btw, dont steal it (´▽`ʃ♡ƪ)
 
     bool isUpload = false;
     bool isCompileCode = true;
