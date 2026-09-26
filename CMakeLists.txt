@@ -14,8 +14,6 @@ set(SOURCES
     src/main.cpp
     src/lexer/lexer.cpp
     src/parser/parser.cpp
-    src/ir/utils.cpp
-    src/ir/ir_generator.cpp
     src/compiler/compiler.cpp
     src/errors/error_handler.cpp
     src/semantic/symbol_table.cpp
@@ -31,7 +29,6 @@ target_include_directories(mello PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/lexer
     ${CMAKE_CURRENT_SOURCE_DIR}/include/parser
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ast
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ir
     ${CMAKE_CURRENT_SOURCE_DIR}/include/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/include/errors
     ${CMAKE_CURRENT_SOURCE_DIR}/include/compiler

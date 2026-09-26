@@ -1476,9 +1476,14 @@ private:
     std::unique_ptr<ExpressionNode> step;
     std::vector<std::unique_ptr<ASTNode>> body;
 
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
 public:
-    ForRangeNode(std::string varName, std::unique_ptr<ExpressionNode> start, std::unique_ptr<ExpressionNode> stop, std::unique_ptr<ExpressionNode> step, std::vector<std::unique_ptr<ASTNode>> body)
-        : varName(std::move(varName)), start(std::move(start)), stop(std::move(stop)), step(std::move(step)), body(std::move(body)) {}
+    ForRangeNode(std::string varName, std::unique_ptr<ExpressionNode> start, std::unique_ptr<ExpressionNode> stop, std::unique_ptr<ExpressionNode> step, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
+        : varName(std::move(varName)), start(std::move(start)), stop(std::move(stop)), step(std::move(step)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     const std::string& getVarName() const noexcept {
@@ -1503,6 +1508,18 @@ public:
 
     virtual std::vector<const std::vector<std::unique_ptr<ASTNode>>*> getChildBodies() const noexcept {
         return { &body };
+    }
+
+    const std::string& getSource() const noexcept {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const noexcept {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const noexcept {
+        return currentColumn;
     }
 
 public:

@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include "ir_generator.hpp"
-
 #include <string>
 #include <filesystem>
 

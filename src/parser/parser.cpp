@@ -870,7 +870,7 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
         auto body = parseBlock();
         consume(TokenType::DEDENT, "Expected dedent at end of for block");
 
-        return std::make_unique<ForRangeNode>(varName, std::move(startExpression), std::move(stopExpression), std::move(stepExpression), std::move(body));
+        return std::make_unique<ForRangeNode>(varName, std::move(startExpression), std::move(stopExpression), std::move(stepExpression), std::move(body), current.line, current.column, this->source);
     }
 
     auto condition = parseExpression();

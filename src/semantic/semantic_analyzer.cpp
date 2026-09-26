@@ -125,6 +125,18 @@ void SemanticAnalyzer::analyzeForRangeStatement(ForRangeNode* forRangeNode) {
         symbolTable.declareVariable(variable);
     }
 
+    if (forRangeNode->getStart()) {
+        analyzeExpression(forRangeNode->getStart().get());
+    }
+
+    if (forRangeNode->getStop()) {
+        analyzeExpression(forRangeNode->getStop().get());
+    }
+
+    if (forRangeNode->getStep()) {
+        analyzeExpression(forRangeNode->getStep().get());
+    }
+
     symbolTable.enterScope();
 
     for (const auto& body : forRangeNode->getChildBodies()) {

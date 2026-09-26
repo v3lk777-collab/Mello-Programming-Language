@@ -265,14 +265,6 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         for (const auto& node : program) {
             analyzer.analyzeNode(node.get());
         }
-
-        IRGenerator generator(&analyzer.getSymbolTable());
-
-        for (const auto& node : program) {
-            generator.generate(node.get());
-        }
-
-        generator.printInstructions();
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << "\n";
 
