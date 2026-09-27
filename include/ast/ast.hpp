@@ -867,9 +867,38 @@ public:
             return name + " = " + final_value + ";";
         }
 
-        auto containsStringVariable = [&](const std::string& expr) {
-            for (const auto& stringVariable : stringVariables) {
-                if (expr.find(stringVariable) != std::string::npos) {
+        auto containsWord = [&](const std::string expression, const std::string& word) -> bool {
+            auto isIdentCharacter = [](char c) -> bool {
+                return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+            };
+
+            size_t position = expression.find(word);
+
+            while (position != std::string::npos) {
+                bool prevOk = (position == 0) || !isIdentCharacter(expression[position - 1]);
+
+                size_t nextPosition = position + word.length();
+                bool nextOk = (nextPosition == expression.length()) || !isIdentCharacter(expression[nextPosition]);
+
+                if (prevOk && nextOk) {
+                    return true;
+                }
+
+                position = expression.find(word, position + 1);
+            }
+
+            return false;
+        };
+
+        auto containsNonConstantVariable = [&]() -> bool {
+            for (const auto& var : nonConstantVariables) {
+                if (containsWord(final_value, var)) {
+                    return true;
+                }
+            }
+
+            for (const auto& param : currentFunctionParams) {
+                if (containsWord(final_value, param)) {
                     return true;
                 }
             }
@@ -877,9 +906,19 @@ public:
             return false;
         };
 
-        auto containsFloatVariable = [&](const std::string& expr) {
+        auto containsStringVariable = [&](const std::string& expression) -> bool {
+            for (const auto& stringVariable : stringVariables) {
+                if (containsWord(expression, stringVariable)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        auto containsFloatVariable = [&](const std::string& expression) -> bool {
             for (const auto& floatVariable : floatVariables) {
-                if (expr.find(floatVariable) != std::string::npos) {
+                if (containsWord(expression, floatVariable)) {
                     return true;
                 }
             }
@@ -983,11 +1022,13 @@ public:
             return type + " " + name + " = " + final_value + ";\n";
         }
 
-        if ((!isReassigned && !hasConst && !isKeyword) || isConstantVar) {
+        if (((!isReassigned && !hasConst && !isKeyword) || isConstantVar) && !containsNonConstantVariable()) {
             if (type == "String") {
                 if (isConstantVar) {
                     return "const " + type + " " + name + " = " + final_value + ";\n";
                 } else {
+                    nonConstantVariables.insert(name);
+
                     return type + " " + name + " = " + final_value + ";\n";
                 }
             }
@@ -996,12 +1037,16 @@ public:
                 if (isConstantVar) {
                     return "const " + type + " " + name + " = " + final_value + ";\n";
                 } else {
+                    nonConstantVariables.insert(name);
+
                     return type + " " + name + " = " + final_value + ";\n";
                 }
             }
 
             return "constexpr " + type + " " + name + " = " + final_value + ";\n";
         }
+
+        nonConstantVariables.insert(name);
 
         return type + " " + name + " = " + final_value + ";\n";
     }
@@ -1318,6 +1363,8 @@ public:
             result += ">\n";
         }
 
+        currentFunctionParams = params;
+
         std::string returnType = params.empty() ? inferReturnType() : "auto";
 
         result += returnType + " " + funcName + "(";
@@ -1333,6 +1380,8 @@ public:
         }
 
         result += "}\n";
+
+        currentFunctionParams.clear();
 
         return result;
     }

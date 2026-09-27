@@ -29,6 +29,8 @@ inline std::set<std::string> floatVariables;
 inline std::set<std::string> stringVariables;
 inline std::set<std::string> integerVariables;
 
+inline std::set<std::string> nonConstantVariables;
+
 inline std::set<std::string> includedLibraries;
 inline std::set<std::string> installedLibraries;
 
@@ -40,6 +42,8 @@ inline std::set<std::string> reassignedVariables;
 inline std::set<std::string> arraysNamesList;
 
 inline std::set<std::string> userDefinedFunctionNames;
+
+inline std::vector<std::string> currentFunctionParams;
 
 inline std::string currentParsingUserFunc = "";
 inline std::vector<std::string> currentFuncParamNames;
@@ -74,12 +78,15 @@ inline auto parseTime = [](std::string timeVal) -> std::string {
             }
         } catch (const std::invalid_argument& error) {
             std::cerr << "\n[Error] Mello Compiler: Expected a valid number in wait(), but got: '" << numPart << "'\n";
+
             exit(1);
         } catch (const std::out_of_range& error) {
             std::cerr << "\n[Error] Mello Compiler: The time value '" << numPart << "' is too large!\n";
+
             exit(1); 
         } catch (...) {
             std::cerr << "\n[Error] Mello Compiler: Unknown error while parsing time.\n";
+
             return timeVal;
         }
     }

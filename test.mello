@@ -1,8 +1,14 @@
-x = 0
+x = 10
+y = 20
+z = 30
 
-fn loop():
-    while x < 5:
-        x = x + 1
+fn add(a, b):
+    result = a + b
 
-    for i in range(0, 10, 2):
-        serial.print(i)
+    return result
+
+fn start():
+    x = 40
+    number = x + y + z
+
+    serial.print(number)

@@ -183,6 +183,7 @@ std::unique_ptr<ExpressionNode> Parser::parseUnary() {
 std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
     if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT) {
         Token t = current;
+
         advance();
 
         return std::make_unique<LiteralNode>(t);
@@ -281,7 +282,18 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
     if (current.type == TokenType::STRING) {
         Token t = current;
+
         t.value = "\"" + t.value + "\"";
+
+        advance();
+
+        return std::make_unique<LiteralNode>(t);
+    }
+
+    if (current.type == TokenType::CHARACTER) {
+        Token t = current;
+
+        t.value = "\'" + t.value + "\'";
 
         advance();
 
@@ -299,11 +311,11 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
     if (current.type == TokenType::LPAREN) {
         advance();
 
-        auto expr = parseExpression();
+        auto expression = parseExpression();
 
         consume(TokenType::RPAREN, "Expected ')' in expression");
 
-        return std::make_unique<GroupNode>(std::move(expr));
+        return std::make_unique<GroupNode>(std::move(expression));
     }
 
     ErrorHandler::report("Unexpected token in expression:", current.value, current.line, current.column, this->source);
