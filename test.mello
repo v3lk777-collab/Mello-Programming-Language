@@ -11,4 +11,5 @@ fn start():
     x = 40
     number = x + y + z
 
-    serial.print(number)
+    every 1s:
+        serial.print(number)

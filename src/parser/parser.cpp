@@ -799,12 +799,21 @@ std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
 std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     advance();
 
-    if (current.type != TokenType::INTEGER || current.type == TokenType::FLOAT && current.type != TokenType::IDENTIFIER) {
+    if (current.type != TokenType::INTEGER && current.type != TokenType::FLOAT && current.type != TokenType::IDENTIFIER) {
         ErrorHandler::report("Expected a number or identifier for interval", current.value, current.line, current.column, this->source);
     }
 
-    std::string interval = current.value;
-    advance();
+    std::string interval;
+
+    while (current.type != TokenType::COLON && current.type != TokenType::NEWLINE && current.type != TokenType::EndOfFile) {
+        interval += current.value;
+
+        advance();
+    }
+
+    if (interval.empty()) {
+        ErrorHandler::report("Missing interval after 'every'", current.value, current.line, current.column, this->source);
+    }
 
     consume(TokenType::COLON, "Expected ':' after every interval");
     match(TokenType::NEWLINE);
@@ -812,6 +821,7 @@ std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     consume(TokenType::INDENT, "Expected indentation after every");
 
     auto body = parseBlock();
+
     consume(TokenType::DEDENT, "Expected dedent at end of every block");
     
     return std::make_unique<EveryNode>(interval, std::move(body));

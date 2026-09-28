@@ -962,7 +962,7 @@ public:
         } else if (val_type == TokenType::IDENTIFIER && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionNames.count(final_value.substr(0, final_value.find("(")))) {
             std::string className = final_value.substr(0, final_value.find("("));
 
-            if (includedLibraries.count(className) < 0) {
+            if (!includedLibraries.count(className)) {
                 ErrorHandler::report("Must import this libarary first:", className, currentLine, currentColumn, source);
             }
 
@@ -986,7 +986,7 @@ public:
             }
 
             stringVariables.insert(name);
-        } else if (val_type == TokenType::BOOLEAN && final_value == "true" || final_value == "false") {
+        } else if (val_type == TokenType::BOOLEAN && (final_value == "true" || final_value == "false")) {
             type = "bool";
         } else if (val_type == TokenType::FLOAT && (final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumeric(final_value)) {
             type = "float";
