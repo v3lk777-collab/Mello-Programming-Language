@@ -862,6 +862,7 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
         }
 
         advance();
+
         consume(TokenType::LPAREN, "Expected '(' after 'range'");
 
         auto startExpression = parseExpression();
@@ -870,6 +871,7 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
 
         if (current.type == TokenType::COMMA) {
             advance();
+
             stopExpression = parseExpression();
         } else {
             stopExpression = std::move(startExpression);
@@ -878,6 +880,7 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
 
         if (current.type == TokenType::COMMA) {
             advance();
+
             stepExpression = parseExpression();
         } else {
             stepExpression = std::make_unique<LiteralNode>(Token(TokenType::INTEGER, "1", current.line));
@@ -890,6 +893,7 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
         consume(TokenType::INDENT, "Expected indentation after for");
 
         auto body = parseBlock();
+
         consume(TokenType::DEDENT, "Expected dedent at end of for block");
 
         return std::make_unique<ForRangeNode>(varName, std::move(startExpression), std::move(stopExpression), std::move(stepExpression), std::move(body), current.line, current.column, this->source);
@@ -903,6 +907,7 @@ std::unique_ptr<ASTNode> Parser::parseForStatement() {
     consume(TokenType::INDENT, "Expected indentation after while");
 
     auto body = parseBlock();
+
     consume(TokenType::DEDENT, "Expected dedent at end of while block");
 
     return std::make_unique<ForNode>(std::move(condition), std::move(body));
