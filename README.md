@@ -370,7 +370,7 @@ This project is explicitly designed to meet high-level engineering evaluation st
 
 Mello Programming Language and the Mello IDE are original works developed for scientific research and educational purposes.
 
-- **Usage:** you are free to view, study, use Mello in embedded systems like Arduino and ESP32, and learn from this codebase.
+- **Usage:** you are free to view, study, use Mello in embedded systems like Arduino and ESP32 **(working on it)**, and learn from this codebase.
 - **Restrictions:** unauthorized use of this source code in any academic competition (e.g., ISEF, science fairs), research submission, or commercial product is **strictly prohibited** without prior written consent from the author.
 - **Attribution:** if you find this project useful for learning, please attribute the work to the original author, Mohammed Tamer Mohammed Ahmed El-Azab.
 
