@@ -2,6 +2,8 @@ x = 10
 y = 20
 z = 30
 
+n = 10
+
 fn add(a, b):
     result = a + b
 
@@ -10,6 +12,14 @@ fn add(a, b):
 fn start():
     x = 40
     number = x + y + z
+
+    for n < 10:
+        serial.print(n)
+        n++
+
+    for i > 10:
+        serial.print(i)
+        i--
 
     every 1s:
         serial.print(number)

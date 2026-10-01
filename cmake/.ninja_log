@@ -32,3 +32,15 @@
 23	38070	8125196155134769	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	dfd531ba0370cd88
 51	43980	8125196155414838	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	71b26225662ad974
 43983	47693	8125196594730557	mello.exe	d543d562735a5e8f
+14	10823	8125229185685204	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	dfd531ba0370cd88
+10841	12283	8125229294860677	mello.exe	d543d562735a5e8f
+40	12101	8125236008281902	CMakeFiles/mello.dir/stdlib/module_loader.cpp.obj	a78368ddfaa95d0b
+9	12623	8125236007961865	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	dfd531ba0370cd88
+25	15982	8125236008121882	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	71b26225662ad974
+15983	17130	8125236167739367	mello.exe	d543d562735a5e8f
+67	15716	8125238024050334	CMakeFiles/mello.dir/src/semantic/semantic_analyzer.cpp.obj	7fe40948ac55b4b9
+100	15886	8125238024240361	CMakeFiles/mello.dir/src/semantic/utils.cpp.obj	9e60e7ab46b42274
+119	16028	8125238024430347	CMakeFiles/mello.dir/stdlib/module_loader.cpp.obj	a78368ddfaa95d0b
+15	17606	8125238023370365	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	dfd531ba0370cd88
+49	19725	8125238023730371	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	71b26225662ad974
+19726	20462	8125238220477157	mello.exe	d543d562735a5e8f

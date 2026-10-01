@@ -25,7 +25,8 @@ private:
     std::vector<Token> tokens;
 
 private:
-    void advance();
+    Token peek() const noexcept;
+    void advance() noexcept;
     bool match(TokenType type);
     void consume(TokenType type, const std::string& errorMessage);
 

@@ -1503,9 +1503,8 @@ public:
 
         bool isDecrement = condStr.find(">") != std::string::npos;
         std::string op = isDecrement ? "--" : "++"; 
-        std::string varType = isDecrement ? "int32_t" : "uint32_t";
 
-        std::string result = "for (" + varType + " " + varName + " = 0; " + condStr + "; " + varName + op + ") {\n";
+        std::string result = "for (; " + condStr + "; " + varName + op + ") {\n";
 
         for (const auto& node : body) {
             result += node->toCpp() + "\n";

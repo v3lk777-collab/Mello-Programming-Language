@@ -27,7 +27,15 @@ Parser::Parser(const std::vector<Token>& tokens, const std::string& source)
     }
 }
 
-void Parser::advance() {
+Token Parser::peek() const noexcept {
+    if (position + 1 < tokens.size()) {
+        return tokens[position + 1];
+    } else {
+        return Token(TokenType::EndOfFile, "", current.line);
+    }
+}
+
+void Parser::advance() noexcept {
     if (position < tokens.size()) {
         position++;
     }
@@ -846,7 +854,7 @@ std::unique_ptr<ASTNode> Parser::parseWhileStatement() {
 std::unique_ptr<ASTNode> Parser::parseForStatement() {
     advance();
 
-    if (current.type == TokenType::IDENTIFIER) {
+    if (current.type == TokenType::IDENTIFIER && peek().type == TokenType::KEYWORD && peek().value == "in") {
         std::string varName = current.value;
 
         advance();
