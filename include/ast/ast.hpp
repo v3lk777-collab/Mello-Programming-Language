@@ -14,7 +14,6 @@
 #include "utils.hpp"
 #include "lexer.hpp"
 #include "module_loader.hpp"
-#include "error_handler.hpp"
 
 #include <sstream>
 #include <string_view>
@@ -381,9 +380,9 @@ public:
                 auto it = std::find(currentFuncParamNames.begin(), currentFuncParamNames.end(), pinName);
                 if (it != currentFuncParamNames.end()) {
                     size_t idx = std::distance(currentFuncParamNames.begin(), it);
-                    if (funcName == "read") {
+                    if (funcName == "read" || funcName == "pulse_in") {
                         userFuncInputParams[currentParsingUserFunc][idx] = true;
-                    } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || (funcName == "write" && arguments.size() >= 2)) {
+                    } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
                         userFuncOutputParams[currentParsingUserFunc][idx] = true;
                     } else {
                         if (userFuncOutputParams.count(funcName)) {
@@ -394,6 +393,7 @@ public:
 
                                     if (pit != currentFuncParamNames.end()) {
                                         size_t pidx = std::distance(currentFuncParamNames.begin(), pit);
+
                                         userFuncOutputParams[currentParsingUserFunc][pidx] = true;
                                     }
                                 }
@@ -401,9 +401,9 @@ public:
                         }
                     }
                 }
-            } else if (funcName == "read") {
+            } else if (funcName == "read" || funcName == "pulse_in") {
                 inputPins.insert(pinName);
-            } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || (funcName == "write" && arguments.size() >= 2)) {
+            } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
                 outputPins.insert(pinName);
             } else {
                 if (userFuncOutputParams.count(funcName)) {
@@ -448,11 +448,13 @@ public:
 
         if (funcName == "turn_on" && argsStr.size() >= 1) {
             std::string pin = argsStr[0];
+
             return "digitalWrite(" + pin + ", HIGH);";
         }
 
         if (funcName == "turn_off" && argsStr.size() >= 1) {
             std::string pin = argsStr[0];
+
             return "digitalWrite(" + pin + ", LOW);";
         }
 
@@ -491,7 +493,7 @@ public:
                 fullArg += arg;
             }
 
-            return "delay(" + parseTime(fullArg) + ");";
+            return "delay(" + parseTime(fullArg, currentLine, currentColumn, source) + ");";
         }
 
         if (funcName == "scale" && argsStr.size() >= 5) {
@@ -546,6 +548,21 @@ public:
             std::string address = argsStr[0];
 
             return "({ float val; EEPROM.get(" + address + ", val); val; })";
+        }
+
+        if (funcName == "pulse_in" && (argsStr.size() <= 4 && argsStr.size() > 1)) {
+            if (argsStr.size() == 2) {
+                std::string pin = argsStr[0];
+                std::string value = argsStr[1];
+
+                return "pulseIn(" + pin + ", " + value + ")";
+            } else if (argsStr.size() == 4) {
+                std::string pin = argsStr[0];
+                std::string value = argsStr[1];
+                std::string timeout = parseTime(argsStr[2] + argsStr[3], currentLine, currentColumn, source);
+
+                return "pulseIn(" + pin + ", " + value + ", " + timeout +")";
+            }
         }
 
         return "";
@@ -950,7 +967,8 @@ public:
                     final_value.pop_back();
                 }
             } else if (funcCall->getVariableName() == "read_memory") {
-                type = "float"; 
+                type = "float";
+
                 floatVariables.insert(name);
             }
         } else if (final_value.find("atof(") != std::string::npos || final_value.find("(float)") != std::string::npos) {
@@ -1322,7 +1340,7 @@ private:
 
 public:
     UserFuncNode(const std::string& name, std::vector<std::string> params, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
-        : funcName(name), params(std::move(params)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+        : funcName(std::move(name)), params(std::move(params)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     const std::string& getFunctionName() const noexcept {
@@ -1393,9 +1411,14 @@ private:
     std::string interval;
     std::vector<std::unique_ptr<ASTNode>> body;
 
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
 public:
-    EveryNode(std::string interval, std::vector<std::unique_ptr<ASTNode>> body)
-        : interval(std::move(interval)), body(std::move(body)) {
+    EveryNode(std::string interval, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
+        : interval(std::move(interval)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {
 
         static int counter = 0;
         id = counter++;
@@ -1420,7 +1443,7 @@ public:
 
 public:
     std::string toCpp() override {
-        interval = parseTime(interval);
+        interval = parseTime(interval, currentLine, currentColumn, source);
 
         std::string timerName = "_every_timer_" + std::to_string(id);
         std::string code = "static unsigned long " + timerName + " = 0;\n";

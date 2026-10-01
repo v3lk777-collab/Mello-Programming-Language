@@ -3,6 +3,7 @@ y = 20
 z = 30
 
 n = 10
+i = 40
 
 fn add(a, b):
     result = a + b

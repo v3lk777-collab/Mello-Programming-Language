@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "error_handler.hpp"
+
 #include <set>
 #include <map>
 #include <string>
@@ -47,6 +49,7 @@ inline std::vector<std::string> currentFunctionParams;
 
 inline std::string currentParsingUserFunc = "";
 inline std::vector<std::string> currentFuncParamNames;
+
 inline std::map<std::string, std::vector<bool>> userFuncInputParams;
 inline std::map<std::string, std::vector<bool>> userFuncOutputParams;
 
@@ -56,36 +59,32 @@ const std::unordered_set<std::string> stdLibs = {
 
 inline std::set<std::string> includedStdLibs;
 
-inline auto parseTime = [](std::string timeVal) -> std::string {
+inline auto parseTime = [](std::string timeVal, int line, int column, const std::string& source) -> std::string {
     timeVal.erase(std::remove(timeVal.begin(), timeVal.end(), ' '), timeVal.end());
     timeVal.erase(std::remove(timeVal.begin(), timeVal.end(), '\"'), timeVal.end());
 
     if (timeVal.size() > 1) {
         std::string numPart = timeVal.substr(0, timeVal.size() - 1);
-        
+
         try {
             long long num = std::stoll(numPart);
 
             switch(timeVal.back()) {
                 case 's':
-                    return std::to_string(num * 1000);
-                
+                    return std::to_string(num * 1000LL);
+
                 case 'm':
-                    return std::to_string(num * 60000);
-                
+                    return std::to_string(num * 60000LL);
+
                 case 'h':
-                    return std::to_string(num * 3600000);
+                    return std::to_string(num * 3600000LL);
             }
         } catch (const std::invalid_argument& error) {
-            std::cerr << "\n[Error] Mello Compiler: Expected a valid number in wait(), but got: '" << numPart << "'\n";
-
-            exit(1);
+            ErrorHandler::report("Expected a valid number in wait(), but got:", numPart, line, column, source);
         } catch (const std::out_of_range& error) {
-            std::cerr << "\n[Error] Mello Compiler: The time value '" << numPart << "' is too large!\n";
-
-            exit(1); 
+            ErrorHandler::report("The time value '" + numPart + "' is too large!", "", line, column, source);
         } catch (...) {
-            std::cerr << "\n[Error] Mello Compiler: Unknown error while parsing time.\n";
+            ErrorHandler::report("Unknown error while parsing time:", timeVal, line, column, source);
 
             return timeVal;
         }

@@ -3,6 +3,7 @@ build/*
 
 # My main test file
 main.mello
+errors.txt
 
 # Output windows file
 !build/mello.exe

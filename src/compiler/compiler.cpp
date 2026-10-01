@@ -276,6 +276,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     }
 
     sketchDir = getTempSketchDir();
+
     std::filesystem::create_directories(sketchDir);
     std::filesystem::path inoFilePath = sketchDir / (sketchDir.filename().string() + ".ino");
 

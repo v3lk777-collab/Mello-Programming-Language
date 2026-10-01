@@ -262,13 +262,22 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
             std::vector<std::unique_ptr<ExpressionNode>> args;
 
-            if (current.type != TokenType::RPAREN) {
-                args.push_back(parseExpression());
-
-                while (current.type == TokenType::COMMA) {
+            while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
+                if (current.type == TokenType::COMMA) {
                     advance();
 
+                    if (current.type == TokenType::RPAREN) {
+                        ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, current.column, this->source);
+                    }
+                }
+
+                if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
                     args.push_back(parseExpression());
+                } else {
+                    ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
+
+                    advance();
+                    continue;
                 }
             }
 
@@ -460,11 +469,11 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& funcName) 
     consume(TokenType::LPAREN, "Expected '(' after " + funcName);
 
     std::vector<std::unique_ptr<ExpressionNode>> args;
-    
+
     while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
         if (current.type == TokenType::COMMA) {
             advance();
-            
+
             if (current.type == TokenType::RPAREN) {
                 ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, current.column, this->source);
             }
@@ -480,21 +489,21 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& funcName) 
             continue;
         }
     }
-    
+
     consume(TokenType::RPAREN, "Expected ')' after arguments in " + funcName);
-    
+
     return std::make_unique<FunctionCallNode>(funcName, std::move(args), current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseBuiltInFunctionCall(const std::string& funcName) {
     consume(TokenType::LPAREN, "Expected '(' after " + funcName);
-    
+
     std::vector<std::unique_ptr<ExpressionNode>> args;
-    
+
     while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
         if (current.type == TokenType::COMMA) {
             advance();
-            
+
             if (current.type == TokenType::RPAREN) {
                 ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, current.column, this->source);
             }
@@ -509,21 +518,21 @@ std::unique_ptr<ASTNode> Parser::parseBuiltInFunctionCall(const std::string& fun
             continue;
         }
     }
-    
+
     consume(TokenType::RPAREN, "Expected ')' after arguments in " + funcName);
-    
+
     return std::make_unique<BuiltInFunctionCallNode>(funcName, std::move(args), current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseSerialFunctionsCall(const std::string& funcName) {
     consume(TokenType::LPAREN, "Expected '(' after " + funcName);
-    
+
     std::vector<std::unique_ptr<ExpressionNode>> args;
-    
+
     while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
         if (current.type == TokenType::COMMA) {
             advance();
-            
+
             if (current.type == TokenType::RPAREN) {
                 ErrorHandler::report("Trailing comma found in function call arguments", current.value, current.line, current.column, this->source);
             }
@@ -831,8 +840,8 @@ std::unique_ptr<ASTNode> Parser::parseEveryStatement() {
     auto body = parseBlock();
 
     consume(TokenType::DEDENT, "Expected dedent at end of every block");
-    
-    return std::make_unique<EveryNode>(interval, std::move(body));
+
+    return std::make_unique<EveryNode>(interval, std::move(body), current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseWhileStatement() {
