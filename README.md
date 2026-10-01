@@ -166,6 +166,8 @@ Standard logical operators and three loop constructs are fully supported.
 LED_PIN = 13
 sensorPin = A0
 
+i = 0
+
 fn loop():
     sensor_value = read(sensorPin)
 
@@ -184,11 +186,12 @@ fn loop():
 
     for i < 10:                 # Direction (++ / --) inferred from the comparison operator
         serial.println(i)
+        i++
 
-    for i in range(10):         # Equivalent to for i < 10, but with an explicit counter
+    for x in range(10):         # Equivalent to for x < 10, but with an explicit counter
         serial.println(i)
 
-    for i in range(2, 10, 2):   # start, stop, and step are all customizable
+    for y in range(2, 10, 2):   # start, stop, and step are all customizable
         serial.println(i)
 ```
 
