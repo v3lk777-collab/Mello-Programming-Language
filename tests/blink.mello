@@ -1,0 +1,5 @@
+pin = 13
+
+fn loop():
+    toggle(pin)
+    wait(1s)

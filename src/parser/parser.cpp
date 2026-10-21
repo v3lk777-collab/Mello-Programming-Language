@@ -515,6 +515,7 @@ std::unique_ptr<ASTNode> Parser::parseBuiltInFunctionCall(const std::string& fun
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
 
             advance();
+
             continue;
         }
     }

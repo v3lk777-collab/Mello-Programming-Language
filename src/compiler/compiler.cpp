@@ -153,10 +153,13 @@ std::string Compiler::findArduinoBoard() {
     if (portsFile.is_open()) {
         while (std::getline(portsFile, line)) {
             size_t addressPos = line.find("\"address\":");
+
             if (addressPos != std::string::npos) {
                 size_t start = line.find("\"", addressPos + 10);
+
                 if (start != std::string::npos) {
                     size_t end = line.find("\"", start + 1);
+
                     if (end != std::string::npos) {
                         detectedPort = line.substr(start + 1, end - start - 1);
                         break; 
@@ -171,6 +174,7 @@ std::string Compiler::findArduinoBoard() {
 
     if (detectedPort.empty()) {
         std::cerr << "No board detected! Please connect your Arduino." << "\n";
+
         exit(EXIT_FAILURE);
     }
 

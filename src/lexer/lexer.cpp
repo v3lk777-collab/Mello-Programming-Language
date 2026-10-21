@@ -309,6 +309,11 @@ std::vector<Token> Lexer::tokenize() {
                 advance();
             }
 
+            if (current == 's' || current == 'm' || current == 'h') {
+                number += current;
+                advance();
+            }
+
             if (isFloat) {
                 tokens.push_back({TokenType::FLOAT, number, line, column, source});
             } else {
