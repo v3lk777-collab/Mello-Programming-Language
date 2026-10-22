@@ -72,7 +72,7 @@ std::unique_ptr<ExpressionNode> Parser::parseExpression() {
 std::unique_ptr<ExpressionNode> Parser::parseLogicalOr() {
     auto left = parseLogicalAnd();
 
-    while (current.type == TokenType::KEYWORD && (current.value == "or" || current.value == "||")) {
+    while (current.type == TokenType::KEYWORD && current.value == "or") {
         Token op = current;
 
         advance();
@@ -87,7 +87,7 @@ std::unique_ptr<ExpressionNode> Parser::parseLogicalOr() {
 std::unique_ptr<ExpressionNode> Parser::parseLogicalAnd() {
     auto left = parseLogicalNot();
 
-    while (current.type == TokenType::KEYWORD && (current.value == "and" || current.value == "&&")) {
+    while (current.type == TokenType::KEYWORD && current.value == "and") {
         Token op = current;
 
         advance();
@@ -100,7 +100,7 @@ std::unique_ptr<ExpressionNode> Parser::parseLogicalAnd() {
 }
 
 std::unique_ptr<ExpressionNode> Parser::parseLogicalNot() {
-    if (current.type == TokenType::KEYWORD && (current.value == "not" || current.value == "!")) {
+    if (current.type == TokenType::KEYWORD && current.value == "not") {
         Token op = current;
         
         advance();

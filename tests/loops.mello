@@ -1,0 +1,30 @@
+LED_PIN = 13
+
+fn start():
+    serial.println("repeat: blink 3 times")
+
+    repeat 3:
+        turn_on(LED_PIN)
+        wait(200)
+        turn_off(LED_PIN)
+        wait(200)
+
+    serial.println("for: even numbers")
+
+    for x in range(0, 10, 2):
+        serial.println(x)
+
+    serial.println("while: stop at 5")
+
+    i = 0
+    while i < 100:
+        if i == 5:
+            break
+
+        serial.println(i)
+
+        i++
+
+fn loop():
+    every 1s:
+        serial.println("tick")

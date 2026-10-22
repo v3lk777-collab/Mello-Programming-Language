@@ -11,15 +11,19 @@
 
 #pragma once
 
-#include <string>
+#include "error.hpp"
+
+#include <vector>
 
 class ErrorHandler {
 private:
     static int errorCount;
 
 public:
-    static void report(const std::string& message, const std::string& tokenValue, int lineNumber, int columnNumber, const std::string& source);
+    static void report(std::string message, std::string tokenValue, int lineNumber, int columnNumber, std::string source);
     static bool hasErrors();
+    static void printErrors();
 };
 
 inline int ErrorHandler::errorCount = 0;
+inline static std::vector<Error> errors;

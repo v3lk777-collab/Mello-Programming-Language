@@ -1,0 +1,17 @@
+LED_PIN = 13
+
+fn loop():
+    value = read(A0)
+
+    if value > 700:
+        turn_on(LED_PIN)
+        serial.println("bright")
+
+    elif value > 300 and value <= 700:
+        serial.println("normal")
+
+    else:
+        turn_off(LED_PIN)
+        serial.println("dark")
+
+    wait(500)

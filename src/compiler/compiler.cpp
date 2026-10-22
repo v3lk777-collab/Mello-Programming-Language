@@ -244,6 +244,11 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     Lexer lexer(sourceCode);
 
     std::vector<Token> tokens = lexer.tokenize();
+
+    if (ErrorHandler::hasErrors()) {
+        ErrorHandler::printErrors();
+        return false;
+    }
     
     std::vector<std::unique_ptr<ASTNode>> program;
 
@@ -251,6 +256,11 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         Parser parser(tokens, sourceCode);
 
         program = parser.parse();
+
+        if (ErrorHandler::hasErrors()) {
+            ErrorHandler::printErrors();
+            return false;
+        }
 
         std::string sourceDir = std::filesystem::path(filePath).parent_path().string();
 
@@ -268,6 +278,11 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
 
         for (const auto& node : program) {
             analyzer.analyzeNode(node.get());
+        }
+
+        if (ErrorHandler::hasErrors()) {
+            ErrorHandler::printErrors();
+            return false;
         }
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << "\n";
