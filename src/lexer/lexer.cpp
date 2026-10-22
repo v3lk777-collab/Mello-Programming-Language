@@ -294,8 +294,22 @@ std::vector<Token> Lexer::tokenize() {
         if (isdigit(current)) {
             std::string number;
             bool isFloat = false;
+            bool isHexadecimal = false;
 
             while ((current != '\0' && current != '\n') && (isdigit(current) || current == '.')) {
+                if (isdigit(current) && current == '0' && (peek() == 'x' || peek() == 'X')) {
+                    isHexadecimal = true;
+                    number += current;
+
+                    advance();
+
+                    number += current;
+
+                    advance();
+
+                    continue;
+                }
+
                 if (current == '.') {
                     if (!isFloat) {
                         isFloat = true;
