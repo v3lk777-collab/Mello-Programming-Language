@@ -30,7 +30,7 @@ def runFile(file_path: Path):
         return
 
     try:
-        result = subprocess.run([str(COMPILER), str(file_path)], cwd=COMPILER.parent, capture_output=True, text=True)
+        result = subprocess.run(f"{str(COMPILER)} {str(file_path)} --no-compile", cwd=COMPILER.parent, capture_output=True, text=True, shell=True)
 
         if result.stdout:
             print(result.stdout)

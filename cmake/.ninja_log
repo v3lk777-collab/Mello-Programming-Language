@@ -23,3 +23,5 @@
 59	8732	8142451496947011	CMakeFiles/mello.dir/src/lexer/lexer.cpp.obj	64ff9ae13b9d6af7
 81	10969	8142451497327013	CMakeFiles/mello.dir/src/semantic/semantic_analyzer.cpp.obj	7fe40948ac55b4b9
 10970	12597	8142451606059923	mello.exe	d543d562735a5e8f
+19	8134	8143352823144173	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	71b26225662ad974
+8136	8892	8143352904322850	mello.exe	d543d562735a5e8f
