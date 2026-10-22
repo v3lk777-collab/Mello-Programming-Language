@@ -31,6 +31,10 @@ inline const std::unordered_set<std::string> serialKeywordsList = {
     "find", "findUntil", "waitUntilSend", "parseFloat", "parseInt", "peek", "readStringUntil"
 };
 
+inline const std::unordered_set<std::string> arrayBuiltInFunctions = {
+    "len"
+};
+
 class Lexer {
 private:
     int line;

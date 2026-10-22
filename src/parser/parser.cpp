@@ -227,19 +227,23 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
                 consume(TokenType::RPAREN, "Expected ')' after method arguments");
 
+                if (arraysNamesList.contains(name) && arrayBuiltInFunctions.contains(methodName)) {
+                    return std::make_unique<ArrayBuiltInFunctionsNode>(std::move(name), std::move(methodName), std::move(args));
+                }
+
                 std::unique_ptr<ASTNode> methodCall;
 
                 if (name == "serial") {
-                    methodCall = std::make_unique<SerialFunctionsCallNode>(methodName, std::move(args), current.line, current.column, this->source);
+                    methodCall = std::make_unique<SerialFunctionsCallNode>(std::move(methodName), std::move(args), current.line, current.column, this->source);
                 } else {
-                    methodCall = std::make_unique<FunctionCallNode>(methodName, std::move(args), current.line, current.column, this->source);
+                    methodCall = std::make_unique<FunctionCallNode>(std::move(methodName), std::move(args), current.line, current.column, this->source);
                 }
 
-                return std::make_unique<MethodCallNode>(name, std::move(methodCall), current.line, current.column, this->source);
+                return std::make_unique<MethodCallNode>(std::move(name), std::move(methodCall), current.line, current.column, this->source);
             } else {
-                auto methodCall = std::make_unique<FunctionCallNode>(methodName, std::vector<std::unique_ptr<ExpressionNode>>(), current.line, current.column, this->source);
+                auto methodCall = std::make_unique<FunctionCallNode>(std::move(methodName), std::vector<std::unique_ptr<ExpressionNode>>(), current.line, current.column, this->source);
 
-                return std::make_unique<MethodCallNode>(name, std::move(methodCall), current.line, current.column, this->source);
+                return std::make_unique<MethodCallNode>(std::move(name), std::move(methodCall), current.line, current.column, this->source);
             }
         }
 

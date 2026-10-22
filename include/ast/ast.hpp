@@ -186,6 +186,26 @@ public:
     }
 };
 
+class ArrayBuiltInFunctionsNode : public ExpressionNode {
+private:
+    std::string arrayName;
+    std::string functionName;
+    std::vector<std::unique_ptr<ExpressionNode>> arguments;
+
+public:
+    ArrayBuiltInFunctionsNode(std::string arrayName, std::string functionName, std::vector<std::unique_ptr<ExpressionNode>> arguments)
+        : arrayName(std::move(arrayName)), functionName(std::move(functionName)), arguments(std::move(arguments)) {}
+
+public:
+    std::string toCpp() override {
+        if (functionName == "len") {
+            return "sizeof(" + arrayName + ") / sizeof(" + arrayName + "[0])";
+        }
+
+        return "";
+    }
+};
+
 class FunctionNode : public ASTNode {
 private:
     std::string funcName;

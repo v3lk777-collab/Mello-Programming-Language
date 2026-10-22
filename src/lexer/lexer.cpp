@@ -373,7 +373,7 @@ std::vector<Token> Lexer::tokenize() {
                 advance();
             }
 
-            if (keywordsList.count(word) > 0) {
+            if (keywordsList.count(word) > 0 || serialKeywordsList.count(word) > 0 || arrayBuiltInFunctions.count(word) > 0) {
                 tokens.push_back({TokenType::KEYWORD, word, line, column, source});
             } else {
                 tokens.push_back({TokenType::IDENTIFIER, word, line, column, source});
@@ -389,6 +389,7 @@ std::vector<Token> Lexer::tokenize() {
 
     while (indentationStack.size() > 1) {
         indentationStack.pop_back();
+
         tokens.push_back({TokenType::DEDENT, "", line, column, source});
     }
 

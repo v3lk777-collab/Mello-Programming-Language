@@ -1,2 +1,6 @@
 decimalNumbers = [10, 20, 30, 40]
 hexadecimalNumbers = [0x10, 0x20, 0x30, 0x40]
+
+fn start():
+    for i in range(decimalNumbers.len()):
+        serial.print(decimalNumbers[i])

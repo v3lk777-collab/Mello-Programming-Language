@@ -270,7 +270,7 @@ void SemanticAnalyzer::analyzeMethodCall(MethodCallNode* methodCallNode) {
     ASTNode* inner = methodCallNode->getMethodCall();
 
     if (!objectName.empty()) {
-        if (objectName != "serial") {
+        if (objectName != "serial" && !arraysNamesList.contains(objectName)) {
             const VariableSymbol* objVar = symbolTable.lookupVariable(objectName);
 
             if (!objVar) {
