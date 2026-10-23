@@ -30,7 +30,7 @@ Mello compiles directly to native C++ — no runtime interpreter, no virtual mac
 Programming microcontrollers typically forces a choice between two extremes:
 
 - **C/C++ (Arduino IDE):** Extremely fast and memory-efficient, but suffers from a steep learning curve, verbose syntax (semicolons, brackets), and manual hardware timer/debounce management.
-- **MicroPython / CircuitPython:** Beautiful, readable syntax, but requires a resident runtime VM — 250,000+ bytes of Flash and thousands of bytes of RAM just to boot — which is simply incompatible with lower-end microcontrollers like the ATmega328P.
+- **MicroPython (v1.29.0) / CircuitPython (10.x / 11.x alpha):** Beautiful, readable syntax, but requires a resident runtime VM — 250,000+ bytes of Flash and 16,000+ bytes of RAM just to boot — which is simply incompatible with lower-end microcontrollers like the ATmega328P.
 
 **The Mello Hypothesis:** By parsing an indentation-based, highly readable language into an Abstract Syntax Tree (AST) and transpiling it directly into strictly optimized, static C++ code *before* compilation, it's possible to achieve **100% of the native C++ performance footprint** while cutting code verbosity by **up to 60%**.
 

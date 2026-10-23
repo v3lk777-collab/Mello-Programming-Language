@@ -373,7 +373,7 @@ std::vector<Token> Lexer::tokenize() {
                 advance();
             }
 
-            if (keywordsList.count(word) > 0 || serialKeywordsList.count(word) > 0 || arrayBuiltInFunctions.count(word) > 0) {
+            if (keywordsList.contains(word) || serialKeywordsList.contains(word) || arrayBuiltInFunctions.contains(word)) {
                 tokens.push_back({TokenType::KEYWORD, word, line, column, source});
             } else {
                 tokens.push_back({TokenType::IDENTIFIER, word, line, column, source});
