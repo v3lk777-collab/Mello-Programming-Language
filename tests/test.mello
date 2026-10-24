@@ -1,17 +1,8 @@
 use math
 
-a = square(5)
-b = cube(3)
-c = min_value(10, 4)
-d = max_value(10, 4)
-e = clamp(150, 0, 100)
-f = lerp(0, 100, 0.5)
+z = -60
+x = absolute(z)
 
 fn loop():
-    serial.println(a)
-    serial.println(b)
-    serial.println(c)
-    serial.println(d)
-    serial.println(e)
-    serial.println(f)
-    wait(3s)
+    serial.println(x)
+    wait(1s)

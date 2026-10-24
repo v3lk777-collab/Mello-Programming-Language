@@ -716,6 +716,10 @@ public:
             return "Serial.peek();";
         }
 
+        if (funcName == "millis") {
+            return "millis();";
+        }
+
         return "";
     }
 };
