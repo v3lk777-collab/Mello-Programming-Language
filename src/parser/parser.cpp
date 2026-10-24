@@ -162,7 +162,7 @@ std::unique_ptr<ExpressionNode> Parser::parseTerm() {
 std::unique_ptr<ExpressionNode> Parser::parseFactor() {
     auto left = parseUnary();
 
-    while (current.type == TokenType::MULTIPLY || current.type == TokenType::DIVIDE) {
+    while (current.type == TokenType::MULTIPLY || current.type == TokenType::DIVIDE || current.type == TokenType::MODULO) {
         Token op = current;
 
         advance();
