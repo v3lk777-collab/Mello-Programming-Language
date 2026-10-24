@@ -1,24 +1,24 @@
 random_state = 4095
 
-fn seed_random(seed):
+fn seed_random(seed) -> void:
     random_state = seed % 4096
 
     if random_state < 0:
         random_state = random_state + 4096
 
 
-fn random_next():
+fn random_next() -> int:
     random_state = (random_state * 5 + 1) % 4096
 
     return random_state
 
-fn random_below(max_exclusive):
+fn random_below(max_exclusive) -> int:
     if max_exclusive <= 0:
         return 0
 
     return random_next() % max_exclusive
 
-fn random_range(low, high):
+fn random_range(low, high) -> int:
     if high < low:
         return low
 

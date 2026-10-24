@@ -275,7 +275,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
                     }
                 }
 
-                if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+                if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::CHARACTER || current.type == TokenType::BOOLEAN  || current.type == TokenType::LPAREN || current.type == TokenType::PLUS || current.type == TokenType::MINUS) {
                     args.push_back(parseExpression());
                 } else {
                     ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
@@ -485,7 +485,7 @@ std::unique_ptr<ASTNode> Parser::parseFunctionCall(const std::string& funcName) 
             }
         }
 
-        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::CHARACTER || current.type == TokenType::BOOLEAN  || current.type == TokenType::LPAREN || current.type == TokenType::PLUS || current.type == TokenType::MINUS) {            
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
@@ -515,7 +515,7 @@ std::unique_ptr<ASTNode> Parser::parseBuiltInFunctionCall(const std::string& fun
             }
         }
 
-        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::CHARACTER || current.type == TokenType::BOOLEAN  || current.type == TokenType::LPAREN || current.type == TokenType::PLUS || current.type == TokenType::MINUS) {            
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
@@ -545,7 +545,7 @@ std::unique_ptr<ASTNode> Parser::parseSerialFunctionsCall(const std::string& fun
             }
         }
 
-        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::CHARACTER || current.type == TokenType::BOOLEAN  || current.type == TokenType::LPAREN || current.type == TokenType::PLUS || current.type == TokenType::MINUS) {            
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
@@ -762,6 +762,7 @@ std::unique_ptr<ASTNode> Parser::parseControlTransferStatements(const std::strin
 
 std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     advance();
+
     std::string funcName = current.value;
 
     advance();
@@ -780,7 +781,21 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     }
 
     consume(TokenType::RPAREN, "Expected ')' after parameters");
+
+    std::string returnType = "void";
+
+    if (match(TokenType::ARROW)) {
+        returnType = current.value;
+
+        if (returnType != "int" && returnType != "str" && returnType != "float" && returnType != "bool" && returnType != "any" && returnType != "void") {
+            ErrorHandler::report("Invalid return type for function: " + funcName, current.value, current.line, current.column, this->source);
+        }
+
+        advance();
+    }
+
     consume(TokenType::COLON, "Expected ':' after function signature");
+
     match(TokenType::NEWLINE);
 
     currentParsingUserFunc = funcName;
@@ -804,11 +819,15 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     funcParams.clear();
 
     if (funcName == "loop" || funcName == "start") {
+        if (returnType != "void") {
+            ErrorHandler::report("Function '" + funcName + "' cannot have a return type", current.value, current.line, current.column, this->source);
+        }
+
         return std::make_unique<FunctionNode>(funcName, std::move(body), current.line, current.column, this->source);
     } else {
         userDefinedFunctionNames.insert(funcName);
 
-        return std::make_unique<UserFuncNode>(funcName, std::move(params), std::move(body), current.line, current.column, this->source);
+        return std::make_unique<UserFuncNode>(funcName, std::move(params), std::move(returnType), std::move(body), current.line, current.column, this->source);
     }
 }
 
@@ -968,7 +987,7 @@ std::unique_ptr<ASTNode> Parser::parseTypeConversionCall(const std::string& func
             }
         }
 
-        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::LPAREN) {
+        if (current.type == TokenType::INTEGER || current.type == TokenType::FLOAT || current.type == TokenType::IDENTIFIER || current.type == TokenType::KEYWORD || current.type == TokenType::STRING || current.type == TokenType::CHARACTER || current.type == TokenType::BOOLEAN  || current.type == TokenType::LPAREN || current.type == TokenType::PLUS || current.type == TokenType::MINUS) {            
             args.push_back(parseExpression());
         } else {
             ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);

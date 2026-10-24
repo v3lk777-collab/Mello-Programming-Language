@@ -1315,6 +1315,7 @@ public:
 class UserFuncNode : public ASTNode {
 private:
     std::string funcName;
+    std::string userReturnType;
     std::vector<std::string> params;
     std::vector<std::unique_ptr<ASTNode>> body;
 
@@ -1323,48 +1324,9 @@ private:
     int currentColumn;
     std::string source;
 
-private:
-    std::string typeFromReturnValue(const std::string& value) const noexcept {
-        if (value.find("\"") != std::string::npos || value.find("String(") != std::string::npos) {
-            return "String";
-        }
-    
-        if (value.find('.') != std::string::npos || value.find("atof(") != std::string::npos) {
-            return "float";
-        }
-    
-        if (value.find("true") != std::string::npos || value.find("false") != std::string::npos) {
-            return "bool";
-        }
-    
-        return "int";
-    }
-
-    std::string findReturnTypeIn(const std::vector<std::unique_ptr<ASTNode>>& nodes) const noexcept {
-        for (const auto& node : nodes) {
-            if (auto* returnNode = dynamic_cast<ReturnNode*>(node.get())) {
-                return typeFromReturnValue(returnNode->toCpp());
-            }
-
-            for (const auto* childBody : node->getChildBodies()) {
-                std::string result = findReturnTypeIn(*childBody);
-    
-                if (result != "void") {
-                    return result;
-                }
-            }
-        }
-
-        return "void";
-    }
-
-    std::string inferReturnType() const noexcept {
-        return findReturnTypeIn(body);
-    }
-
 public:
-    UserFuncNode(const std::string& name, std::vector<std::string> params, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
-        : funcName(std::move(name)), params(std::move(params)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+    UserFuncNode(const std::string& name, std::vector<std::string> params, const std::string& userReturnType, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
+        : funcName(std::move(name)), params(std::move(params)), userReturnType(std::move(userReturnType)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     const std::string& getFunctionName() const noexcept {
@@ -1407,7 +1369,7 @@ public:
 
         currentFunctionParams = params;
 
-        std::string returnType = params.empty() ? inferReturnType() : "auto";
+        const std::string& returnType = (userReturnType == "void" || userReturnType == "any") ? "auto" : userReturnType;
 
         result += returnType + " " + funcName + "(";
 
