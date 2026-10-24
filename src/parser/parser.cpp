@@ -402,6 +402,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
 
             if (keyword == "if") {
                 body.push_back(parseIfStatement());
+            } else if (keyword == "fn") {
+                body.push_back(parseUserFuncDefinition());
             } else if (keyword == "return") {
                 body.push_back(parseReturnStatement());
             } else if (keyword == "every") {

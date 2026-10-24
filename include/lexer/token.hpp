@@ -39,6 +39,7 @@ enum class TokenType {
     MULTIPLY,
     DIVIDE,
     MODULO,
+    ARROW,
     DOT,
     COLON,
     COMMA,

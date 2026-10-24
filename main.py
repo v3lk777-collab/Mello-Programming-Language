@@ -42,7 +42,7 @@ def main() -> None:
 
             return
         else:
-            print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.")
+            print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.\n")
 
         subprocess.run("py test_runner.py", shell=True)
     elif currentOS == "Linux":

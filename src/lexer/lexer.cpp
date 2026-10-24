@@ -176,6 +176,10 @@ std::vector<Token> Lexer::tokenize() {
                 tokens.push_back({TokenType::MINUS_EQUAL, "-=", line, column, source});
 
                 advance();
+            } else if (peek() == '>') {
+                tokens.push_back({TokenType::ARROW, "->", line, column, source});
+
+                advance();
             } else {
                 tokens.push_back({TokenType::MINUS, "-", line, column, source});
             }
