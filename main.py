@@ -9,46 +9,61 @@
  * prohibited without the express written permission of the author.
 """
 
+import os
+import platform
 import subprocess
-from pathlib import Path
 
 RED = '\033[31m'
 GREEN = '\033[32m'
 RESET = '\033[0m'
 
-COMPILER = Path(__file__).parent / "cmake/mello.exe"
-FILE_EXTENSION = ".mello"
-TESTS_DIR = Path(__file__).parent / "tests"
+def main() -> None:
+    subprocess.run(["cls" if platform.system() == "Windows" else "clear"], shell=True)
 
-def runFile(file_path: Path):
-    if not file_path.exists():
-        print(f"Error: File '{file_path}' does not exist.")
-        return
+    currentOS = platform.system()
 
-    if file_path.suffix != FILE_EXTENSION:
-        print(f"Error: File '{file_path}' is not a valid Mello source file.")
-        return
+    if currentOS == "Windows":
+        VCVARS_PATH = r"C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvars64.bat"
 
-    try:
-        result = subprocess.run(f"{str(COMPILER)} {str(file_path)} --no-compile", cwd=COMPILER.parent, capture_output=True, text=True, shell=True)
+        if not os.path.exists(VCVARS_PATH):
+            print(f"[{RED}!{RESET}] {RED}Error{RESET}: Visual Studio vcvars64.bat not found at '{VCVARS_PATH}'. Please ensure Visual Studio is installed.")
+            return
 
-        if result.stdout:
-            print(result.stdout)
+        result = subprocess.run(f"\"{VCVARS_PATH}\" && cmake --build cmake", shell=True, text=True, capture_output=True)
 
-        if result.stderr:
-            print(f"{RED}Errors:{RESET}", result.stderr)
+        if result.returncode != 0:
+            print(f"[{RED}!{RESET}] {RED}Error{RESET}: CMake build failed with error code {result.returncode}.")
 
-    except Exception as error:
-        print(f"{RED}An error occurred while running the compiler: {error}{RESET}")
+            if result.stdout:
+                print(f"    -----> {result.stdout}")
 
-def main():
-    if not TESTS_DIR.exists():
-        print(f"{RED}Error: Tests directory '{TESTS_DIR}' does not exist.{RESET}")
-        return
+            if result.stderr:
+                print(f"    -----> {result.stderr}")
 
-    for file_path in TESTS_DIR.glob(f"*{FILE_EXTENSION}"):
-        print(f"{GREEN}Running test: {file_path.name}{RESET}")
-        runFile(file_path)
+            return
+        else:
+            print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.")
+
+        subprocess.run("py test_runner.py", shell=True)
+    elif currentOS == "Linux":
+        result = subprocess.run(f"cmake --build cmake", shell=True, text=True, capture_output=True)
+
+        if result.returncode != 0:
+            print(f"[{RED}!{RESET}] {RED}Error{RESET}: CMake build failed with error code {result.returncode}.")
+
+            if result.stdout:
+                print(f"    -----> {result.stdout}")
+
+            if result.stderr:
+                print(f"    -----> {result.stderr}")
+
+            return
+        else:
+            print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.")
+
+        subprocess.run("python3 test_runner.py", shell=True)
+    else:
+        print(f"[{RED}!{RESET}] {RED}Error{RESET}: Unsupported operating system: {currentOS}")
 
 if __name__ == "__main__":
     main()
