@@ -1,0 +1,25 @@
+random_state = 4095
+
+fn seed_random(seed):
+    random_state = seed % 4096
+
+    if random_state < 0:
+        random_state = random_state + 4096
+
+
+fn random_next():
+    random_state = (random_state * 5 + 1) % 4096
+
+    return random_state
+
+fn random_below(max_exclusive):
+    if max_exclusive <= 0:
+        return 0
+
+    return random_next() % max_exclusive
+
+fn random_range(low, high):
+    if high < low:
+        return low
+
+    return low + random_below(high - low + 1)

@@ -1,8 +1,9 @@
-use math
+use random
 
-z = -60
-x = absolute(z)
+fn start():
+    seed_random(12345)
 
 fn loop():
-    serial.println(x)
+    number = random_range(1, 10)
+    serial.println(number)
     wait(1s)
