@@ -1,0 +1,38 @@
+fn absolute(x):
+    if x < 0:
+        return -x
+
+    return x
+
+fn min_value(a, b):
+    if a > b:
+        return b
+    else:
+        return a
+
+fn max_value(a, b):
+    if a < b:
+        return b
+    else:
+        return a
+
+fn clamp(value, min, max):
+    return max_value(min, min_value(value, max))
+
+fn square(x):
+    return x * x
+
+fn cube(x):
+    return x * x * x
+
+fn lerp(a, b, t):
+    return a + (b - a) * t
+
+fn degrees_to_radians(value):
+    return value * PI / 180.0
+
+fn radians_to_degrees(value):
+    return value * 180.0 / PI
+
+fn isclose(a, b, epsilon):
+    return absolute(a - b) <= epsilon

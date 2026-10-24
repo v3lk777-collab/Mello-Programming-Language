@@ -1,26 +1,17 @@
-x = 10
-y = 20
-z = 30
+use math
 
-n = 10
-i = 40
+a = square(5)
+b = cube(3)
+c = min_value(10, 4)
+d = max_value(10, 4)
+e = clamp(150, 0, 100)
+f = lerp(0, 100, 0.5)
 
-fn add(a, b):
-    result = a + b
-
-    return result
-
-fn start():
-    x = 40
-    number = x + y + z
-
-    for n < 10:
-        serial.print(n)
-        n++
-
-    for i > 10:
-        serial.print(i)
-        i--
-
-    every 1s:
-        serial.print(number)
+fn loop():
+    serial.println(a)
+    serial.println(b)
+    serial.println(c)
+    serial.println(d)
+    serial.println(e)
+    serial.println(f)
+    wait(3s)
