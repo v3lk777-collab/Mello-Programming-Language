@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <unordered_set>
+#include <unordered_map>
 
 inline std::set<std::string> inputPins;
 inline std::set<std::string> outputPins;
@@ -36,14 +37,15 @@ inline std::set<std::string> nonConstantVariables;
 inline std::set<std::string> includedLibraries;
 inline std::set<std::string> installedLibraries;
 
-inline std::set<std::string> funcParams;
 inline std::set<std::string> parsedVariables;
 inline std::set<std::string> declaredVariables;
 inline std::set<std::string> reassignedVariables;
 
 inline std::set<std::string> arraysNamesList;
 
-inline std::set<std::string> userDefinedFunctionNames;
+inline std::set<std::string> funcParams;
+inline std::set<std::string> userDefinedFunctionsNames;
+inline std::unordered_map<std::string, std::string> userDefinedFunctionsReturnType;
 
 inline std::vector<std::string> currentFunctionParams;
 
@@ -92,3 +94,23 @@ inline auto parseTime = [](std::string timeVal, int line, int column, const std:
 
     return timeVal;
 };
+
+inline std::string mapReturnTypeToString(const std::string& returnType, const std::string& funcName, int currentLine, int currentColumn, const std::string& source) {
+    if (returnType == "int") {
+        return "int";
+    } else if (returnType == "float") {
+        return "float";
+    } else if (returnType == "str") {
+        return "String";
+    } else if (returnType == "char") {
+        return "char";
+    } else if (returnType == "bool") {
+        return "bool";
+    } else if (returnType == "any") {
+        return "auto";
+    } else {
+        ErrorHandler::report("Unknown return type for function '" + funcName + "':", returnType, currentLine, currentColumn, source);
+
+        return "";
+    }
+}

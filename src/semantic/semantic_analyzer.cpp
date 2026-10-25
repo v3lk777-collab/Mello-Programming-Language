@@ -68,7 +68,7 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
         VariableSymbol paramSymbol;
 
         paramSymbol.name = paramName;
-        paramSymbol.type = DataType::UNKNOWN;
+        paramSymbol.type = DataType::ANY;
         paramSymbol.isConstant = false;
         paramSymbol.declaredLine = 0;
 

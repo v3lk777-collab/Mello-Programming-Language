@@ -12,7 +12,7 @@
 #include "semantic_analyzer.hpp"
 
 DataType SemanticAnalyzer::mapStringToDataType(const std::string& typeStr) {
-    if (typeStr == "int" || typeStr == "uint8_t" || typeStr == "int16_t" || typeStr == "uint16_t" || typeStr == "int32_t" || typeStr == "uint32_t") {
+    if (typeStr == "int") {
         return DataType::INTEGER;
     }
 
@@ -20,13 +20,17 @@ DataType SemanticAnalyzer::mapStringToDataType(const std::string& typeStr) {
         return DataType::FLOAT;
     }
 
-    if (typeStr == "String" || typeStr == "const char*") {
+    if (typeStr == "str") {
         return DataType::STRING;
+    }
+
+    if (typeStr == "char") {
+        return DataType::CHARACTER;
     }
 
     if (typeStr == "bool") {
         return DataType::BOOLEAN;
     }
 
-    return DataType::UNKNOWN;
+    return DataType::ANY;
 }

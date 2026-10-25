@@ -246,7 +246,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     std::vector<Token> tokens = lexer.tokenize();
 
     if (ErrorHandler::hasErrors()) {
-        ErrorHandler::printErrors();
+        ErrorHandler::showErrors();
 
         return false;
     }
@@ -260,7 +260,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         program = parser.parse();
 
         if (ErrorHandler::hasErrors()) {
-            ErrorHandler::printErrors();
+            ErrorHandler::showErrors();
 
             return false;
         }
@@ -288,7 +288,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         }
 
         if (ErrorHandler::hasErrors()) {
-            ErrorHandler::printErrors();
+            ErrorHandler::showErrors();
 
             return false;
         }

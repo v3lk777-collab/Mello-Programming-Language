@@ -47,7 +47,7 @@ void Parser::advance() noexcept {
     }
 }
 
-bool Parser::match(TokenType type) {
+bool Parser::match(TokenType type) noexcept {
     if (current.type == type) {
         advance();
 
@@ -341,7 +341,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
     ErrorHandler::report("Unexpected token in expression:", current.value, current.line, current.column, this->source);
     
-    return nullptr;
+    std::unreachable();
 }
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
@@ -782,7 +782,7 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
 
     consume(TokenType::RPAREN, "Expected ')' after parameters");
 
-    std::string returnType = "void";
+    std::string returnType = "any";
 
     if (match(TokenType::ARROW)) {
         returnType = current.value;
@@ -803,8 +803,8 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     userFuncOutputParams[funcName] = std::vector<bool>(params.size(), false);
     userFuncInputParams[funcName] = std::vector<bool>(params.size(), false);
 
-    for (const auto& p : params) {
-        funcParams.insert(p);
+    for (const auto& param : params) {
+        funcParams.insert(param);
     }
 
     consume(TokenType::INDENT, "Expected indentation after function");
@@ -819,13 +819,14 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     funcParams.clear();
 
     if (funcName == "loop" || funcName == "start") {
-        if (returnType != "void") {
+        if (returnType != "void" && returnType != "any") {
             ErrorHandler::report("Function '" + funcName + "' cannot have a return type", current.value, current.line, current.column, this->source);
         }
 
         return std::make_unique<FunctionNode>(funcName, std::move(body), current.line, current.column, this->source);
     } else {
-        userDefinedFunctionNames.insert(funcName);
+        userDefinedFunctionsNames.insert(funcName);
+        userDefinedFunctionsReturnType[funcName] = mapReturnTypeToString(returnType, funcName, current.line, current.column, this->source);
 
         return std::make_unique<UserFuncNode>(funcName, std::move(params), std::move(returnType), std::move(body), current.line, current.column, this->source);
     }

@@ -19,7 +19,9 @@ enum class DataType {
     STRING,
     FLOAT,
     BOOLEAN,
-    UNKNOWN
+    CHARACTER,
+    VOID,
+    ANY
 };
 
 struct VariableSymbol {

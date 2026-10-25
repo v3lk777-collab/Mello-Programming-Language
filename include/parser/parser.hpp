@@ -27,7 +27,7 @@ private:
 private:
     Token peek() const noexcept;
     void advance() noexcept;
-    bool match(TokenType type);
+    bool match(TokenType type) noexcept;
     void consume(TokenType type, const std::string& errorMessage);
 
 private:

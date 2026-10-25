@@ -994,6 +994,8 @@ public:
                 type = "float";
 
                 floatVariables.insert(name);
+            } else if (funcCall->getFunctionName() == "millis") {
+                type = "long int";
             }
         } else if (final_value.find("atof(") != std::string::npos || final_value.find("(float)") != std::string::npos) {
             type = "float";
@@ -1001,7 +1003,7 @@ public:
         } else if (final_value.find("atoi(") != std::string::npos || final_value.find("(int)") != std::string::npos) {
             type = "int";
             integerVariables.insert(name);
-        } else if (val_type == TokenType::IDENTIFIER && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionNames.count(final_value.substr(0, final_value.find("(")))) {
+        } else if (val_type == TokenType::IDENTIFIER && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionsNames.count(final_value.substr(0, final_value.find("(")))) {
             std::string className = final_value.substr(0, final_value.find("("));
 
             if (!includedLibraries.count(className)) {
@@ -1041,12 +1043,15 @@ public:
         } else {
             if (containsFloatVariable(final_value) || final_value.find("(float)") != std::string::npos || final_value.find("atof(") != std::string::npos) {
                 type = "float";
+
                 floatVariables.insert(name);
             } else if (final_value.find("(int)") != std::string::npos || final_value.find("atoi(") != std::string::npos) {
                 type = "int";
+
                 integerVariables.insert(name);
             } else {
                 type = "int";
+
                 integerVariables.insert(name);
             }
         }
@@ -1076,6 +1081,17 @@ public:
             }
 
             if (isFunctionCall) {
+                if (auto* function = dynamic_cast<FunctionCallNode*>(value.get())) {
+                    std::string functionName = function->getFunctionName();
+                    auto it = userDefinedFunctionsReturnType.find(functionName);
+
+                    if (it != userDefinedFunctionsReturnType.end()) {
+                        type = it->second;
+                    } else {
+                        ErrorHandler::report("Unknown function return type for:", functionName, currentLine, currentColumn, source);
+                    }
+                }
+
                 if (isConstantVar) {
                     return "const " + type + " " + name + " = " + final_value + ";\n";
                 } else {
@@ -1341,6 +1357,10 @@ public:
         return body;
     }
 
+    const std::string& getUserReturnType() const noexcept {
+        return userReturnType;
+    }
+
     std::string getSource() const noexcept {
         return source;
     }
@@ -1369,7 +1389,7 @@ public:
 
         currentFunctionParams = params;
 
-        const std::string& returnType = (userReturnType == "void" || userReturnType == "any") ? "auto" : userReturnType;
+        const std::string returnType = (userReturnType == "void" || userReturnType == "any") ? "auto" : mapReturnTypeToString(userReturnType, funcName, currentLine, currentColumn, source);
 
         result += returnType + " " + funcName + "(";
 
