@@ -10,6 +10,7 @@
 """
 
 import os
+import sys
 import platform
 import subprocess
 
@@ -17,7 +18,15 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 RESET = '\033[0m'
 
+shouldCompileTheOutputCode = False
+
 def main() -> None:
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--compile":
+            shouldCompileTheOutputCode = True
+        else:
+            shouldCompileTheOutputCode = False
+
     subprocess.run(["cls" if platform.system() == "Windows" else "clear"], shell=True)
 
     currentOS = platform.system()
@@ -44,7 +53,7 @@ def main() -> None:
         else:
             print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.\n")
 
-        subprocess.run("py test_runner.py", shell=True)
+        subprocess.run(f"py test_runner.py {"--compile" if shouldCompileTheOutputCode else "--no-compile"}", shell=True)
     elif currentOS == "Linux":
         result = subprocess.run(f"cmake --build cmake", shell=True, text=True, capture_output=True)
 
