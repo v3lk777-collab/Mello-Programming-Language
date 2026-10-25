@@ -10,7 +10,6 @@
 """
 
 import os
-import sys
 import platform
 import subprocess
 
@@ -19,11 +18,6 @@ GREEN = '\033[32m'
 RESET = '\033[0m'
 
 def main() -> None:
-    shouldCompileTheOutputCode = False
-
-    if len(sys.argv) > 1 and sys.argv[1] == "--compile":
-        shouldCompileTheOutputCode = True
-
     subprocess.run(["cls" if platform.system() == "Windows" else "clear"], shell=True)
 
     currentOS = platform.system()
@@ -41,33 +35,33 @@ def main() -> None:
             print(f"[{RED}!{RESET}] {RED}Error{RESET}: CMake build failed with error code {result.returncode}.")
 
             if result.stdout:
-                print(f"    -----> {result.stdout}")
+                print(f"    {GREEN}----->{RESET} {result.stdout}")
 
             if result.stderr:
-                print(f"    -----> {result.stderr}")
+                print(f"    {RED}----->{RESET} {result.stderr}")
 
             return
         else:
             print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.\n")
 
-        subprocess.run(f"py test_runner.py {"--compile" if shouldCompileTheOutputCode else "--no-compile"}", shell=True)
-    elif currentOS == "Linux":
+        subprocess.run(f"py test_runner.py", shell=True)
+    elif currentOS in ["Linux", "Darwin"]:
         result = subprocess.run(f"cmake --build cmake", shell=True, text=True, capture_output=True)
 
         if result.returncode != 0:
             print(f"[{RED}!{RESET}] {RED}Error{RESET}: CMake build failed with error code {result.returncode}.")
 
             if result.stdout:
-                print(f"    -----> {result.stdout}")
+                print(f"    {GREEN}----->{RESET} {result.stdout}")
 
             if result.stderr:
-                print(f"    -----> {result.stderr}")
+                print(f"    {RED}----->{RESET} {result.stderr}")
 
             return
         else:
             print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.")
 
-        subprocess.run("python3 test_runner.py", shell=True)
+        subprocess.run(f"python3 test_runner.py", shell=True)
     else:
         print(f"[{RED}!{RESET}] {RED}Error{RESET}: Unsupported operating system: {currentOS}")
 

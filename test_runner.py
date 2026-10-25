@@ -9,7 +9,6 @@
  * prohibited without the express written permission of the author.
 """
 
-import sys
 import subprocess
 from pathlib import Path
 
@@ -21,8 +20,6 @@ COMPILER = Path(__file__).parent / "cmake/mello.exe"
 FILE_EXTENSION = ".mello"
 TESTS_DIR = Path(__file__).parent / "tests"
 
-shouldCompileTheOutputCode = False
-
 def runFile(file_path: Path) -> None:
     if not file_path.exists():
         print(f"Error: File '{file_path}' does not exist.")
@@ -33,7 +30,7 @@ def runFile(file_path: Path) -> None:
         return
 
     try:
-        result = subprocess.run(f"{str(COMPILER)} {str(file_path)} {"" if shouldCompileTheOutputCode else "--no-compile"}", cwd=COMPILER.parent, capture_output=True, text=True, shell=True)
+        result = subprocess.run(f"{str(COMPILER)} {str(file_path)}", cwd=COMPILER.parent, capture_output=True, text=True, shell=True)
 
         if result.stdout:
             print(result.stdout)
@@ -45,12 +42,6 @@ def runFile(file_path: Path) -> None:
         print(f"{RED}An error occurred while running the compiler: {error}{RESET}")
 
 def main() -> None:
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "--compile":
-            shouldCompileTheOutputCode = True
-        else:
-            shouldCompileTheOutputCode = False
-
     if not TESTS_DIR.exists():
         print(f"[{RED}!{RESET}] {RED}Error{RESET}: Tests directory '{TESTS_DIR}' does not exist.")
         return
