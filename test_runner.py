@@ -23,7 +23,7 @@ TESTS_DIR = Path(__file__).parent / "tests"
 
 shouldCompileTheOutputCode = False
 
-def runFile(file_path: Path, shouldCompileCode: bool) -> None:
+def runFile(file_path: Path) -> None:
     if not file_path.exists():
         print(f"Error: File '{file_path}' does not exist.")
         return
@@ -33,7 +33,7 @@ def runFile(file_path: Path, shouldCompileCode: bool) -> None:
         return
 
     try:
-        result = subprocess.run(f"{str(COMPILER)} {str(file_path)} {"" if shouldCompileCode else "--no-compile"}", cwd=COMPILER.parent, capture_output=True, text=True, shell=True)
+        result = subprocess.run(f"{str(COMPILER)} {str(file_path)} {"" if shouldCompileTheOutputCode else "--no-compile"}", cwd=COMPILER.parent, capture_output=True, text=True, shell=True)
 
         if result.stdout:
             print(result.stdout)
@@ -57,7 +57,7 @@ def main() -> None:
 
     for file_path in TESTS_DIR.glob(f"*{FILE_EXTENSION}"):
         print(f"{GREEN}Running test: {file_path.name}{RESET}")
-        runFile(file_path, shouldCompileTheOutputCode)
+        runFile(file_path)
 
 if __name__ == "__main__":
     main()

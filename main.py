@@ -18,14 +18,11 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 RESET = '\033[0m'
 
-shouldCompileTheOutputCode = False
-
 def main() -> None:
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "--compile":
-            shouldCompileTheOutputCode = True
-        else:
-            shouldCompileTheOutputCode = False
+    shouldCompileTheOutputCode = False
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--compile":
+        shouldCompileTheOutputCode = True
 
     subprocess.run(["cls" if platform.system() == "Windows" else "clear"], shell=True)
 
