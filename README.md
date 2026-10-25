@@ -52,7 +52,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 The Mello compiler, built from scratch in C++23 and CMake 3.25, operates in five sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
-The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 31 core keywords: `start`, `loop`, `use`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `fn`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `save_memory`, `read_memory`, `serial.*` family.
+The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 31 core keywords: `start`, `loop`, `use`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `fn`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `save_memory`, `read_memory`, `millis`, `serial.*` family.
 
 ### Phase B: Syntax Analysis (Parser)
 The `Parser` consumes the token stream and validates it against Mello's grammar using recursive-descent parsing, constructing a full Abstract Syntax Tree (AST) with properly nested logical blocks.
@@ -200,14 +200,27 @@ fn loop():
 Define reusable blocks of code easily with the `fn` keyword.
 
 ```python
-pin = 13
+PIN = 13
 
 fn blink_fast(pin_num):
     toggle(pin_num)
     wait(100)
 
 fn loop():
-    blink_fast(pin)
+    blink_fast(PIN)
+```
+
+You can explicitly specify a function's return type using the `->` return-type arrow. Use void for functions that do not return a value.
+
+```python
+PIN = 13
+
+fn blink(led_pin) -> void:
+    toggle(led_pin)
+    wait(1s)
+
+fn loop() -> void:
+    blink(PIN)
 ```
 
 ### Break / Continue Control Transfer Statements
@@ -341,7 +354,7 @@ Mello has been rigorously tested against standard alternatives on an ATmega328P:
 |---|---|---|---|
 | **Mello** | ~900 Bytes | 9 Bytes | Full 8-bit/32-bit parity |
 | **Native Arduino C++** | ~900 Bytes | 9 Bytes | Full 8-bit/32-bit parity |
-| **MicroPython VM** | > 250,000 Bytes | > 8,000 Bytes | Incompatible — fails to initialize |
+| **MicroPython VM (v1.29.0)** | > 250,000 Bytes | > 16,000 Bytes | Incompatible — fails to initialize |
 
 - **Lines of Code (LoC):** Mello reduces required lines of code by **40–60%** compared to native Arduino C++, primarily through automatic timer state, debounce state, and `setup()` boilerplate.
 - **Native Binary Output:** Because Mello transpiles straight to C++, its binaries are byte-for-byte comparable to hand-written Arduino code — there's no interpreter tax to pay.
