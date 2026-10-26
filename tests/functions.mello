@@ -1,0 +1,15 @@
+must_boo = true
+
+fn boo():
+    serial.println("Boo")
+
+fn foo():
+    if must_boo:
+        boo()
+
+        return true
+
+    return false
+
+fn start():
+    foo()

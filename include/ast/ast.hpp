@@ -482,7 +482,7 @@ public:
             std::string pin = argsStr[0];
             std::string stateVar = "_toggle_state_" + pin;
 
-            return "static uint8_t " + stateVar + " = LOW;\n" + stateVar + " = (" + stateVar + " == LOW) ? HIGH : LOW;\n" + "digitalWrite(" + pin + ", " + stateVar + ");";
+            return "static uint8_t " + stateVar + " = LOW;\n" + stateVar + " = !" + stateVar + ";\n" + "digitalWrite(" + pin + ", " + stateVar + ");";
         }
 
         if (funcName == "write") {
@@ -570,19 +570,25 @@ public:
             return "({ float val; EEPROM.get(" + address + ", val); val; })";
         }
 
-        if (funcName == "pulse_in" && (argsStr.size() <= 4 && argsStr.size() > 1)) {
+        if (funcName == "pulse_in") {
+            if (argsStr.size() < 2 || argsStr.size() > 4) {
+                ErrorHandler::report("pulse_in expects 2, 3, or 4 arguments:", funcName, currentLine, currentColumn, source);
+            }
+
             if (argsStr.size() == 2) {
                 std::string pin = argsStr[0];
                 std::string value = argsStr[1];
 
                 return "pulseIn(" + pin + ", " + value + ")";
-            } else if (argsStr.size() == 4) {
-                std::string pin = argsStr[0];
-                std::string value = argsStr[1];
-                std::string timeout = parseTime(argsStr[2] + argsStr[3], currentLine, currentColumn, source);
-
-                return "pulseIn(" + pin + ", " + value + ", " + timeout +")";
             }
+
+            std::string timeInput = (argsStr.size() == 4) ? (argsStr[2] + argsStr[3]) : argsStr[2];
+            std::string timeout = parseTime(timeInput, currentLine, currentColumn, source);
+            
+            std::string pin = argsStr[0];
+            std::string value = argsStr[1];
+
+            return "pulseIn(" + pin + ", " + value + ", " + timeout + ")";
         }
 
         return "";
