@@ -5,7 +5,10 @@ fn text_to_int(text):
     return int(text)
 
 fn start():
-    intNumber = text_to_int(10)
+    intNumber = text_to_int("10")
     strNumber = int_to_test(5)
+
     serial.print(strNumber)
+    serial.print(intNumber)
+
     serial.print("Hello, World! I'm Mello Programming Language")
