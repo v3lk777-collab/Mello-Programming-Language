@@ -1,3 +1,5 @@
+<img src="./logo.svg" width="20%" alt="Mello Programming Language Logo"/>
+
 # Mello Programming Language
 
 [![C++](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/23)
