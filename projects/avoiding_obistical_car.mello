@@ -1,0 +1,71 @@
+ENA = 5
+ENB = 6
+IN1 = 7
+IN2 = 8
+IN3 = 9
+IN4 = 10
+TRIG = 2
+ECHO = 3
+
+SAFE_DISTANCE = 20
+
+fn forward():
+    turn_on(IN1)
+    turn_off(IN2)
+    turn_on(IN3)
+    turn_off(IN4)
+    write(ENA, 180)
+    write(ENB, 180)
+
+fn backward():
+    turn_off(IN1)
+    turn_on(IN2)
+    turn_off(IN3)
+    turn_on(IN4)
+    write(ENA, 180)
+    write(ENB, 180)
+
+fn turn_right():
+    turn_on(IN1)
+    turn_off(IN2)
+    turn_off(IN3)
+    turn_on(IN4)
+    write(ENA, 180)
+    write(ENB, 180)
+
+fn stop():
+    turn_off(IN1)
+    turn_off(IN2)
+    turn_off(IN3)
+    turn_off(IN4)
+    write(ENA, 0)
+    write(ENB, 0)
+
+fn loop():
+    every 50:
+        turn_off(TRIG)
+        wait(2)
+        turn_on(TRIG)
+        wait(10)
+        turn_off(TRIG)
+
+        t = pulse_in(ECHO, HIGH, 3s)
+
+        distance = t * 0.034 / 2
+
+        serial.println(distance)
+
+        if distance == 0:
+            stop()
+
+        elif distance > SAFE_DISTANCE:
+            forward()
+
+        else:
+            stop()
+            wait(200)
+            backward()
+            wait(400)
+            turn_right()
+            wait(450)
+            stop()

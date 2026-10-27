@@ -1,0 +1,23 @@
+soilMoisturePin = A0
+ledPin = 8
+
+threshold = 500
+
+fn loop():
+    soilMoistureValue = read(soilMoisturePin)
+    moisturePercentage = scale(soilMoistureValue, 0, 1023, 0, 100)
+
+    serial.print("Soil Moisture Value: ")
+    serial.print(soilMoistureValue)
+    serial.print(" | Moisture Percentage: ")
+    serial.print(moisturePercentage)
+    serial.println("%")
+
+    if soilMoistureValue > threshold:
+        turn_on(ledPin)
+        serial.print("Status: Soil is DRY. Water your plant!")
+    else:
+        turn_off(ledPin)
+        serial.print("Status: Soil is WET.")
+
+    wait(1s)

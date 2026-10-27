@@ -1,8 +1,7 @@
 # Build files
 build/*
 
-# My main test file
-main.mello
+# Like a TODO file but for fixing errors
 errors.txt
 
 # Output windows file

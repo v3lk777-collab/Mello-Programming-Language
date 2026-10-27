@@ -18,7 +18,7 @@ RESET = '\033[0m'
 
 COMPILER = Path(__file__).parent / "cmake/mello.exe"
 FILE_EXTENSION = ".mello"
-TESTS_DIR = Path(__file__).parent / "tests"
+TESTS_DIR = Path(__file__).parent / "projects"
 
 def runFile(file_path: Path) -> None:
     if not file_path.exists():

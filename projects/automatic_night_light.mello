@@ -1,0 +1,14 @@
+ldrPin = A0
+ledPin = 13
+threshold = 500
+
+fn loop():
+    sensorValue = read(ldrPin)
+    serial.println(sensorValue)
+
+    if sensorValue <= threshold:
+        turn_on(ledPin)
+    else:
+        turn_off(ledPin)
+
+    wait(1s)

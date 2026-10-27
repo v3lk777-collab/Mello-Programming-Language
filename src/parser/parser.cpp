@@ -593,6 +593,10 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
 
     auto expr_value = parseExpression();
 
+    if (!variablesValues.contains(varName)) {
+        variablesValues[varName] = expr_value->toCpp();
+    }
+
     if (parsedVariables.count(varName)) {
         reassignedVariables.insert(varName);
     } else {

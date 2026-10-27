@@ -1,0 +1,19 @@
+sensorPin = A0
+buzzerPin = 8
+tempThreshold = 27.0
+
+fn loop():
+    sensorValue = read(sensorPin)
+
+    temperatureC = (sensorValue * (5.0 / 1023.0)) * 100.0
+
+    serial.print("Temperature: ")
+    serial.print(temperatureC)
+    serial.println(" °C")
+
+    if temperatureC > tempThreshold:
+        turn_on(buzzerPin)
+    else:
+        turn_off(buzzerPin)
+
+    wait(1s)

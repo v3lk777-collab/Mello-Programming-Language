@@ -1,0 +1,19 @@
+sensorPin = A0
+ledPin = 13
+buzzerPin = 8
+threshold = 500
+
+fn loop():
+    waterValue = read(sensorPin)
+
+    serial.print("Water Level Value: ")
+    serial.println(waterValue)
+
+    if waterValue >= threshold:
+        turn_on(ledPin)
+        turn_on(buzzerPin)
+    else:
+        turn_off(ledPin)
+        turn_off(buzzerPin)
+
+    wait(1s)

@@ -32,6 +32,8 @@ inline std::set<std::string> floatVariables;
 inline std::set<std::string> stringVariables;
 inline std::set<std::string> integerVariables;
 
+inline std::unordered_map<std::string, std::string> variablesValues;
+
 inline std::set<std::string> nonConstantVariables;
 
 inline std::set<std::string> includedLibraries;

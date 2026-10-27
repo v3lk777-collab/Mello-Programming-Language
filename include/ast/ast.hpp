@@ -489,6 +489,14 @@ public:
             std::string pin = argsStr[0];
             std::string value = argsStr[1];
 
+            if (variablesValues.contains(pin)) {
+                std::string pinValue = variablesValues[pin];
+
+                if (!(value == "0" || value == "1" || value == "HIGH" || value == "LOW")) {
+                    return "analogWrite(" + pin + ", " + value + ");";
+                }
+            }
+
             if (value == "0" || value == "1" || value == "HIGH" || value == "LOW") {
                 return "digitalWrite(" + pin + ", " + value + ");";
             } else {
@@ -498,6 +506,14 @@ public:
 
         if (funcName == "read") {
             std::string pin = argsStr[0];
+
+            if (variablesValues.contains(pin)) {
+                std::string pinValue = variablesValues[pin];
+
+                if (pinValue.length() >= 2 && pinValue[0] == 'A' && isdigit(pinValue[1])) {
+                    return "analogRead(" + pin + ")";
+                }
+            }
 
             if (pin.length() >= 2 && pin[0] == 'A' && isdigit(pin[1])) {
                 return "analogRead(" + pin + ")";
