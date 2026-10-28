@@ -1,8 +1,8 @@
-<div style="text-align: center;">
+<center>
     <img src="./logo.png" width="20%" alt="Mello Programming Language Logo"/>
 
 # Mello Programming Language
-</div>
+</center>
 
 [![C++](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/23)
 [![CMake](https://img.shields.io/badge/CMake-3.25%2B-informational.svg)](https://cmake.org/)
