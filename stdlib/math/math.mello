@@ -36,3 +36,11 @@ fn radians_to_degrees(value) -> float:
 
 fn isclose(a, b, epsilon) -> bool:
     return absolute(a - b) <= epsilon
+
+fn power(base, expression) -> float:
+    result = 1.0
+
+    for i in range(0, expression):
+        result = result * base
+
+    return result

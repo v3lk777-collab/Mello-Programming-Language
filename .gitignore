@@ -4,6 +4,9 @@ build/*
 # Like a TODO file but for fixing errors
 errors.txt
 
+# The file that i test Mello code in
+main.mello
+
 # Output windows file
 !build/mello.exe
 
