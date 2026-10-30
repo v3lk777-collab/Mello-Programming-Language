@@ -1,16 +1,18 @@
-<center>
+<p align="center">
     <img src="./logo.png" width="20%" alt="Mello Programming Language Logo"/>
+</p>
 
-# Mello Programming Language
-</center>
+<h1 align="center">Mello Programmming Language</h1>
 
-[![C++](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/23)
-[![CMake](https://img.shields.io/badge/CMake-3.25%2B-informational.svg)](https://cmake.org/)
-[![Python](https://img.shields.io/badge/Python-3-informational.svg)](https://www.python.org)
+<p align="center">A high-performance, indentation-based programming language and transpiler for streamlining embedded systems and IoT development.</p>
 
-**A high-performance, indentation-based programming language and transpiler for streamlining embedded systems and IoT development.**
+<p align="center">Mello compiles directly to native C++ — no runtime interpreter, no virtual machine. Write readable, Python-like code and get the exact binary footprint of hand-written Arduino C++.</p>
 
-Mello compiles directly to native C++ — no runtime interpreter, no virtual machine. Write readable, Python-like code and get the exact binary footprint of hand-written Arduino C++.
+<p align="center">
+    <img src="https://img.shields.io/badge/C%2B%2B-23-blue.svg" alt="C++ 23"/>
+    <img src="https://img.shields.io/badge/CMake-3.25%2B-informational.svg" alt="CMake +3.25"/>
+    <img src="https://img.shields.io/badge/Python-3-informational.svg" alt="Python v3"/>
+</p>
 
 ---
 
