@@ -1,28 +1,28 @@
-fn absolute(x) -> int:
+fn absolute(x) -> float:
     if x < 0:
         return -x
 
     return x
 
-fn min_value(a, b) -> int:
+fn min_value(a, b) -> float:
     if a > b:
         return b
     else:
         return a
 
-fn max_value(a, b) -> int:
+fn max_value(a, b) -> float:
     if a < b:
         return b
     else:
         return a
 
-fn clamp(value, min, max) -> int:
-    return max_value(min, min_value(value, max))
+fn clamp(value, min, max) -> float:
+    return min_value(max, max_value(value, min))
 
-fn square(x) -> int:
+fn square(x) -> float:
     return x * x
 
-fn cube(x) -> int:
+fn cube(x) -> float:
     return x * x * x
 
 fn lerp(a, b, t) -> float:
@@ -44,3 +44,9 @@ fn power(base, expression) -> float:
         result = result * base
 
     return result
+
+fn factorial(n) -> float:
+    if n <= 1:
+        return 1.0
+
+    return float(n) * factorial(n - 1)
