@@ -9,8 +9,8 @@
 <p align="center">Mello compiles directly to native C++ — no runtime interpreter, no virtual machine. Write readable, Python-like code and get the exact binary footprint of hand-written Arduino C++.</p>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/C%2B%2B-23-blue.svg" alt="C++ 23"/>
-    <img src="https://img.shields.io/badge/CMake-3.25%2B-informational.svg" alt="CMake +3.25"/>
+    <img src="https://img.shields.io/badge/C%2B%2B-23-blue.svg" alt="C++23"/>
+    <img src="https://img.shields.io/badge/CMake-3.25%2B-informational.svg" alt="CMake v3.25+"/>
     <img src="https://img.shields.io/badge/Python-3-informational.svg" alt="Python v3"/>
 </p>
 
