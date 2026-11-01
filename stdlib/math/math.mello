@@ -41,7 +41,7 @@ fn power(base, expression) -> float:
     result = 1.0
 
     for i in range(0, expression):
-        result = result * base
+        result *= base
 
     return result
 
