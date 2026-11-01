@@ -12,11 +12,11 @@
 #include "symbol_table.hpp"
 
 SymbolTable::SymbolTable() {
-    variableScopes.push_back({});
+    variableScopes.emplace_back();
 }
 
 void SymbolTable::enterScope() {
-    variableScopes.push_back({});
+    variableScopes.emplace_back();
 }
 
 void SymbolTable::exitScope() {

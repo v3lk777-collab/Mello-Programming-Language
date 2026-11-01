@@ -364,30 +364,54 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 body.push_back(parseFunctionCall(name));
             } else if (current.type == TokenType::PLUS_EQUAL) {
                 advance();
-                std::string val = current.value;
+                auto value = parseExpression();
 
                 advance();
                 reassignedVariables.insert(name);
 
-                body.push_back(std::make_unique<CompoundAssignNode>(name, "+=", val));
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "+=", std::move(value)));
             } else if (current.type == TokenType::MINUS_EQUAL) {
                 advance();
-                std::string val = current.value;
+                auto value = parseExpression();
 
                 advance();
                 reassignedVariables.insert(name);
 
-                body.push_back(std::make_unique<CompoundAssignNode>(name, "-=", val));
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "-=", std::move(value)));
+            } else if (current.type == TokenType::MULTIPLY_EQUAL) {
+                advance();
+                auto value = parseExpression();
+
+                advance();
+                reassignedVariables.insert(name);
+
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "*=", std::move(value)));
+            } else if (current.type == TokenType::DIVIDE_EQUAL) {
+                advance();
+                auto value = parseExpression();
+
+                advance();
+                reassignedVariables.insert(name);
+
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "/=", std::move(value)));
+            } else if (current.type == TokenType::MODULO_EQUAL) {
+                advance();
+                auto value = parseExpression();
+
+                advance();
+                reassignedVariables.insert(name);
+
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "%=", std::move(value)));
             } else if (current.type == TokenType::INCREMENT) {
                 advance();
                 reassignedVariables.insert(name);
 
-                body.push_back(std::make_unique<CompoundAssignNode>(name, "++", ""));
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "++"));
             } else if (current.type == TokenType::DECREMENT) {
                 advance();
                 reassignedVariables.insert(name);
 
-                body.push_back(std::make_unique<CompoundAssignNode>(name, "--", ""));
+                body.push_back(std::make_unique<CompoundAssignNode>(name, "--"));
             } else if (current.type == TokenType::DOT) {
                 advance();
                 std::string methodName = current.value;

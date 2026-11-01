@@ -1233,10 +1233,10 @@ class CompoundAssignNode : public ASTNode {
 private:
     std::string op;
     std::string name;
-    std::string value;
+    std::unique_ptr<ExpressionNode> value;
 
 public:
-    CompoundAssignNode(std::string name, std::string op, std::string value)
+    CompoundAssignNode(std::string name, std::string op, std::unique_ptr<ExpressionNode> value = nullptr)
         : name(std::move(name)), op(std::move(op)), value(std::move(value)) {}
 
 public:
@@ -1248,8 +1248,8 @@ public:
         return name;
     }
 
-    const std::string& getValue() const noexcept {
-        return value;
+    const ExpressionNode* getValue() const noexcept {
+        return value.get();
     }
 
 public:
@@ -1262,7 +1262,7 @@ public:
             return name + "--;";
         }
 
-        return name + " " + op + " " + value + ";";
+        return name + " " + op + " " + value->toCpp() + ";";
     }
 };
 

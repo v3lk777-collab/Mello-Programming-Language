@@ -188,19 +188,37 @@ std::vector<Token> Lexer::tokenize() {
             continue;
 
         case '*':
-            tokens.push_back({TokenType::MULTIPLY, "*", line, column, source});
+            if (peek() == '=') {
+                tokens.push_back({TokenType::MULTIPLY_EQUAL, "*=", line, column, source});
+
+                advance();
+            } else {
+                tokens.push_back({TokenType::MULTIPLY, "*", line, column, source});
+            }
 
             advance();
             continue;
 
         case '/':
-            tokens.push_back({TokenType::DIVIDE, "/", line, column, source});
+            if (peek() == '=') {
+                tokens.push_back({TokenType::DIVIDE_EQUAL, "/=", line, column, source});
+
+                advance();
+            } else {
+                tokens.push_back({TokenType::DIVIDE, "/", line, column, source});
+            }
 
             advance();
             continue;
 
         case '%':
-            tokens.push_back({TokenType::MODULO, "%", line, column, source});
+            if (peek() == '=') {
+                tokens.push_back({TokenType::MODULO_EQUAL, "%=", line, column, source});
+
+                advance();
+            } else {
+                tokens.push_back({TokenType::MODULO, "%", line, column, source});
+            }
 
             advance();
             continue;
