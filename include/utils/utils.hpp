@@ -58,7 +58,7 @@ inline std::map<std::string, std::vector<bool>> userFuncInputParams;
 inline std::map<std::string, std::vector<bool>> userFuncOutputParams;
 
 const std::unordered_set<std::string> stdLibs = {
-    "math", "random"
+    "math", "random", "arrays"
 };
 
 inline std::set<std::string> includedStdLibs;

@@ -50,3 +50,8 @@ fn factorial(n) -> float:
         return 1.0
 
     return float(n) * factorial(n - 1)
+
+fn sin(x) -> int:
+    result = 2.0
+
+    return result

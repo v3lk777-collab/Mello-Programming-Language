@@ -807,6 +807,7 @@ public:
     TokenType val_type;
     std::string raw_value;
     std::unique_ptr<ASTNode> value;
+    bool declaration = true;
 
 private:
     int currentLine;
@@ -903,6 +904,14 @@ public:
         return currentColumn;
     }
 
+    bool isDeclaration() const noexcept {
+        return declaration;
+    }
+
+    void setIsDeclaration(bool value) noexcept {
+        declaration = value;
+    }
+
 public:
     std::string toCpp() override {
         type = "";
@@ -912,7 +921,7 @@ public:
             final_value.pop_back();
         }
 
-        if (declaredVariables.count(name)) {
+        if (!declaration) {
             bool wasString = stringVariables.count(name) > 0;
             bool wasFloat = floatVariables.count(name) > 0;
             bool wasInt = integerVariables.count(name) > 0;
@@ -1332,8 +1341,8 @@ private:
     std::unique_ptr<ASTNode> value;
 
 public:
-    ReturnNode(std::unique_ptr<ASTNode> val)
-        : value(std::move(val)) {}
+    ReturnNode(std::unique_ptr<ASTNode> value)
+        : value(std::move(value)) {}
 
 public:
     ASTNode* getValue() const noexcept {
@@ -1371,7 +1380,7 @@ public:
         return funcName;
     }
 
-    std::vector<std::string> getFuncParams() const noexcept {
+    const std::vector<std::string>& getFuncParams() const noexcept {
         return params;
     }
 

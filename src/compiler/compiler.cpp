@@ -345,41 +345,31 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     }
 
     for (const auto& node : program) {
-        if (auto varNode = dynamic_cast<VarAssignNode*>(node.get())) {
-            std::string code = varNode->toCpp();
+        std::string code = node->toCpp();
 
-            if (code.find(varNode->name + " =") == 0) {
-                std::cerr << "\nSyntax Error: You cannot reassign the variable '" << varNode->name << "' outside of a function.\n" << "Please move '" << varNode->name << " = ...' inside 'fn start():' or 'fn loop():'.\n" << "\n";
-                
-                outputFile.close();
-                
-                std::filesystem::remove_all(sketchDir);
+        if (dynamic_cast<VarAssignNode*>(node.get())) {
+            globalVariablesCode += code;
 
-                return false; 
-            } else {
-                globalVariablesCode += code;
-            }
-        } else {
-            std::string code = node->toCpp();
-            
-            if (code.find("void setup()") != std::string::npos) {
-                hasSetup = true;
-            }
-
-            if (code.find("Serial.begin") != std::string::npos) {
-                hasSerial = true;
-            }
-
-            if ((code.find("Serial.") != std::string::npos) && code.find("Serial.begin") == std::string::npos) {
-                hasSerialCommand = true;
-            }
-
-            if (code.find("void loop()") != std::string::npos) {
-                hasLoop = true;
-            }
-
-            functionsCode += code + "\n";
+            continue;
         }
+            
+        if (code.find("void setup()") != std::string::npos) {
+            hasSetup = true;
+        }
+
+        if (code.find("Serial.begin") != std::string::npos) {
+            hasSerial = true;
+        }
+
+        if ((code.find("Serial.") != std::string::npos) && code.find("Serial.begin") == std::string::npos) {
+            hasSerialCommand = true;
+        }
+
+        if (code.find("void loop()") != std::string::npos) {
+            hasLoop = true;
+        }
+
+        functionsCode += code + "\n";
     }
 
     if (!includedLibraries.empty()) {

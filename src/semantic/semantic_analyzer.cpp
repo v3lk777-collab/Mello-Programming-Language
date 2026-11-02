@@ -14,6 +14,18 @@
 #include "utils.hpp"
 
 void SemanticAnalyzer::analyzeAssignment(VarAssignNode* varNode) {
+    if (varNode->getValue()) {
+        analyzeNode(varNode->getValue());
+    }
+
+    if (symbolTable.lookupVariable(varNode->name)) {
+        varNode->setIsDeclaration(false);
+
+        return;
+    }
+
+    varNode->setIsDeclaration(true);
+
     VariableSymbol symbol;
 
     symbol.name = varNode->name;
@@ -21,13 +33,7 @@ void SemanticAnalyzer::analyzeAssignment(VarAssignNode* varNode) {
     symbol.isConstant = varNode->isConstantVar;
     symbol.declaredLine = varNode->getCurrentDeclaredLine();
 
-    std::string source = varNode->getSource();
-    int currentLine = varNode->getCurrentDeclaredLine();
-    int currentColumn = varNode->getCurrentDeclaredColumn();
-
-    if (!symbolTable.declareVariable(symbol) && declaredVariables.contains(symbol.name)) {
-        ErrorHandler::report("This variable has already been declared:", symbol.name, currentLine, currentColumn, source);
-    }
+    symbolTable.declareVariable(symbol);
 }
 
 void SemanticAnalyzer::analyzeIfStatment(IfNode* ifNode) {
@@ -117,6 +123,8 @@ void SemanticAnalyzer::analyzeForStatement(ForNode* forNode) {
 }
 
 void SemanticAnalyzer::analyzeForRangeStatement(ForRangeNode* forRangeNode) {
+    symbolTable.enterScope();
+
     if (!forRangeNode->getVarName().empty()) {
         VariableSymbol variable;
 
@@ -136,8 +144,6 @@ void SemanticAnalyzer::analyzeForRangeStatement(ForRangeNode* forRangeNode) {
     if (forRangeNode->getStep()) {
         analyzeExpression(forRangeNode->getStep().get());
     }
-
-    symbolTable.enterScope();
 
     for (const auto& body : forRangeNode->getChildBodies()) {
         for (const auto& node : *body) {
@@ -314,6 +320,12 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
     }
 }
 
+void SemanticAnalyzer::analyzeReturnStatement(ReturnNode* returnNode) {
+    if (returnNode->getValue()) {
+        analyzeNode(returnNode->getValue());
+    }
+}
+
 void SemanticAnalyzer::analyzeNode(ASTNode* node) {
     if (auto varNode = dynamic_cast<VarAssignNode*>(node)) {
         analyzeAssignment(varNode);
@@ -359,5 +371,7 @@ void SemanticAnalyzer::analyzeExpression(ExpressionNode* node) {
         analyzeSerialCall(serialCallNode);
     } else if (auto builtInCallNode = dynamic_cast<BuiltInFunctionCallNode*>(node)) {
         analyzeBuiltInCall(builtInCallNode);
+    } else if (auto returnNode = dynamic_cast<ReturnNode*>(node)) {
+        analyzeReturnStatement(returnNode);
     }
 }

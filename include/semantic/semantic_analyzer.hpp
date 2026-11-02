@@ -35,6 +35,7 @@ private:
     void analyzeRepeatStatement(RepeatNode* repeatNode);
     void analyzeOnPressStatement(OnPressNode* onPressNode);
     void analyzeFunctionDefinition(FunctionNode* funcNode);
+    void analyzeReturnStatement(ReturnNode* returnNode);
 
 private:
     void analyzeLiteral(LiteralNode* literalNode);
