@@ -83,7 +83,7 @@ Variables are dynamically inferred at transpile time but become strictly typed, 
 
 ```python
 name = "Mohammed"      # String variable
-sensor_pin = 5         # Integer variable
+sensorPin = 5          # Integer variable
 threshold = 10.5       # Float variable
 isAMelloCode = true    # Boolean variable
 character = 'A'        # Char variable (single quotes only)
@@ -252,6 +252,49 @@ fn start():
 
     serial.println(number)
 ```
+
+### Standard Library (`use`)
+
+Mello ships with a standard library written in Mello itself. Import a module with `use`:
+
+```python
+use math
+use random
+
+fn start():
+    seed_random(42)
+
+    c = clamp(15, 0, 10)
+    randomNumber = random_range(1, 6)
+
+    serial.println(c)              # 10
+    serial.println(randomNumber)   # pseudo-random number from 1 to 6
+```
+
+#### `math`
+
+| Function | Description |
+|---|---|
+| `absolute(x)` | Absolute value |
+| `min_value(a, b)` / `max_value(a, b)` | Smaller / larger of two values |
+| `clamp(value, min, max)` | Limit `value` to the range `[min, max]` |
+| `square(x)` / `cube(x)` | `x²` / `x³` |
+| `power(base, exponent)` | `base` raised to a non-negative integer exponent |
+| `factorial(n)` | `n!` (returns `1.0` for `n <= 1`) |
+| `lerp(a, b, t)` | Linear interpolation between `a` and `b` |
+| `degrees_to_radians(v)` / `radians_to_degrees(v)` | Angle conversion |
+| `isclose(a, b, epsilon)` | `true` if `a` and `b` differ by at most `epsilon` |
+
+#### `random`
+
+A small, deterministic linear congruential generator (state in `0..4095`, light enough for an ATmega328P).
+
+| Function | Description |
+|---|---|
+| `seed_random(seed)` | Set the generator state |
+| `random_next()` | Next raw value in `0..4095` |
+| `random_below(max_exclusive)` | Value in `0 .. max_exclusive-1` (returns `0` if `max_exclusive <= 0`) |
+| `random_range(low, high)` | Value in `low .. high` inclusive (returns `low` if `high < low`) |
 
 ---
 
