@@ -21,7 +21,8 @@ enum class DataType {
     BOOLEAN,
     CHARACTER,
     VOID,
-    ANY
+    ANY,
+    ARRAY
 };
 
 struct VariableSymbol {

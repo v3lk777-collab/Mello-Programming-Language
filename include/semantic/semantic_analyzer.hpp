@@ -25,6 +25,7 @@ public:
 
 private:
     void analyzeAssignment(VarAssignNode* varNode);
+    void analyzeArrayDefinition(ArrayNode* arrayNode);
     void analyzeIfStatment(IfNode* ifNode);
     void analyzeUserFuncDefinition(UserFuncNode* userFuncNode);
     void analyzeWhileStatement(WhileNode* whileNode);

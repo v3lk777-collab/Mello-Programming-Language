@@ -36,6 +36,18 @@ void SemanticAnalyzer::analyzeAssignment(VarAssignNode* varNode) {
     symbolTable.declareVariable(symbol);
 }
 
+void SemanticAnalyzer::analyzeArrayDefinition(ArrayNode* arrayNode) {
+    VariableSymbol array;
+
+    array.name = arrayNode->getArrayName();
+    array.type = DataType::ARRAY;
+    array.declaredLine = arrayNode->getCurrentDeclaredLine();
+
+    if (!symbolTable.declareVariable(array)) {
+        ErrorHandler::report("This array has already been declared:", array.name, arrayNode->getCurrentDeclaredLine(), arrayNode->getCurrentDeclaredColumn(), arrayNode->getSource());
+    }
+}
+
 void SemanticAnalyzer::analyzeIfStatment(IfNode* ifNode) {
     if (ifNode->getCondition()) {
         analyzeNode(ifNode->getCondition().get());
@@ -331,6 +343,8 @@ void SemanticAnalyzer::analyzeNode(ASTNode* node) {
         analyzeAssignment(varNode);
     } else if (auto funcNode = dynamic_cast<FunctionNode*>(node)) {
         analyzeFunctionDefinition(funcNode);
+    } else if (auto arrayNode = dynamic_cast<ArrayNode*>(node)) {
+        analyzeArrayDefinition(arrayNode);
     } else if (auto ifNode = dynamic_cast<IfNode*>(node)) {
         analyzeIfStatment(ifNode);
     } else if (auto userFuncNode = dynamic_cast<UserFuncNode*>(node)) {

@@ -254,7 +254,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
             consume(TokenType::RBRACKET, "Expected ']' after array index");
 
-            if (!arraysNamesList.count(name)) {
+            if (!arraysNamesList.contains(name) && !std::ranges::contains(currentFuncParamNames, name)) {
                 ErrorHandler::report("Undefined array name", name, current.line, current.column, this->source);
             }
 
@@ -662,13 +662,13 @@ std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
 
     consume(TokenType::RBRACKET, "Expected ']' to close list literal");
 
-    return std::make_unique<ArrayNode>(name, members);
+    return std::make_unique<ArrayNode>(name, members, current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseArrayAssignment(const std::string& name) {
     advance();
 
-    if (!arraysNamesList.count(name)) {
+    if (!arraysNamesList.contains(name)) {
         ErrorHandler::report("Undefined array name", name, current.line, current.column, this->source);
     }
 

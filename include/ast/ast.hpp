@@ -83,6 +83,11 @@ private:
     std::vector<std::string> arrayMembers;
 
 private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+private:
     std::string inferElementType() const noexcept {
         if (arrayMembers.empty()) {
             return "int";
@@ -102,8 +107,8 @@ private:
     }
 
 public:
-    ArrayNode(std::string name, std::vector<std::string> arrayMembers)
-        : arrayName(std::move(name)), arrayMembers(std::move(arrayMembers)) {}
+    ArrayNode(std::string name, std::vector<std::string> arrayMembers, int currentLine, int currentColumn, std::string source)
+        : arrayName(std::move(name)), arrayMembers(std::move(arrayMembers)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     const std::string& getArrayName() const noexcept {
@@ -112,6 +117,18 @@ public:
 
     const std::vector<std::string>& getArrayMembers() const noexcept {
         return arrayMembers;
+    }
+
+    const std::string& getSource() const noexcept {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const noexcept {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const noexcept {
+        return currentColumn;
     }
 
 public:
