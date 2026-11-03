@@ -284,6 +284,8 @@ fn start():
 | `lerp(a, b, t)` | Linear interpolation between `a` and `b` |
 | `degrees_to_radians(v)` / `radians_to_degrees(v)` | Angle conversion |
 | `isclose(a, b, epsilon)` | `true` if `a` and `b` differ by at most `epsilon` |
+| `sin(x)` | Get the sine of x |
+| `cos(x)` | Get the cosine of x |
 
 #### `random`
 
