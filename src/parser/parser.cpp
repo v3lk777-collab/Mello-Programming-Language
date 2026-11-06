@@ -828,6 +828,8 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
 
     currentParsingUserFunc = funcName;
     currentFuncParamNames = params;
+
+    userDefinedFunctionsParamsNumber[funcName] = params.size();
     userFuncOutputParams[funcName] = std::vector<bool>(params.size(), false);
     userFuncInputParams[funcName] = std::vector<bool>(params.size(), false);
 

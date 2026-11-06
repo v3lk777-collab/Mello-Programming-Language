@@ -364,6 +364,10 @@ public:
         return arguments; 
     }
 
+    const int getFuncArgumentsSize() const noexcept {
+        return arguments.size();;
+    }
+
     std::string getSource() const noexcept {
         return source;
     }

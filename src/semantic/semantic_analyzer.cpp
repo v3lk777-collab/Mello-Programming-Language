@@ -238,7 +238,7 @@ void SemanticAnalyzer::analyzeLiteral(LiteralNode* literalNode) {
     if (token.type == TokenType::IDENTIFIER) {
         const VariableSymbol* var = symbolTable.lookupVariable(token.value);
 
-        if (!var) {
+        if (var && (var->name.starts_with("A") && std::all_of(var->name.begin() + 1, var->name.end(), [] (char c) { return isdigit(c); }))) {
             ErrorHandler::report("Use of undeclared variable:", token.value, token.line, token.column, token.value);
         }
     }
@@ -276,6 +276,20 @@ void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
 
     if (!func) {
         ErrorHandler::report("Call to undeclared function:", funcName, currentLine, currentColumn, source);
+    }
+
+    auto it = userDefinedFunctionsParamsNumber.find(functionCallNode->getFunctionName());
+
+    int userFunctionParamsNumber;
+
+    if (it != userDefinedFunctionsParamsNumber.end()) {
+        userFunctionParamsNumber = it->second;
+    }
+
+    int functionParamsNumber = functionCallNode->getFuncArgumentsSize();
+
+    if ((functionParamsNumber > userFunctionParamsNumber) || (functionParamsNumber < userFunctionParamsNumber)) {
+        ErrorHandler::report(std::format("This function takes {} argument, but it was taken {} argument:", userFunctionParamsNumber, functionParamsNumber), functionCallNode->getFunctionName(), currentLine, currentColumn, source);
     }
 
     for (const auto& arg : functionCallNode->getArguments()) {

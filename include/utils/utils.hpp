@@ -47,6 +47,7 @@ inline std::set<std::string> arraysNamesList;
 
 inline std::set<std::string> funcParams;
 inline std::set<std::string> userDefinedFunctionsNames;
+inline std::unordered_map<std::string, int> userDefinedFunctionsParamsNumber;
 inline std::unordered_map<std::string, std::string> userDefinedFunctionsReturnType;
 
 inline std::vector<std::string> currentFunctionParams;
@@ -54,8 +55,8 @@ inline std::vector<std::string> currentFunctionParams;
 inline std::string currentParsingUserFunc = "";
 inline std::vector<std::string> currentFuncParamNames;
 
-inline std::map<std::string, std::vector<bool>> userFuncInputParams;
-inline std::map<std::string, std::vector<bool>> userFuncOutputParams;
+inline std::unordered_map<std::string, std::vector<bool>> userFuncInputParams;
+inline std::unordered_map<std::string, std::vector<bool>> userFuncOutputParams;
 
 const std::unordered_set<std::string> stdLibs = {
     "math", "random", "arrays"
@@ -108,7 +109,7 @@ inline std::string mapReturnTypeToString(const std::string& returnType, const st
         return "char";
     } else if (returnType == "bool") {
         return "bool";
-    } else if (returnType == "any") {
+    } else if (returnType == "any" || returnType == "void") {
         return "auto";
     } else {
         ErrorHandler::report("Unknown return type for function '" + funcName + "':", returnType, currentLine, currentColumn, source);
