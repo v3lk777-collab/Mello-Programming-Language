@@ -58,8 +58,12 @@ inline std::vector<std::string> currentFuncParamNames;
 inline std::unordered_map<std::string, std::vector<bool>> userFuncInputParams;
 inline std::unordered_map<std::string, std::vector<bool>> userFuncOutputParams;
 
+const std::unordered_set<std::string> stdProtocol = {
+    "i2c"
+};
+
 const std::unordered_set<std::string> stdLibs = {
-    "math", "random", "arrays"
+    "math", "random", "i2c"
 };
 
 inline std::set<std::string> includedStdLibs;

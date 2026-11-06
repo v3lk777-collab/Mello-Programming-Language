@@ -1188,7 +1188,7 @@ public:
             opStr = "!";
         }
 
-        std::string result = "(" + opStr + right->toCpp() + ")";
+        std::string result = opStr + right->toCpp();
 
         return result;
     }
@@ -1256,6 +1256,22 @@ public:
         }
 
         return leftStr + " " + opStr + " " + rightStr;
+    }
+};
+
+class BitwiseNode : public ExpressionNode {
+private:
+    std::string op;
+    std::unique_ptr<ExpressionNode> left;
+    std::unique_ptr<ExpressionNode> right;
+
+public:
+    BitwiseNode(std::unique_ptr<ExpressionNode> left, std::string op, std::unique_ptr<ExpressionNode> right)
+        : left(std::move(left)), op(std::move(op)), right(std::move(right)) {}
+
+public:
+    std::string toCpp() override {
+        return left->toCpp() + " " + op + " " + right->toCpp();
     }
 };
 

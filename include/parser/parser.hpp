@@ -40,6 +40,7 @@ private:
     std::unique_ptr<ExpressionNode> parseLogicalNot();
     std::unique_ptr<ExpressionNode> parseEquality();
     std::unique_ptr<ExpressionNode> parseComparison();
+    std::unique_ptr<ExpressionNode> parseBitwise();
     std::unique_ptr<ExpressionNode> parseTerm();
     std::unique_ptr<ExpressionNode> parseFactor();
     std::unique_ptr<ExpressionNode> parseUnary();

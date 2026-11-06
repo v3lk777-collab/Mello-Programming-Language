@@ -13,8 +13,6 @@
 
 #include "error_handler.hpp"
 
-#include <iostream>
-
 Lexer::Lexer(std::string source) {
     this->source = std::move(source);
     this->position = 0;
@@ -264,6 +262,30 @@ std::vector<Token> Lexer::tokenize() {
 
             advance();
             continue;
+
+        case '&':
+            tokens.push_back({TokenType::BITWISE_AND, "&", line, column, source});
+
+            advance();
+            continue;
+
+        case '|':
+            tokens.push_back({TokenType::BITWISE_OR, "|", line, column, source});
+
+            advance();
+            continue;
+
+        case '^':
+            tokens.push_back({TokenType::BITWISE_XOR, "^", line, column, source});
+
+            advance();
+            continue;
+
+        case '~':
+            tokens.push_back({TokenType::BITWISE_NOT, "~", line, column, source});
+
+            advance();
+            continue;
         }
 
         if (current == '!' && peek() == '=') {
@@ -292,6 +314,10 @@ std::vector<Token> Lexer::tokenize() {
                 tokens.push_back({TokenType::GREATER_EQUAL, ">=", line, column, source});
 
                 advance();
+            } else if (peek() == '>') {
+                tokens.push_back({TokenType::RSHIFT, ">>", line, column, source});
+
+                advance();
             } else {
                 tokens.push_back({TokenType::GREATER, ">", line, column, source});
             }
@@ -303,6 +329,10 @@ std::vector<Token> Lexer::tokenize() {
         if (current == '<') {
             if (peek() == '=') {
                 tokens.push_back({TokenType::LESS_EQUAL, "<=", line, column, source});
+
+                advance();
+            } else if (peek() == '<') {
+                tokens.push_back({TokenType::LSHIFT, "<<", line, column, source});
 
                 advance();
             } else {

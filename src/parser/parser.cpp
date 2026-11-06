@@ -130,15 +130,30 @@ std::unique_ptr<ExpressionNode> Parser::parseEquality() {
 }
 
 std::unique_ptr<ExpressionNode> Parser::parseComparison() {
-    auto left = parseTerm();
+    auto left = parseBitwise();
 
     while (current.type == TokenType::GREATER || current.type == TokenType::GREATER_EQUAL || current.type == TokenType::LESS || current.type == TokenType::LESS_EQUAL) {
         Token op = current;
 
         advance();
-        auto right = parseTerm();
+        auto right = parseBitwise();
 
         left = std::make_unique<BinaryOpNode>(std::move(left), op, std::move(right));
+    }
+
+    return left;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseBitwise() {
+    auto left = parseTerm();
+
+    while (current.type == TokenType::BITWISE_AND || current.type == TokenType::BITWISE_OR || current.type == TokenType::BITWISE_XOR || current.type == TokenType::LSHIFT || current.type == TokenType::RSHIFT) {
+        std::string bitwise = current.value;
+
+        advance();
+        auto right = parseTerm();
+
+        left = std::make_unique<BitwiseNode>(std::move(left), std::move(bitwise), std::move(right));
     }
 
     return left;
@@ -175,7 +190,17 @@ std::unique_ptr<ExpressionNode> Parser::parseFactor() {
 }
 
 std::unique_ptr<ExpressionNode> Parser::parseUnary() {
-    if ((current.type == TokenType::MINUS || current.type == TokenType::PLUS) && (current.value == "-" || current.value == "+")) {
+    if (current.type == TokenType::BITWISE_NOT) {
+        Token op = current;
+
+        advance();
+
+        auto right = parseUnary();
+
+        return std::make_unique<UnaryOpNode>(std::move(op), std::move(right));
+    }
+
+    if (current.type == TokenType::MINUS || current.type == TokenType::PLUS) {
         Token op = current;
 
         advance();
