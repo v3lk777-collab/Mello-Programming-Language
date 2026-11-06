@@ -1,0 +1,98 @@
+sclPin = A1
+sdaPin = A0
+
+fn delay_short():
+    wait_ms(1) 
+
+fn clear_scl():
+    pin_mode(sclPin, OUTPUT)
+    write(sclPin, LOW)
+
+fn clear_sda():
+    pin_mode(sdaPin, OUTPUT)
+    write(sdaPin, LOW)
+
+fn release_scl():
+    pin_mode(sclPin, INPUT)
+
+fn release_sda():
+    pin_mode(sdaPin, INPUT)
+
+fn begin():
+    release_sda()
+    release_scl()
+    delay_short()
+    clear_sda()
+    delay_short()
+    clear_scl()
+    delay_short()
+
+fn stop():
+    clear_sda()
+    delay_short()
+    release_scl()
+    delay_short()
+    release_sda()
+    delay_short()
+
+fn write_byte(byte_val) -> int:
+    for i in range(8):
+        bit = (byte_val >> (7 - i)) & 1
+        
+        if bit == 1:
+            release_sda()
+        else:
+            clear_sda()
+        delay_short()
+
+        release_scl()
+        delay_short()
+        clear_scl()
+        delay_short()
+
+    release_sda()
+    delay_short()
+    release_scl()
+    delay_short()
+
+    ack_signal = read(sdaPin)
+    
+    clear_scl()
+    delay_short()
+
+    if ack_signal == LOW:
+        return 1
+    else:
+        return 0
+
+fn read_byte(send_ack) -> int:
+    byte_val = 0
+
+    release_sda()
+    delay_short()
+
+    for i in range(8):
+        release_scl()
+        delay_short()
+
+        bit = read(sdaPin)
+
+        if bit == HIGH:
+            byte_val = byte_val | (1 << (7 - i))
+
+        clear_scl()
+        delay_short()
+
+    if send_ack == 1:
+        clear_sda()
+    else:
+        release_sda()
+
+    delay_short()
+    release_scl()
+    delay_short()
+    clear_scl()
+    delay_short()
+    release_sda()
+
+    return byte_val
