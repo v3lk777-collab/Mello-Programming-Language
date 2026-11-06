@@ -628,6 +628,14 @@ public:
             return "pulseIn(" + pin + ", " + value + ", " + timeout + ")";
         }
 
+        if (funcName == "wait_ms") {
+            if (argsStr.empty()) {
+                ErrorHandler::report("wait_ms() requires one argument:", funcName, currentLine, currentColumn, source);
+            }
+
+            return "delayMicroseconds(" + argsStr[0] + ");";
+        }
+
         return "";
     }
 };
