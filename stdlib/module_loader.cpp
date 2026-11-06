@@ -27,7 +27,7 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
 
     if (stdLibs.contains(moduleName)) {
         if (stdProtocol.contains(moduleName)) {
-            path = "../stdlib/protocol/" + moduleName + "/" + moduleName + ".mello";
+            path = "../stdlib/protocols/" + moduleName + "/" + moduleName + ".mello";
         } else {
             path = "../stdlib/" + moduleName + "/" + moduleName + ".mello";
         }
