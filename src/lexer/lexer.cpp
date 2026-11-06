@@ -13,6 +13,8 @@
 
 #include "error_handler.hpp"
 
+#include <cctype>
+
 Lexer::Lexer(std::string source) {
     this->source = std::move(source);
     this->position = 0;
@@ -343,25 +345,43 @@ std::vector<Token> Lexer::tokenize() {
             continue;
         }
 
-        if (isdigit(current)) {
+        if (std::isdigit(static_cast<unsigned char>(current))) {
             std::string number;
             bool isFloat = false;
-            bool isHexadecimal = false;
 
-            while ((current != '\0' && current != '\n') && (isdigit(current) || current == '.')) {
-                if (isdigit(current) && current == '0' && (peek() == 'x' || peek() == 'X')) {
-                    isHexadecimal = true;
-                    number += current;
+            if (current == '0' && (peek() == 'x' || peek() == 'X')) {
+                number += current;
 
-                    advance();
+                advance();
 
-                    number += current;
+                number += current;
 
-                    advance();
+                advance();
+
+                if (!std::isxdigit(static_cast<unsigned char>(current))) {
+                    ErrorHandler::report("Lexical Error: Expected hexadecimal digit after 0x", number, line, column, source);
 
                     continue;
                 }
 
+                while (current != '\0' && (std::isxdigit(static_cast<unsigned char>(current)))) {
+                    number += current;
+
+                    advance();
+                }
+
+                if (std::isalnum(static_cast<unsigned char>(current)) || current == '_') {
+                    ErrorHandler::report("Lexical Error: Invalid hexadecimal number", number + current, line, column, source);
+
+                    continue;
+                }
+
+                tokens.push_back({TokenType::INTEGER, number, line, column, source});
+
+                continue;
+            }
+
+            while (current != '\0' && current != '\n' && (std::isdigit(static_cast<unsigned char>(current)) || current == '.')) {
                 if (current == '.') {
                     if (!isFloat) {
                         isFloat = true;
@@ -377,6 +397,7 @@ std::vector<Token> Lexer::tokenize() {
 
             if (current == 's' || current == 'm' || current == 'h') {
                 number += current;
+
                 advance();
             }
 
@@ -416,10 +437,10 @@ std::vector<Token> Lexer::tokenize() {
             continue;
         }
 
-        if (isalpha(current) || current == '_') {
+        if (std::isalpha(static_cast<unsigned char>(current)) || current == '_') {
             std::string word;
 
-            while (current != '\0' && (isalnum(current) || current == '_')) {
+            while (current != '\0' && (std::isalnum(static_cast<unsigned char>(current)) || current == '_')) {
                 word += current;
 
                 advance();
