@@ -26,7 +26,11 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
     std::string path;
 
     if (stdLibs.contains(moduleName)) {
-        path = "../stdlib/" + moduleName + "/" + moduleName + ".mello";
+        if (stdProtocol.contains(moduleName)) {
+            path = "../stdlib/protocol/" + moduleName + "/" + moduleName + ".mello";
+        } else {
+            path = "../stdlib/" + moduleName + "/" + moduleName + ".mello";
+        }
     } else {
         path = sourceDir + "/" + moduleName + ".mello";
     }
@@ -45,6 +49,10 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
 
     Lexer lexer(sourceCode);
     std::vector<Token> tokens = lexer.tokenize();
+
+    if (ErrorHandler::hasErrors()) {
+        ErrorHandler::showErrors();
+    }
     
     std::vector<std::unique_ptr<ASTNode>> program;
 
@@ -52,6 +60,10 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
         Parser parser(tokens, sourceCode);
 
         program = parser.parse();
+
+        if (ErrorHandler::hasErrors()) {
+            ErrorHandler::showErrors();
+        }
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << "\n";
     } catch (const std::exception& error) {
