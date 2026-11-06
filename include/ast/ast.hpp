@@ -15,6 +15,7 @@
 #include "lexer.hpp"
 #include "module_loader.hpp"
 
+#include <array>
 #include <sstream>
 #include <string_view>
 
@@ -634,6 +635,21 @@ public:
             }
 
             return "delayMicroseconds(" + argsStr[0] + ");";
+        }
+
+        if (funcName == "pin_mode") {
+            if (argsStr.size() < 2) {
+                ErrorHandler::report("pin_mode() requires two arguments:", funcName, currentLine, currentColumn, source);
+            }
+
+            std::string pin = argsStr[0];
+            std::string mode = argsStr[1];
+
+            if (std::ranges::none_of(std::array{"INPUT", "OUTPUT", "INPUT_PULLUP"}, [&](auto m) { return mode == m; })) {
+                ErrorHandler::report("pin_mode() expects the second argument to be one of: INPUT, OUTPUT, INPUT_PULLUP", funcName, currentLine, currentColumn, source);
+            }
+
+            return "pinMode(" + pin + ", " + mode + ");";
         }
 
         return "";
