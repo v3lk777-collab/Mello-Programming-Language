@@ -588,13 +588,13 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
     advance();
 
     if (current.type == TokenType::LBRACKET) {
-        if (!arraysNamesList.count(varName)) {
+        if (!arraysNamesList.contains(varName)) {
             arraysNamesList.insert(varName);
         }
 
         auto listNode = parseArrayLiteral(varName);
 
-        if (parsedVariables.count(varName)) {
+        if (parsedVariables.contains(varName)) {
             reassignedVariables.insert(varName);
         } else {
             parsedVariables.insert(varName);
@@ -621,7 +621,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
         variablesValues[varName] = expr_value->toCpp();
     }
 
-    if (parsedVariables.count(varName)) {
+    if (parsedVariables.contains(varName)) {
         reassignedVariables.insert(varName);
     } else {
         parsedVariables.insert(varName);
@@ -635,7 +635,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
         advance();
     }
 
-    return std::make_unique<VarAssignNode>(varName, std::move(expr_value), raw, type_of_value, isConstantVar, this->current.line, this->current.column, this->source);
+    return std::make_unique<VarAssignNode>(varName, std::move(expr_value), raw, type_of_value, isConstantVar, current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
@@ -1107,6 +1107,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
             std::string badToken = current.value;
 
             advance();
+
             ErrorHandler::report("Unexpected token in expression", badToken, current.line, current.column, this->source);
         }
     }
