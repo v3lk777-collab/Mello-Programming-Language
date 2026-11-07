@@ -393,7 +393,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
             std::vector<std::unique_ptr<ExpressionNode>> beginArgs;
 
             beginArgs.push_back(std::make_unique<LiteralNode>(Token(TokenType::INTEGER, "9600", 0, 0, "")));
-            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), 0, 0, ""));
+            setupBody.push_back(std::make_unique<FunctionCallNode>("Serial.begin", std::move(beginArgs), false, 0, 0, ""));
         }
 
         FunctionNode autoSetup("setup", std::move(setupBody), 0, 0, "");

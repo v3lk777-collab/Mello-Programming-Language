@@ -327,6 +327,7 @@ public:
 
 class FunctionCallNode : public ExpressionNode {
 private:
+    bool isStatement;
     std::string funcName;
     std::vector<std::unique_ptr<ExpressionNode>> arguments;
 
@@ -353,8 +354,8 @@ private:
     }
 
 public:
-    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> arguments, int currentLine, int currentColumn, std::string source)
-        : funcName(std::move(name)), arguments(std::move(arguments)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+    FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> arguments, bool isStatement, int currentLine, int currentColumn, std::string source)
+        : funcName(std::move(name)), arguments(std::move(arguments)), isStatement(isStatement), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     std::string getFunctionName() const noexcept {
@@ -395,7 +396,7 @@ public:
             }
         }
 
-        oss << ");";
+        oss << ")" << (isStatement ? ";" : "");
 
         return oss.str();
     }
