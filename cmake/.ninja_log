@@ -33,3 +33,7 @@
 43	13281	8157878198736555	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	dfd531ba0370cd88
 62	16321	8157878198936421	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	71b26225662ad974
 16321	17722	8157878361514884	mello.exe	d543d562735a5e8f
+10	8093	8157891552895740	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	dfd531ba0370cd88
+8094	8703	8157891633734008	mello.exe	d543d562735a5e8f
+10	6520	8157892180803608	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	dfd531ba0370cd88
+6521	7099	8157892245903170	mello.exe	d543d562735a5e8f

@@ -1,5 +1,5 @@
-sclPin = A1
-sdaPin = A0
+sclPin = 12
+sdaPin = 13
 
 fn delay_short():
     wait_ms(1) 

@@ -638,9 +638,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
     TokenType type_of_value = current.type;
 
     bool isConstantVar = false;
-    bool isAllUpercase = std::all_of(varName.begin(), varName.end(), [] (unsigned char c) {
-        return std::isupper(c) || c == '_';
-    });
+    bool isAllUpercase = std::all_of(varName.begin(), varName.end(), [] (unsigned char c) { return std::isupper(c) || c == '_'; });
 
     auto expr_value = parseExpression();
 
