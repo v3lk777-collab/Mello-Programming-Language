@@ -68,6 +68,7 @@ private:
     std::unique_ptr<ASTNode> parseOnPressStatement();
     std::unique_ptr<ASTNode> parseTypeConversionCall(const std::string& funcName);
     std::unique_ptr<ASTNode> parseControlTransferStatements(const std::string& statement);
+    std::unique_ptr<ASTNode> parseModule();
 
 public:
     Parser(const std::vector<Token>& tokens, const std::string& source);

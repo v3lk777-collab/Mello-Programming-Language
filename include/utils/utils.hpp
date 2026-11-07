@@ -58,6 +58,8 @@ inline std::vector<std::string> currentFuncParamNames;
 inline std::unordered_map<std::string, std::vector<bool>> userFuncInputParams;
 inline std::unordered_map<std::string, std::vector<bool>> userFuncOutputParams;
 
+inline std::set<std::string> userDefinedModulesNames;
+
 const std::unordered_set<std::string> stdProtocol = {
     "i2c"
 };

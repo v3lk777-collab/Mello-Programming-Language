@@ -273,7 +273,7 @@ public:
             }
 
             for (const auto& pin : outputPins) {
-                if (!inputPins.count(pin)) {
+                if (!inputPins.contains(pin)) {
                     result += "pinMode(" + pin + ", OUTPUT);\n";
                 } else {
                     ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, currentColumn, source);
@@ -281,10 +281,10 @@ public:
             }
 
             for (const auto& pin : inputPullUpPins) {
-                if (!inputPins.count(pin) && !outputPins.count(pin)) {
+                if (!inputPins.contains(pin) && !outputPins.contains(pin)) {
                     result += "pinMode(" + pin + ", INPUT_PULLUP);\n";
                 } else {
-                    if (inputPins.count(pin)) {
+                    if (inputPins.contains(pin)) {
                         ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, currentColumn, source);
                     } else {
                         ErrorHandler::report("Error: This var was use in output pin", pin, currentLine, currentColumn, source);
@@ -419,7 +419,7 @@ public:
         if (!arguments.empty()) {
             std::string pinName = arguments[0]->toCpp();
             
-            if (!currentParsingUserFunc.empty() && funcParams.count(pinName)) {
+            if (!currentParsingUserFunc.empty() && funcParams.contains(pinName)) {
                 auto it = std::find(currentFuncParamNames.begin(), currentFuncParamNames.end(), pinName);
                 if (it != currentFuncParamNames.end()) {
                     size_t idx = std::distance(currentFuncParamNames.begin(), it);
@@ -428,7 +428,7 @@ public:
                     } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
                         userFuncOutputParams[currentParsingUserFunc][idx] = true;
                     } else {
-                        if (userFuncOutputParams.count(funcName)) {
+                        if (userFuncOutputParams.contains(funcName)) {
                             for (size_t i = 0; i < arguments.size() && i < userFuncOutputParams[funcName].size(); ++i) {
                                 if (userFuncOutputParams[funcName][i]) {
                                     std::string argPin = arguments[i]->toCpp();
@@ -449,7 +449,7 @@ public:
             } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
                 outputPins.insert(pinName);
             } else {
-                if (userFuncOutputParams.count(funcName)) {
+                if (userFuncOutputParams.contains(funcName)) {
                     for (size_t i = 0; i < arguments.size() && i < userFuncOutputParams[funcName].size(); ++i) {
                         if (userFuncOutputParams[funcName][i]) {
                             outputPins.insert(arguments[i]->toCpp());
@@ -457,7 +457,7 @@ public:
                     }
                 }
 
-                if (userFuncInputParams.count(funcName)) {
+                if (userFuncInputParams.contains(funcName)) {
                     for (size_t i = 0; i < arguments.size() && i < userFuncInputParams[funcName].size(); ++i) {
                         if (userFuncInputParams[funcName][i]) {
                             inputPins.insert(arguments[i]->toCpp());
@@ -479,7 +479,7 @@ public:
 
 public:
     std::string toCpp() override {
-        if (!keywordsList.count(funcName)) {
+        if (!keywordsList.contains(funcName)) {
             ErrorHandler::report("'" + funcName + "' is not a known built-in command", funcName, currentLine, currentColumn, source);
         }
 
@@ -589,7 +589,7 @@ public:
         }
 
         if (funcName == "save_memory") {
-            if (!includedLibraries.count("EEPROM")) {
+            if (!includedLibraries.contains("EEPROM")) {
                 includedLibraries.insert("EEPROM");
             }
 
@@ -600,7 +600,7 @@ public:
         }
 
         if (funcName == "read_memory") {
-            if (!includedLibraries.count("EEPROM")) {
+            if (!includedLibraries.contains("EEPROM")) {
                 includedLibraries.insert("EEPROM");
             }
 
@@ -682,7 +682,7 @@ public:
 
 public:
     std::string toCpp() override {
-        if (!serialKeywordsList.count(funcName)) {
+        if (!serialKeywordsList.contains(funcName)) {
             ErrorHandler::report("'" + funcName + "' is not a known serial command", funcName, currentLine, currentColumn, source);
         }
 
@@ -841,7 +841,9 @@ public:
             finalObjectName = "Serial";
         }
 
-        return finalObjectName + "." + methodStr;
+        bool isModuleName = userDefinedModulesNames.contains(finalObjectName);
+
+        return finalObjectName + (isModuleName ? "::" : ".") + methodStr;
     }
 };
 
@@ -968,9 +970,9 @@ public:
         }
 
         if (!declaration) {
-            bool wasString = stringVariables.count(name) > 0;
-            bool wasFloat = floatVariables.count(name) > 0;
-            bool wasInt = integerVariables.count(name) > 0;
+            bool wasString = stringVariables.contains(name);
+            bool wasFloat = floatVariables.contains(name);
+            bool wasInt = integerVariables.contains(name);
 
             bool isNowString = (val_type == TokenType::STRING) || final_value.find("\"") != std::string::npos;
             bool isNowFloat = !isNowString && final_value.find('.') != std::string::npos && isNumeric(final_value);
@@ -1044,12 +1046,13 @@ public:
             return false;
         };
 
+        MethodCallNode* methodNode = dynamic_cast<MethodCallNode*>(value.get());
+        bool isModuleCall = methodNode && userDefinedModulesNames.contains(methodNode->getObjectName());
+
         SerialFunctionsCallNode* funcCall = dynamic_cast<SerialFunctionsCallNode*>(value.get());
 
-        if (!funcCall) {
-            if (auto methodNode = dynamic_cast<MethodCallNode*>(value.get())) {
-                funcCall = dynamic_cast<SerialFunctionsCallNode*>(methodNode->getMethodCall());
-            }
+        if (!funcCall && methodNode) {
+            funcCall = dynamic_cast<SerialFunctionsCallNode*>(methodNode->getMethodCall());
         }
 
         if (funcCall) {
@@ -1080,10 +1083,10 @@ public:
         } else if (final_value.find("atoi(") != std::string::npos || final_value.find("(int)") != std::string::npos) {
             type = "int";
             integerVariables.insert(name);
-        } else if (val_type == TokenType::IDENTIFIER && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionsNames.count(final_value.substr(0, final_value.find("(")))) {
+        } else if (val_type == TokenType::IDENTIFIER && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionsNames.contains(final_value.substr(0, final_value.find("("))) && !userDefinedModulesNames.contains(final_value.substr(0, final_value.find("::")))) {
             std::string className = final_value.substr(0, final_value.find("("));
 
-            if (!includedLibraries.count(className)) {
+            if (!includedLibraries.contains(className)) {
                 ErrorHandler::report("Must import this libarary first:", className, currentLine, currentColumn, source);
             }
 
@@ -1135,12 +1138,41 @@ public:
 
         declaredVariables.insert(name);
 
-        bool isReassigned = reassignedVariables.count(name) > 0;
+        bool isReassigned = reassignedVariables.contains(name);
         bool hasConst = type.find("constexpr") != std::string::npos;
-        bool isKeyword = keywordsList.count(raw_value) > 0;
+        bool isKeyword = keywordsList.contains(raw_value);
         bool isArrayAccess = final_value.find('[') != std::string::npos;
 
-        bool isFunctionCall = dynamic_cast<FunctionCallNode*>(value.get()) != nullptr || dynamic_cast<BuiltInFunctionCallNode*>(value.get()) != nullptr || funcCall != nullptr;
+        bool isFunctionCall = dynamic_cast<FunctionCallNode*>(value.get()) != nullptr || dynamic_cast<BuiltInFunctionCallNode*>(value.get()) != nullptr || funcCall != nullptr || isModuleCall;
+
+        FunctionCallNode* userFunction = dynamic_cast<FunctionCallNode*>(value.get());
+
+        if (!userFunction && isModuleCall) {
+            userFunction = dynamic_cast<FunctionCallNode*>(methodNode->getMethodCall());
+        }
+
+        bool returnTypeKnown = false;
+
+        if (userFunction) {
+            auto it = userDefinedFunctionsReturnType.find(userFunction->getFunctionName());
+
+            if (it != userDefinedFunctionsReturnType.end()) {
+                type = it->second;
+                returnTypeKnown = true;
+
+                integerVariables.erase(name);
+                floatVariables.erase(name);
+                stringVariables.erase(name);
+
+                if (type == "float") {
+                    floatVariables.insert(name);
+                } else if (type == "String" || type == "const char*") {
+                    stringVariables.insert(name);
+                } else if (type.find("int") != std::string::npos) {
+                    integerVariables.insert(name);
+                }
+            }
+        }
 
         if (isArrayAccess) {
             return type + " " + name + " = " + final_value + ";\n";
@@ -1158,15 +1190,8 @@ public:
             }
 
             if (isFunctionCall) {
-                if (auto* function = dynamic_cast<FunctionCallNode*>(value.get())) {
-                    std::string functionName = function->getFunctionName();
-                    auto it = userDefinedFunctionsReturnType.find(functionName);
-
-                    if (it != userDefinedFunctionsReturnType.end()) {
-                        type = it->second;
-                    } else {
-                        ErrorHandler::report("Unknown function return type for:", functionName, currentLine, currentColumn, source);
-                    }
+                if (userFunction && !returnTypeKnown) {
+                    ErrorHandler::report("Unknown function return type for:", userFunction->getFunctionName(), currentLine, currentColumn, source);
                 }
 
                 if (isConstantVar) {
@@ -1519,8 +1544,8 @@ public:
     EveryNode(std::string interval, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
         : interval(std::move(interval)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {
 
-        static int counter = 0;
-        id = counter++;
+        static int containser = 0;
+        id = containser++;
     }
 
 public:
@@ -1782,8 +1807,8 @@ public:
     OnPressNode(std::string pin, std::vector<std::unique_ptr<ASTNode>> body)
         : pin(pin), body(std::move(body)) {
 
-        static int counter = 0;
-        id = counter++;
+        static int containser = 0;
+        id = containser++;
 
         inputPullUpPins.insert(pin);
     }
@@ -1888,7 +1913,7 @@ public:
         bool isStringArg = literal && literal->getToken().type == TokenType::STRING;
 
         if (funcName == "int") {
-            if (isStringArg || stringVariables.count(value) > 0) {
+            if (isStringArg || stringVariables.contains(value)) {
                 return "atoi(" + value + ")";
             }
 
@@ -1896,7 +1921,7 @@ public:
         }
 
         if (funcName == "float") {
-            if (isStringArg || stringVariables.count(value) > 0) {
+            if (isStringArg || stringVariables.contains(value)) {
                 return "atof(" + value + ")";
             }
 
@@ -1910,5 +1935,35 @@ public:
         ErrorHandler::report("'" + funcName + "' is not a known type conversion", funcName, currentLine, currentColumn, source);
 
         return "";
+    }
+};
+
+class ModuleNode : public ASTNode {
+private:
+    std::string moduleName;
+    std::vector<std::unique_ptr<ASTNode>> body;
+
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+public:
+    ModuleNode(std::string moduleName, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
+        : moduleName(std::move(moduleName)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+
+public:
+    std::string toCpp() override {
+        std::string result;
+
+        result += "namespace " + moduleName + " {";
+
+        for (const auto& node : body) {
+            result += node->toCpp() + "\n";
+        }
+
+        result += "}";
+
+        return result;
     }
 };

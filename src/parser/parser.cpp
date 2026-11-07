@@ -449,7 +449,9 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
         } else if (current.type == TokenType::KEYWORD) {
             std::string keyword = current.value;
 
-            if (keyword == "if") {
+            if (keyword == "module") {
+                body.push_back(parseModule());
+            } else if (keyword == "if") {
                 body.push_back(parseIfStatement());
             } else if (keyword == "fn") {
                 body.push_back(parseUserFuncDefinition());
@@ -1016,16 +1018,18 @@ std::unique_ptr<ASTNode> Parser::parseRepeatStatement() {
     advance();
 
     std::string count = current.value;
+
     advance();
 
     consume(TokenType::COLON, "Expected ':' after repeat count");
     match(TokenType::NEWLINE);
-    
+
     consume(TokenType::INDENT, "Expected indentation after repeat");
 
     auto body = parseBlock();
+
     consume(TokenType::DEDENT, "Expected dedent at end of repeat block");
-    
+
     return std::make_unique<RepeatNode>(count, std::move(body));
 }
 
@@ -1072,9 +1076,30 @@ std::unique_ptr<ASTNode> Parser::parseOnPressStatement() {
     consume(TokenType::INDENT, "Expected indentation after 'on_press'");
 
     auto body = parseBlock();
+
     consume(TokenType::DEDENT, "Expected dedent at end of 'on_press' block");
 
-    return std::make_unique<OnPressNode>(pin, std::move(body));
+    return std::make_unique<OnPressNode>(std::move(pin), std::move(body));
+}
+
+std::unique_ptr<ASTNode> Parser::parseModule() {
+    advance();
+
+    std::string moduleName = current.value;
+
+    userDefinedModulesNames.insert(moduleName);
+
+    advance();
+    consume(TokenType::COLON, "Expected ':' after 'module' signature");
+
+    match(TokenType::NEWLINE);
+    consume(TokenType::INDENT, "Expected indentation after 'module'");
+
+    auto body = parseBlock();
+
+    consume(TokenType::DEDENT, "Expected dedent at end of 'module' block");
+
+    return std::make_unique<ModuleNode>(std::move(moduleName), std::move(body), current.line, current.column, this->source);
 }
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
@@ -1103,6 +1128,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
 
             if (keyword == "use") {
                 program.push_back(parseUseStatement());
+            } else if (keyword == "module") {
+                program.push_back(parseModule());
             } else if (keyword == "if") {
                 program.push_back(parseIfStatement());
             } else if (keyword == "fn") {
