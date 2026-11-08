@@ -1955,6 +1955,11 @@ public:
         : moduleName(std::move(moduleName)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
+        return body;
+    }
+
+public:
     std::string toCpp() override {
         std::string result;
 

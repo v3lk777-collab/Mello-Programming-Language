@@ -95,6 +95,10 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
         std::cerr << error.what() << "\n";
     }
 
+    if (stdProtocol.contains(moduleName)) {
+        return program;
+    }
+
     std::vector<std::unique_ptr<ASTNode>> result;
 
     userDefinedModulesNames.insert(moduleName);

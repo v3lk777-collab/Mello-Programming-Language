@@ -352,6 +352,12 @@ void SemanticAnalyzer::analyzeReturnStatement(ReturnNode* returnNode) {
     }
 }
 
+void SemanticAnalyzer::analyzeModule(ModuleNode* moduleNode) {
+    for (const auto& node : moduleNode->getBody()) {
+        analyzeNode(node.get());
+    }
+}
+
 void SemanticAnalyzer::analyzeNode(ASTNode* node) {
     if (auto varNode = dynamic_cast<VarAssignNode*>(node)) {
         analyzeAssignment(varNode);
@@ -377,6 +383,8 @@ void SemanticAnalyzer::analyzeNode(ASTNode* node) {
         analyzeRepeatStatement(repeatNode);
     } else if (auto onPressNode = dynamic_cast<OnPressNode*>(node)) {
         analyzeOnPressStatement(onPressNode);
+    } else if (auto moduleNode = dynamic_cast<ModuleNode*>(node)) {
+        analyzeModule(moduleNode);
     } else if (auto expressionrNode = dynamic_cast<ExpressionNode*>(node)) {
         analyzeExpression(expressionrNode);
     }
