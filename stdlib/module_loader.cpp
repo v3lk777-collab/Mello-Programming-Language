@@ -21,9 +21,28 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+
+std::filesystem::path ModuleLoader::searchForFile(const std::filesystem::path& directory, const std::string& fileName) {
+    try {
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
+            if (entry.is_regular_file() && entry.path().filename() == fileName) {
+                return entry.path();
+            }
+        }
+
+        ErrorHandler::report("Can't find the file:", fileName, 0, 0, "");
+    } catch (const std::filesystem::filesystem_error& error) {
+        ErrorHandler::report("Error while searching for the file:", error.what(), 0, 0, "", true);
+    }
+
+    ErrorHandler::report("Can't find the file:", fileName, 0, 0, "", true);
+
+    return {};
+}
 
 std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
-    std::string path;
+    std::filesystem::path path;
 
     if (stdLibs.contains(moduleName)) {
         if (stdProtocol.contains(moduleName)) {
@@ -32,7 +51,7 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
             path = "../stdlib/" + moduleName + "/" + moduleName + ".mello";
         }
     } else {
-        path = sourceDir + "/" + moduleName + ".mello";
+        path = searchForFile(sourceDir, moduleName + ".mello");
     }
 
     std::ifstream moduleFile(path);
@@ -40,6 +59,12 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
     if (!moduleFile.is_open()) {
         ErrorHandler::report("Can't open '" + moduleName + "' standerd library file", "", 0, 0, "");
     }
+
+    if (std::find(loadedModules.begin(), loadedModules.end(), moduleName) != loadedModules.end()) {
+        return {};
+    }
+
+    loadedModules.push_back(moduleName);
 
     std::stringstream buffer;
 

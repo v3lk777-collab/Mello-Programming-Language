@@ -280,7 +280,7 @@ void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
 
     auto it = userDefinedFunctionsParamsNumber.find(functionCallNode->getFunctionName());
 
-    int userFunctionParamsNumber;
+    int userFunctionParamsNumber = 0;
 
     if (it != userDefinedFunctionsParamsNumber.end()) {
         userFunctionParamsNumber = it->second;

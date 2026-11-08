@@ -277,6 +277,16 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
             }
         }
 
+        for (const auto& module : userIncludedFiles) {
+            ModuleLoader moduleLoader(module, sourceDir);
+
+            auto moduleNodes = moduleLoader.load();
+
+            for (auto& node : moduleNodes) {
+                stdLibProgram.push_back(std::move(node));
+            }
+        }
+
         SemanticAnalyzer analyzer;
 
         for (const auto& node : stdLibProgram) {

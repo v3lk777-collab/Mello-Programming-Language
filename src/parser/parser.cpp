@@ -515,8 +515,10 @@ std::unique_ptr<ASTNode> Parser::parseUseStatement() {
 
     if (stdLibs.contains(libName)) {
         includedStdLibs.insert(libName);
-    } else {
+    } else if (arduinoLibraries.contains(libName)) {
         includedLibraries.insert(libName);
+    } else {
+        userIncludedFiles.insert(libName);
     }
 
     return std::make_unique<UseNode>(libName, current.line, current.column, this->source);

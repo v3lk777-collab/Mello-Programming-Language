@@ -564,7 +564,9 @@ public:
                 ErrorHandler::report("sleep() requires one argument:", "idle | adc | deep", currentLine, currentColumn, source);
             }
 
-            includedLibraries.insert("avr/sleep");
+            if (!includedLibraries.contains("avr/sleep")) {
+                includedLibraries.insert("avr/sleep");
+            }
 
             std::string sleepModeType;
             std::string sleepMode = argsStr[0];

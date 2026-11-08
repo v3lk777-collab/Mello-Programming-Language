@@ -36,6 +36,8 @@ inline std::unordered_map<std::string, std::string> variablesValues;
 
 inline std::set<std::string> nonConstantVariables;
 
+inline std::set<std::string> includedStdLibs;
+inline std::set<std::string> userIncludedFiles;
 inline std::set<std::string> includedLibraries;
 inline std::set<std::string> installedLibraries;
 
@@ -60,6 +62,10 @@ inline std::unordered_map<std::string, std::vector<bool>> userFuncOutputParams;
 
 inline std::set<std::string> userDefinedModulesNames;
 
+inline const std::unordered_set<std::string> arduinoLibraries = {
+    "Servo"
+};
+
 const std::unordered_set<std::string> stdProtocol = {
     "i2c"
 };
@@ -67,8 +73,6 @@ const std::unordered_set<std::string> stdProtocol = {
 const std::unordered_set<std::string> stdLibs = {
     "math", "random", "i2c"
 };
-
-inline std::set<std::string> includedStdLibs;
 
 inline auto parseTime = [](std::string timeVal, int line, int column, const std::string& source) -> std::string {
     timeVal.erase(std::remove(timeVal.begin(), timeVal.end(), ' '), timeVal.end());
