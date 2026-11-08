@@ -302,7 +302,7 @@ void SemanticAnalyzer::analyzeMethodCall(MethodCallNode* methodCallNode) {
     ASTNode* inner = methodCallNode->getMethodCall();
 
     if (!objectName.empty()) {
-        if (objectName != "serial" && !arraysNamesList.contains(objectName) && !stdLibs.contains(objectName) && !userDefinedModulesNames.contains(objectName)) {
+        if (objectName != "serial" && !arraysNamesList.contains(objectName) && !stdLibs.contains(objectName) && !userDefinedModulesNames.contains(objectName) && !userIncludedFiles.contains(objectName)) {
             const VariableSymbol* objVar = symbolTable.lookupVariable(objectName);
 
             if (!objVar) {

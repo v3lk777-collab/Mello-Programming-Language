@@ -1,0 +1,2 @@
+fn add(a, b) -> int:
+    return a + b

@@ -95,5 +95,11 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
         std::cerr << error.what() << "\n";
     }
 
-    return program;
+    std::vector<std::unique_ptr<ASTNode>> result;
+
+    userDefinedModulesNames.insert(moduleName);
+
+    result.push_back(std::make_unique<ModuleNode>(moduleName, std::move(program), 0, 0, ""));
+
+    return result;
 }
