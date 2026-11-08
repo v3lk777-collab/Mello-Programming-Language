@@ -26,7 +26,7 @@ private:
     std::string moduleName;
 
 private:
-    std::vector<std::string> loadedModules;
+    inline static std::vector<std::string> loadedModules;
 
 public:
     ModuleLoader(std::string moduleName, std::string sourceDir)

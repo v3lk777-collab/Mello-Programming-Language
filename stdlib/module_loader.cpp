@@ -89,8 +89,8 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
         if (ErrorHandler::hasErrors()) {
             ErrorHandler::showErrors();
         }
-    } catch (const std::runtime_error& e) {
-        std::cerr << e.what() << "\n";
+    } catch (const std::runtime_error& error) {
+        std::cerr << error.what() << "\n";
     } catch (const std::exception& error) {
         std::cerr << error.what() << "\n";
     }

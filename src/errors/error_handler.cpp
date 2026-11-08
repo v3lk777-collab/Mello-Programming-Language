@@ -28,7 +28,6 @@ void ErrorHandler::report(std::string message, std::string tokenValue, int lineN
         return;
     }
 
-    errorCount++;
     errors.emplace_back(std::move(message), std::move(tokenValue), lineNumber, columnNumber, std::move(source));
 }
 
@@ -80,6 +79,4 @@ void ErrorHandler::showErrors() {
     for (const auto& error : errors) {
         printError(std::move(error.message), std::move(error.tokenValue), error.lineNumber, error.columnNumber, std::move(error.source));
     }
-
-    std::cerr << "Total errors: " << errorCount << "\n";
 }
