@@ -59,11 +59,11 @@ fn factorial(n) -> float:
 fn sin(x) -> float:
     v = float(x)
 
-    while v >= MELLO_TWO_PI:
-        v -= MELLO_TWO_PI
-    while v < 0:
-        v += MELLO_TWO_PI
+    turns = int(v / MELLO_TWO_PI)
+    v -= float(turns) * MELLO_TWO_PI
 
+    if v < 0.0:
+        v += MELLO_TWO_PI
     if v > MELLO_PI:
         v -= MELLO_TWO_PI
 
@@ -79,3 +79,20 @@ fn sin(x) -> float:
 
 fn cos(x) -> float:
     return sin(x + (MELLO_PI / 2.0))
+
+fn tan(x) -> float:
+    return sin(x) / cos(x)
+
+fn sqrt(x) -> float:
+    if x < 0.0:
+        return -1.0
+
+    if x == 0.0:
+        return 0.0
+
+    guess = float(x)
+
+    for i in range(0, 20):
+        guess = 0.5 * (guess + x / guess)
+
+    return guess
