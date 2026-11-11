@@ -286,6 +286,8 @@ fn start():
 | `isclose(a, b, epsilon)` | `true` if `a` and `b` differ by at most `epsilon` |
 | `sin(x)` | Get the sine of x |
 | `cos(x)` | Get the cosine of x |
+| `tan(x)` | Get the tan of x |
+| `sqrt(x)` | Get the sqrt of x |
 
 #### `random`
 
