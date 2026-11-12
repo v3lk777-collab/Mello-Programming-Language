@@ -42,6 +42,10 @@ std::filesystem::path ModuleLoader::searchForFile(const std::filesystem::path& d
 }
 
 std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
+    if (std::find(loadedModules.begin(), loadedModules.end(), moduleName) != loadedModules.end()) {
+        return {};
+    }
+
     std::filesystem::path path;
 
     if (stdLibs.contains(moduleName)) {
@@ -60,10 +64,6 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
         ErrorHandler::report("Can't open '" + moduleName + "' standerd library file", "", 0, 0, "");
     }
 
-    if (std::find(loadedModules.begin(), loadedModules.end(), moduleName) != loadedModules.end()) {
-        return {};
-    }
-
     loadedModules.push_back(moduleName);
 
     std::stringstream buffer;
@@ -77,6 +77,8 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
 
     if (ErrorHandler::hasErrors()) {
         ErrorHandler::showErrors();
+
+        return {};
     }
     
     std::vector<std::unique_ptr<ASTNode>> program;
@@ -88,6 +90,8 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
 
         if (ErrorHandler::hasErrors()) {
             ErrorHandler::showErrors();
+
+            return {};
         }
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << "\n";
@@ -95,13 +99,46 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
         std::cerr << error.what() << "\n";
     }
 
-    if (stdProtocol.contains(moduleName)) {
-        return program;
+    std::set<std::string> dependencies;
+
+    for (const auto& node : program) {
+        auto* useNode = dynamic_cast<UseNode*>(node.get());
+
+        if (!useNode) {
+            continue;
+        }
+
+        const std::string dependencyName = useNode->getLibraryName();
+
+        if (dependencyName == moduleName || arduinoLibraries.contains(dependencyName)) {
+            continue;
+        }
+
+        dependencies.insert(dependencyName);
     }
 
     std::vector<std::unique_ptr<ASTNode>> result;
 
+    for (const auto& dependency : dependencies) {
+        ModuleLoader dependencyLoader(dependency, sourceDir);
+
+        auto dependencyNodes = dependencyLoader.load();
+
+        for (auto& node : dependencyNodes) {
+            result.push_back(std::move(node));
+        }
+    }
+
     userDefinedModulesNames.insert(moduleName);
+
+    if (stdProtocol.contains(moduleName)) {
+
+        for (auto& node : program) {
+            result.push_back(std::move(node));
+        }
+
+        return result;
+    }
 
     result.push_back(std::make_unique<ModuleNode>(moduleName, std::move(program), 0, 0, ""));
 
