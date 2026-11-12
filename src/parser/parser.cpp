@@ -15,7 +15,6 @@
 #include "error_handler.hpp"
 
 #include <cctype>
-#include <iostream>
 #include <algorithm>
 #include <stdexcept>
 
@@ -668,6 +667,10 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
 std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
     advance();
 
+    while (current.type == TokenType::NEWLINE || current.type == TokenType::INDENT || current.type == TokenType::DEDENT) {
+        advance();
+    }
+
     std::vector<std::string> members;
 
     while (current.type != TokenType::RBRACKET) {
@@ -680,8 +683,16 @@ std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
 
         members.push_back(elementCpp);
 
+        while (current.type == TokenType::NEWLINE || current.type == TokenType::INDENT || current.type == TokenType::DEDENT) {
+            advance();
+        }
+
         if (current.type == TokenType::COMMA) {
             advance();
+
+            while (current.type == TokenType::NEWLINE || current.type == TokenType::INDENT || current.type == TokenType::DEDENT) {
+                advance();
+            }
         } else {
             break;
         }
