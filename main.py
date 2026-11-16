@@ -17,6 +17,8 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 RESET = '\033[0m'
 
+BUILD_PATH = "cmake"
+
 def main() -> None:
     subprocess.run(["cls" if platform.system() == "Windows" else "clear"], shell=True)
 
@@ -29,7 +31,28 @@ def main() -> None:
             print(f"[{RED}!{RESET}] {RED}Error{RESET}: Visual Studio vcvars64.bat not found at '{VCVARS_PATH}'. Please ensure Visual Studio is installed.")
             return
 
-        result = subprocess.run(f"\"{VCVARS_PATH}\" && cmake --build cmake", shell=True, text=True, capture_output=True)
+        if not os.path.exists(BUILD_PATH):
+            print(f"[{RED}i{RESET}] {RED}Can't find build diractory in '{BUILD_PATH}'.")
+            print(f"[{RED}i{RESET}] {RED}Re-build the project in '{BUILD_PATH}'...")
+
+            result = subprocess.run(f"cmake -B \"{BUILD_PATH}\" -S .", shell=True)
+
+            if result.returncode != 0:
+                print(f"[{RED}!{RESET}] {RED}Error{RESET}: CMake build failed with error code {result.returncode}.")
+
+                if result.stdout:
+                    print(f"    {GREEN}----->{RESET} {result.stdout}")
+
+                if result.stderr:
+                    print(f"    {RED}----->{RESET} {result.stderr}")
+
+                return
+            else:
+                print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.\n")
+
+        print(f"[{GREEN}*{RESET}] {GREEN}Compiling Mello project...{RESET}")
+
+        result = subprocess.run(f"\"{VCVARS_PATH}\" && cmake --build \"{BUILD_PATH}\"", shell=True, text=True, capture_output=True)
 
         if result.returncode != 0:
             print(f"[{RED}!{RESET}] {RED}Error{RESET}: CMake build failed with error code {result.returncode}.")
@@ -46,7 +69,28 @@ def main() -> None:
 
         subprocess.run(f"py test_runner.py", shell=True)
     elif currentOS in ["Linux", "Darwin"]:
-        result = subprocess.run(f"cmake --build cmake", shell=True, text=True, capture_output=True)
+        if not os.path.exists(BUILD_PATH):
+            print(f"[{RED}i{RESET}] {RED}Can't find build diractory in '{BUILD_PATH}'.")
+            print(f"[{RED}i{RESET}] {RED}Re-build the project in '{BUILD_PATH}'...")
+
+            result = subprocess.run(f"cmake -B \"{BUILD_PATH}\" -S .", shell=True)
+
+            if result.returncode != 0:
+                print(f"[{RED}!{RESET}] {RED}Error{RESET}: CMake build failed with error code {result.returncode}.")
+
+                if result.stdout:
+                    print(f"    {GREEN}----->{RESET} {result.stdout}")
+
+                if result.stderr:
+                    print(f"    {RED}----->{RESET} {result.stderr}")
+
+                return
+            else:
+                print(f"[{GREEN}!{RESET}] {GREEN}Success{RESET}: CMake build completed successfully.\n")
+
+        print(f"[{GREEN}*{RESET}] {GREEN}Compiling Mello project...{RESET}")
+
+        result = subprocess.run(f"cmake --build \"{BUILD_PATH}\"", shell=True, text=True, capture_output=True)
 
         if result.returncode != 0:
             print(f"[{RED}!{RESET}] {RED}Error{RESET}: CMake build failed with error code {result.returncode}.")
