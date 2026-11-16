@@ -54,6 +54,8 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
         } else {
             path = "../stdlib/" + moduleName + "/" + moduleName + ".mello";
         }
+    } else if (libs.contains(moduleName)) {
+        path = "../libs/" + moduleName + ".mello";
     } else {
         path = searchForFile(sourceDir, moduleName + ".mello");
     }
@@ -130,15 +132,6 @@ std::vector<std::unique_ptr<ASTNode>> ModuleLoader::load() {
     }
 
     userDefinedModulesNames.insert(moduleName);
-
-    if (stdProtocol.contains(moduleName)) {
-
-        for (auto& node : program) {
-            result.push_back(std::move(node));
-        }
-
-        return result;
-    }
 
     result.push_back(std::make_unique<ModuleNode>(moduleName, std::move(program), 0, 0, ""));
 
