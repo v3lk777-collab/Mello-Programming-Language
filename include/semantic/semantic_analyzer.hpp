@@ -14,8 +14,6 @@
 #include "ast.hpp"
 #include "symbol_table.hpp"
 
-#include <unordered_set>
-
 class SemanticAnalyzer {
 private:
     SymbolTable symbolTable;
