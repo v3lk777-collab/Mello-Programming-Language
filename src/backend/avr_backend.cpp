@@ -272,10 +272,6 @@ void AVRBackend::visit(BuiltInFunctionCallNode* builtInFunctionCallNode) {
     } else if (functionName == "scale" && argsStr.size() >= 5) {
         output << "map(" << argsStr[0] << ", " << argsStr[1] << ", " << argsStr[2] << ", " << argsStr[3] << ", " << argsStr[4] << ")";
     } else if (functionName == "sleep") {
-        if (argsStr.empty()) {
-            ErrorHandler::report("sleep() requires one argument:", "idle | adc | deep", currentLine, currentColumn, source);
-        }
-
         if (!includedLibraries.contains("avr/sleep")) {
             includedLibraries.insert("avr/sleep");
         }
@@ -316,10 +312,6 @@ void AVRBackend::visit(BuiltInFunctionCallNode* builtInFunctionCallNode) {
 
         output << "({ float val; EEPROM.get(" << address << ", val); val; })";
     } else if (functionName == "pulse_in") {
-        if (argsStr.size() < 2 || argsStr.size() > 4) {
-            ErrorHandler::report("pulse_in expects 2, 3, or 4 arguments:", functionName, currentLine, currentColumn, source);
-        }
-
         if (argsStr.size() == 2) {
             std::string pin = argsStr[0];
             std::string value = argsStr[1];
@@ -337,16 +329,8 @@ void AVRBackend::visit(BuiltInFunctionCallNode* builtInFunctionCallNode) {
 
         output << "pulseIn(" << pin << ", " << value << ", " << timeout << ")";
     } else if (functionName == "wait_ms") {
-        if (argsStr.empty()) {
-            ErrorHandler::report("wait_ms() requires one argument:", functionName, currentLine, currentColumn, source);
-        }
-
         output << "delayMicroseconds(" << argsStr[0] << ");";
     } else if (functionName == "pin_mode") {
-        if (argsStr.size() < 2) {
-            ErrorHandler::report("pin_mode() requires two arguments:", functionName, currentLine, currentColumn, source);
-        }
-
         std::string pin = argsStr[0];
         std::string mode = argsStr[1];
 

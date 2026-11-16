@@ -63,3 +63,12 @@
 55	4544	8165317550280609	CMakeFiles/mello.dir/src/lexer/lexer.cpp.obj	771a4a1ee11bfab5
 74	11873	8165317550470506	CMakeFiles/mello.dir/src/backend/esp32_backend.cpp.obj	c4fadbddad3ca73d
 11874	12656	8165317668468978	mello.exe	8133e28669776c4d
+108	15183	8165613632219009	CMakeFiles/mello.dir/src/errors/error_handler.cpp.obj	fc55872540aeeb3e
+141	17547	8165613632548811	CMakeFiles/mello.dir/src/semantic/utils.cpp.obj	ba01e1c0e1030034
+87	20341	8165613632009172	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	1bab13bb8011b1e0
+69	20884	8165613631829246	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	2e2e2f617553c9c4
+123	21009	8165613632378931	CMakeFiles/mello.dir/src/semantic/semantic_analyzer.cpp.obj	1c2f331d73981e65
+159	22294	8165613632738715	CMakeFiles/mello.dir/src/backend/avr_backend.cpp.obj	5ce49167f3659903
+17547	27469	8165613806610144	CMakeFiles/mello.dir/stdlib/module_loader.cpp.obj	f5133add47a7246
+15185	28086	8165613783004323	CMakeFiles/mello.dir/src/backend/esp32_backend.cpp.obj	c4fadbddad3ca73d
+28087	29740	8165613912006013	mello.exe	8133e28669776c4d

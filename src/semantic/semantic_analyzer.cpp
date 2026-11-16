@@ -350,6 +350,10 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
     const std::string& funcName = builtInCallNode->getFunctionName();
     const std::vector<std::unique_ptr<ExpressionNode>>& arguments = builtInCallNode->getArguments();
 
+    std::string source = builtInCallNode->getSource();
+    int currentLine = builtInCallNode->getCurrentDeclaredLine();
+    int currentColumn = builtInCallNode->getCurrentDeclaredColumn();
+
     auto getPinNameFromExpression = [](ExpressionNode* expression) -> std::string {
         if (!expression) {
             return "";
@@ -362,7 +366,17 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
         return "";
     };
 
-    if (arguments.empty()) {
+    auto it = builtInFunctions.find(funcName);
+
+    if (it == builtInFunctions.end()) {
+        ErrorHandler::report("Unknown function called " + funcName, "", currentLine, currentColumn, source);
+
+        return;
+    }
+
+    if (arguments.size() != it->second) {
+        ErrorHandler::report(std::format("{}() expects {} arguments, got {}", funcName, it->second, arguments.size()), "", currentLine, currentColumn, source);
+
         return;
     }
 

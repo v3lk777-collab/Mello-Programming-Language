@@ -61,6 +61,21 @@ inline std::unordered_map<std::string, std::vector<bool>> userFuncOutputParams;
 
 inline std::set<std::string> userDefinedModulesNames;
 
+inline const std::unordered_map<std::string, size_t> builtInFunctions = {
+    {"write", 2},
+    {"read", 1},
+    {"turn_on", 1},
+    {"turn_off", 1},
+    {"toggle", 1},
+    {"wait", 1},
+    {"wait_ms", 1},
+    {"sleep", 1},
+    {"scale", 5},
+    {"save_memory", 2},
+    {"read_memory", 1},
+    {"pin_mode", 2}
+};
+
 inline const std::unordered_set<std::string> arduinoLibraries = {
     "Servo"
 };
