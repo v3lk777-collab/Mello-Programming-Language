@@ -1,5 +1,5 @@
 # Build files
-build/*
+cmake/*
 
 # Like a TODO file but for fixing errors
 errors.txt
@@ -8,12 +8,7 @@ errors.txt
 main.mello
 
 # Output windows file
-!build/mello.exe
+!cmake/mello.exe
 
 # Ignore VS Code settings folder
 .vscode/*
-
-# Allow useful shared settings
-!.vscode/launch.json
-!.vscode/tasks.json
-!.vscode/extensions.json
