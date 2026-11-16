@@ -199,6 +199,12 @@ void SemanticAnalyzer::analyzeRepeatStatement(RepeatNode* repeatNode) {
 }
 
 void SemanticAnalyzer::analyzeOnPressStatement(OnPressNode* onPressNode) {
+    std::string buttonPin = onPressNode->getPin();
+
+    if (!buttonPin.empty()) {
+        inputPullUpPins.insert(buttonPin);
+    }
+
     symbolTable.enterScope();
 
     for (const auto& body : onPressNode->getChildBodies()) {
@@ -341,8 +347,93 @@ void SemanticAnalyzer::analyzeSerialCall(SerialFunctionsCallNode* serialCallNode
 }
 
 void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNode) {
-    for (const auto& arg : builtInCallNode->getArguments()) {
-        analyzeExpression(arg.get());
+    const std::string& funcName = builtInCallNode->getFunctionName();
+    const std::vector<std::unique_ptr<ExpressionNode>>& arguments = builtInCallNode->getArguments();
+
+    auto getPinNameFromExpression = [](ExpressionNode* expression) -> std::string {
+        if (!expression) {
+            return "";
+        }
+
+        if (auto* it = dynamic_cast<LiteralNode*>(expression)) {
+            return it->getToken().value;
+        }
+
+        return "";
+    };
+
+    if (arguments.empty()) {
+        return;
+    }
+
+    for (const auto& argument : arguments) {
+        analyzeExpression(argument.get());
+    }
+
+    auto resolvePin = [&](const std::string& name) -> std::string {
+        if (name.empty() || currentModuleName.empty() || funcParams.contains(name)) {
+            return name;
+        }
+
+        bool isNumber = std::isdigit(static_cast<unsigned char>(name[0]));
+        bool isAnalog = (name.size() >= 2 && name[0] == 'A' && std::isdigit(static_cast<unsigned char>(name[1])));
+            
+        if (!isNumber && !isAnalog) {
+            return currentModuleName + "::" + name;
+        }
+
+        return name;
+    };
+
+    if (!arguments.empty()) {
+        std::string pinName = getPinNameFromExpression(arguments[0].get());
+            
+        if (!currentParsingUserFunc.empty() && funcParams.contains(pinName)) {
+            auto it = std::find(currentFuncParamNames.begin(), currentFuncParamNames.end(), pinName);
+            if (it != currentFuncParamNames.end()) {
+                size_t idx = std::distance(currentFuncParamNames.begin(), it);
+                if (funcName == "read" || funcName == "pulse_in") {
+                    userFuncInputParams[currentParsingUserFunc][idx] = true;
+                } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
+                    userFuncOutputParams[currentParsingUserFunc][idx] = true;
+                } else {
+                    if (userFuncOutputParams.contains(funcName)) {
+                        for (size_t i = 0; i < arguments.size() && i < userFuncOutputParams[funcName].size(); ++i) {
+                            if (userFuncOutputParams[funcName][i]) {
+                                std::string argPin = getPinNameFromExpression(arguments[i].get());
+                                auto pit = std::find(currentFuncParamNames.begin(), currentFuncParamNames.end(), argPin);
+
+                                if (pit != currentFuncParamNames.end()) {
+                                    size_t pidx = std::distance(currentFuncParamNames.begin(), pit);
+
+                                    userFuncOutputParams[currentParsingUserFunc][pidx] = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (funcName == "read" || funcName == "pulse_in") {
+            inputPins.insert(resolvePin(pinName));
+        } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
+            outputPins.insert(resolvePin(pinName));
+        } else {
+            if (userFuncOutputParams.contains(funcName)) {
+                for (size_t i = 0; i < arguments.size() && i < userFuncOutputParams[funcName].size(); ++i) {
+                    if (userFuncOutputParams[funcName][i]) {
+                        outputPins.insert(getPinNameFromExpression(arguments[i].get()));
+                    }
+                }
+            }
+
+            if (userFuncInputParams.contains(funcName)) {
+                for (size_t i = 0; i < arguments.size() && i < userFuncInputParams[funcName].size(); ++i) {
+                    if (userFuncInputParams[funcName][i]) {
+                        inputPins.insert(getPinNameFromExpression(arguments[i].get()));
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -353,9 +444,18 @@ void SemanticAnalyzer::analyzeReturnStatement(ReturnNode* returnNode) {
 }
 
 void SemanticAnalyzer::analyzeModule(ModuleNode* moduleNode) {
+    std::string previousModule = currentModuleName;
+    currentModuleName = moduleNode->getModuleName();
+
+    symbolTable.enterScope();
+
     for (const auto& node : moduleNode->getBody()) {
         analyzeNode(node.get());
     }
+
+    symbolTable.exitScope();
+
+    currentModuleName = previousModule;
 }
 
 void SemanticAnalyzer::analyzeNode(ASTNode* node) {

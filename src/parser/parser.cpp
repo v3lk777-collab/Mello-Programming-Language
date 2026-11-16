@@ -16,7 +16,6 @@
 
 #include <cctype>
 #include <algorithm>
-#include <stdexcept>
 
 Parser::Parser(const std::vector<Token>& tokens, const std::string& source)
     : tokens(tokens), source(source), position(0) {
@@ -364,8 +363,8 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
     }
 
     ErrorHandler::report("Unexpected token in expression:", current.value, current.line, current.column, this->source);
-    
-    std::unreachable();
+
+    return {};
 }
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
@@ -643,8 +642,20 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
 
     auto expr_value = parseExpression();
 
+    auto getValueFromExpression = [] (ExpressionNode* expression) -> std::string {
+        if (!expression) {
+            return "";
+        }
+
+        if (auto* it = dynamic_cast<LiteralNode*>(expression)) {
+            return it->getToken().value;
+        }
+
+        return "";
+    };
+
     if (!variablesValues.contains(varName)) {
-        variablesValues[varName] = expr_value->toCpp();
+        variablesValues[varName] = getValueFromExpression(expr_value.get());
     }
 
     if (parsedVariables.contains(varName)) {
@@ -674,14 +685,25 @@ std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
     std::vector<std::string> members;
 
     while (current.type != TokenType::RBRACKET) {
-        auto element = parseExpression();
-        std::string elementCpp = element->toCpp();
+        auto getValueFromExpression = [] (ExpressionNode* expression) -> std::string {
+            if (!expression) {
+                return "";
+            }
 
-        while (!elementCpp.empty() && (elementCpp.back() == ';' || elementCpp.back() == '\n')) {
-            elementCpp.pop_back();
+            if (auto* it = dynamic_cast<LiteralNode*>(expression)) {
+                return it->getToken().value;
+            }
+
+            return "";
+        };
+
+        std::string element = getValueFromExpression(parseExpression().get());
+
+        while (!element.empty() && (element.back() == ';' || element.back() == '\n')) {
+            element.pop_back();
         }
 
-        members.push_back(elementCpp);
+        members.push_back(element);
 
         while (current.type == TokenType::NEWLINE || current.type == TokenType::INDENT || current.type == TokenType::DEDENT) {
             advance();
