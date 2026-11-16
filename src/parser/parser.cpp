@@ -682,28 +682,12 @@ std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
         advance();
     }
 
-    std::vector<std::string> members;
+    std::vector<std::unique_ptr<ExpressionNode>> members;
 
     while (current.type != TokenType::RBRACKET) {
-        auto getValueFromExpression = [] (ExpressionNode* expression) -> std::string {
-            if (!expression) {
-                return "";
-            }
+        auto element = parseExpression();
 
-            if (auto* it = dynamic_cast<LiteralNode*>(expression)) {
-                return it->getToken().value;
-            }
-
-            return "";
-        };
-
-        std::string element = getValueFromExpression(parseExpression().get());
-
-        while (!element.empty() && (element.back() == ';' || element.back() == '\n')) {
-            element.pop_back();
-        }
-
-        members.push_back(element);
+        members.push_back(std::move(element));
 
         while (current.type == TokenType::NEWLINE || current.type == TokenType::INDENT || current.type == TokenType::DEDENT) {
             advance();
@@ -722,7 +706,7 @@ std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
 
     consume(TokenType::RBRACKET, "Expected ']' to close list literal");
 
-    return std::make_unique<ArrayNode>(name, members, current.line, current.column, this->source);
+    return std::make_unique<ArrayNode>(name, std::move(members), current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseArrayAssignment(const std::string& name) {

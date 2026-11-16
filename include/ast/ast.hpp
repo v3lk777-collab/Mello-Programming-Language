@@ -81,7 +81,7 @@ public:
 class ArrayNode : public ASTNode {
 private:
     std::string arrayName;
-    std::vector<std::string> arrayMembers;
+    std::vector<std::unique_ptr<ExpressionNode>> arrayMembers;
 
 private:
     int currentLine;
@@ -89,7 +89,7 @@ private:
     std::string source;
 
 public:
-    ArrayNode(std::string name, std::vector<std::string> arrayMembers, int currentLine, int currentColumn, std::string source)
+    ArrayNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> arrayMembers, int currentLine, int currentColumn, std::string source)
         : arrayName(std::move(name)), arrayMembers(std::move(arrayMembers)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
@@ -97,7 +97,7 @@ public:
         return arrayName;
     }
 
-    const std::vector<std::string>& getArrayMembers() const noexcept {
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArrayMembers() const noexcept {
         return arrayMembers;
     }
 

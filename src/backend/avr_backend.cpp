@@ -14,6 +14,7 @@
 #include "ast.hpp"
 
 #include <list>
+#include <ranges>
 #include <algorithm>
 
 std::string AVRBackend::evaluateExpression(ExpressionNode* expression) {
@@ -49,7 +50,7 @@ std::string AVRBackend::evaluateNode(ASTNode* node) {
 
 void AVRBackend::visit(ArrayNode* arrayNode) {
     const std::string& arrayName = arrayNode->getArrayName();
-    const std::vector<std::string>& arrayMembers = arrayNode->getArrayMembers();
+    const std::vector<std::string> arrayMembers = arrayNode->getArrayMembers() | std::views::transform([this] (const auto& expression) -> std::string { return evaluateExpression(expression.get()); }) | std::ranges::to<std::vector>();
 
     auto inferElementType = [&]() -> std::string {
         if (arrayMembers.empty()) {

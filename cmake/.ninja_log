@@ -49,3 +49,12 @@
 11	9270	8165259835342791	CMakeFiles/mello.dir/src/backend/avr_backend.cpp.obj	5ce49167f3659903
 29	9282	8165259835512642	CMakeFiles/mello.dir/src/backend/esp32_backend.cpp.obj	c4fadbddad3ca73d
 9282	10108	8165259928046257	mello.exe	8133e28669776c4d
+67	19240	8165302840351123	CMakeFiles/mello.dir/src/semantic/utils.cpp.obj	ba01e1c0e1030034
+31	20801	8165302839991341	CMakeFiles/mello.dir/src/compiler/compiler.cpp.obj	1bab13bb8011b1e0
+51	21065	8165302840191214	CMakeFiles/mello.dir/src/semantic/semantic_analyzer.cpp.obj	1c2f331d73981e65
+85	22127	8165302840521024	CMakeFiles/mello.dir/src/backend/avr_backend.cpp.obj	5ce49167f3659903
+101	20465	8165303945727356	CMakeFiles/mello.dir/stdlib/module_loader.cpp.obj	f5133add47a7246
+68	22775	8165303945407555	CMakeFiles/mello.dir/src/backend/avr_backend.cpp.obj	5ce49167f3659903
+40	13268	8165304799619222	CMakeFiles/mello.dir/src/backend/esp32_backend.cpp.obj	c4fadbddad3ca73d
+17	7314	8165305895791713	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	2e2e2f617553c9c4
+7315	8440	8165305968776447	mello.exe	8133e28669776c4d
