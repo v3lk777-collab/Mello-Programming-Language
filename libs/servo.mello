@@ -1,0 +1,40 @@
+# Mello Standard Library - Software Servo Driver
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
+use math
+
+servoPin = 9
+currentAngle = 90
+
+fn attach(pin) -> void:
+    servoPin = pin
+    pin_mode(servoPin, OUTPUT)
+    write(servoPin, LOW)
+
+fn write(angle) -> void:
+    safe_angle = int(math.clamp(float(angle), 0.0, 180.0))
+    currentAngle = safe_angle
+
+    pulse_width = scale(safe_angle, 0, 180, 544, 2400)
+    off_time = 20000 - pulse_width
+
+    repeat 15:
+        write(servoPin, HIGH)
+        wait_ms(pulse_width)
+        write(servoPin, LOW)
+        wait_ms(off_time)
+
+fn refresh(angle) -> void:
+    safe_angle = int(math.clamp(float(angle), 0.0, 180.0))
+    currentAngle = safe_angle
+
+    pulse_width = scale(safe_angle, 0, 180, 544, 2400)
+    off_time = 20000 - pulse_width
+
+    write(servoPin, HIGH)
+    wait_ms(pulse_width)
+    write(servoPin, LOW)
+    wait_ms(off_time)
+
+fn read_angle() -> int:
+    return currentAngle
