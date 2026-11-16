@@ -14,15 +14,14 @@
 #include "error_handler.hpp"
 
 #include <set>
-#include <map>
 #include <string>
 #include <vector>
 #include <memory>
-#include <iostream>
-#include <algorithm>
 #include <stdexcept>
 #include <unordered_set>
 #include <unordered_map>
+
+inline std::string currentModuleName = "";
 
 inline std::set<std::string> inputPins;
 inline std::set<std::string> outputPins;
@@ -72,6 +71,10 @@ const std::unordered_set<std::string> stdProtocol = {
 
 const std::unordered_set<std::string> stdLibs = {
     "math", "random", "i2c"
+};
+
+const std::unordered_set<std::string> libs = {
+    "oled", "servo"
 };
 
 inline auto parseTime = [](std::string timeVal, int line, int column, const std::string& source) -> std::string {

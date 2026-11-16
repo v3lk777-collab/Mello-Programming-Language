@@ -13,6 +13,7 @@
 
 #include "utils.hpp"
 #include "lexer.hpp"
+#include "visitor.hpp"
 #include "module_loader.hpp"
 
 #include <array>
@@ -29,7 +30,7 @@ public:
     virtual ~ASTNode() = default;
 
 public:
-    virtual std::string toCpp() = 0;
+    virtual void accept(ASTVisitor& visitor) = 0;
 };
 
 class ExpressionNode : public ASTNode {
@@ -71,10 +72,9 @@ public:
     int getCurrentDeclaredColumn() const noexcept {
         return currentColumn;
     }
-
 public:
-    std::string toCpp() override {
-        return "";
+    void accept(ASTVisitor& visitor) override {
+        return;
     }
 };
 
@@ -87,25 +87,6 @@ private:
     int currentLine;
     int currentColumn;
     std::string source;
-
-private:
-    std::string inferElementType() const noexcept {
-        if (arrayMembers.empty()) {
-            return "int";
-        }
-
-        const std::string& first = arrayMembers.front();
-
-        if (!first.empty() && first.front() == '"') {
-            return "const char*";
-        } else if (first == "true" || first == "false") {
-            return "bool";
-        } else if (first.find('.') != std::string::npos) {
-            return "float";
-        } else {
-            return "int";
-        }
-    }
 
 public:
     ArrayNode(std::string name, std::vector<std::string> arrayMembers, int currentLine, int currentColumn, std::string source)
@@ -133,21 +114,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string type = inferElementType();
-        std::string result = type + " " + arrayName + "[" + std::to_string(arrayMembers.size()) + "] = {";
-
-        for (size_t i = 0; i < arrayMembers.size(); ++i) {
-            result += arrayMembers[i];
-
-            if (i + 1 < arrayMembers.size()) {
-                result += ", ";
-            }
-        }
-
-        result += "};\n";
-
-        return result;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -170,8 +138,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        return arrayName + "[" + indexExpression->toCpp() + "]";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -199,8 +167,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        return arrayName + "[" + indexExpression->toCpp() + "] = " + valueExpression->toCpp() + ";";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -215,12 +183,21 @@ public:
         : arrayName(std::move(arrayName)), functionName(std::move(functionName)), arguments(std::move(arguments)) {}
 
 public:
-    std::string toCpp() override {
-        if (functionName == "len") {
-            return "sizeof(" + arrayName + ") / sizeof(" + arrayName + "[0])";
-        }
+    const std::string& getArrayName() const noexcept {
+        return arrayName;
+    }
 
-        return "";
+    const std::string& getFunctionName() const noexcept {
+        return functionName;
+    }
+
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const noexcept {
+        return arguments;
+    }
+
+public:
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -260,49 +237,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        if (funcName == "start") {
-            funcName = "setup";
-        }
-
-        std::string result = "void " + funcName + "() {\n";
-
-        if (funcName == "setup") {
-            for (const auto& pin : inputPins) {
-                result += "pinMode(" + pin + ", INPUT);\n";
-            }
-
-            for (const auto& pin : outputPins) {
-                if (!inputPins.contains(pin)) {
-                    result += "pinMode(" + pin + ", OUTPUT);\n";
-                } else {
-                    ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, currentColumn, source);
-                }
-            }
-
-            for (const auto& pin : inputPullUpPins) {
-                if (!inputPins.contains(pin) && !outputPins.contains(pin)) {
-                    result += "pinMode(" + pin + ", INPUT_PULLUP);\n";
-                } else {
-                    if (inputPins.contains(pin)) {
-                        ErrorHandler::report("Error: This var was use in input pin", pin, currentLine, currentColumn, source);
-                    } else {
-                        ErrorHandler::report("Error: This var was use in output pin", pin, currentLine, currentColumn, source);
-                    }
-                }
-            }
-
-            if (!inputPins.empty() || !outputPins.empty() || !inputPullUpPins.empty()) {
-                result += "\n";
-            }
-        }
-
-        for (const auto& node : body) {
-            result += node->toCpp() + "\n";
-        }
-
-        result += "}";
-        return result;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -320,8 +256,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        return token.value;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -336,34 +272,21 @@ private:
     int currentColumn;
     std::string source;
 
-private:
-    bool isNumber(const std::string &str) {
-        if (str.empty()) {
-            return false;
-        }
-
-        for (const auto &c : str) {
-            if (c == '-' || c == '+' || c == '*' || c == '/') {
-                return !std::isdigit(c);
-            }
-        }
-
-        return std::all_of(str.begin(), str.end(), [] (unsigned char c) {
-            return std::isdigit(c);
-        });
-    }
-
 public:
     FunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> arguments, bool isStatement, int currentLine, int currentColumn, std::string source)
         : funcName(std::move(name)), arguments(std::move(arguments)), isStatement(isStatement), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    std::string getFunctionName() const noexcept {
+    const std::string& getFunctionName() const noexcept {
         return funcName;
     }
 
     const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const noexcept { 
         return arguments; 
+    }
+
+    bool getIsStatement() const noexcept {
+        return isStatement;
     }
 
     const int getFuncArgumentsSize() const noexcept {
@@ -383,22 +306,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::ostringstream oss;
-
-        oss << funcName << "(";
-
-        for (size_t i = 0; i < arguments.size(); ++i) {
-            oss << arguments[i]->toCpp();
-
-            if (i < arguments.size() - 1) {
-                oss << ", ";
-            }
-        }
-
-        oss << ")" << (isStatement ? ";" : "");
-
-        return oss.str();
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -414,59 +323,7 @@ private:
 
 public:
     BuiltInFunctionCallNode(std::string name, std::vector<std::unique_ptr<ExpressionNode>> args, int currentLine, int currentColumn, std::string source)
-        : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {
-
-        if (!arguments.empty()) {
-            std::string pinName = arguments[0]->toCpp();
-            
-            if (!currentParsingUserFunc.empty() && funcParams.contains(pinName)) {
-                auto it = std::find(currentFuncParamNames.begin(), currentFuncParamNames.end(), pinName);
-                if (it != currentFuncParamNames.end()) {
-                    size_t idx = std::distance(currentFuncParamNames.begin(), it);
-                    if (funcName == "read" || funcName == "pulse_in") {
-                        userFuncInputParams[currentParsingUserFunc][idx] = true;
-                    } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
-                        userFuncOutputParams[currentParsingUserFunc][idx] = true;
-                    } else {
-                        if (userFuncOutputParams.contains(funcName)) {
-                            for (size_t i = 0; i < arguments.size() && i < userFuncOutputParams[funcName].size(); ++i) {
-                                if (userFuncOutputParams[funcName][i]) {
-                                    std::string argPin = arguments[i]->toCpp();
-                                    auto pit = std::find(currentFuncParamNames.begin(), currentFuncParamNames.end(), argPin);
-
-                                    if (pit != currentFuncParamNames.end()) {
-                                        size_t pidx = std::distance(currentFuncParamNames.begin(), pit);
-
-                                        userFuncOutputParams[currentParsingUserFunc][pidx] = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } else if (funcName == "read" || funcName == "pulse_in") {
-                inputPins.insert(pinName);
-            } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
-                outputPins.insert(pinName);
-            } else {
-                if (userFuncOutputParams.contains(funcName)) {
-                    for (size_t i = 0; i < arguments.size() && i < userFuncOutputParams[funcName].size(); ++i) {
-                        if (userFuncOutputParams[funcName][i]) {
-                            outputPins.insert(arguments[i]->toCpp());
-                        }
-                    }
-                }
-
-                if (userFuncInputParams.contains(funcName)) {
-                    for (size_t i = 0; i < arguments.size() && i < userFuncInputParams[funcName].size(); ++i) {
-                        if (userFuncInputParams[funcName][i]) {
-                            inputPins.insert(arguments[i]->toCpp());
-                        }
-                    }
-                }
-            }
-        }
-    }
+        : funcName(std::move(name)), arguments(std::move(args)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     const std::string& getFunctionName() const noexcept {
@@ -477,185 +334,21 @@ public:
         return arguments;
     }
 
+    const std::string& getSource() const noexcept {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const noexcept {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const noexcept {
+        return currentColumn;
+    }
+
 public:
-    std::string toCpp() override {
-        if (!keywordsList.contains(funcName)) {
-            ErrorHandler::report("'" + funcName + "' is not a known built-in command", funcName, currentLine, currentColumn, source);
-        }
-
-        std::vector<std::string> argsStr;
-
-        for (const auto& arg : arguments) {
-            argsStr.push_back(arg->toCpp());
-        }
-
-        if (funcName == "turn_on" && argsStr.size() >= 1) {
-            std::string pin = argsStr[0];
-
-            return "digitalWrite(" + pin + ", HIGH);";
-        }
-
-        if (funcName == "turn_off" && argsStr.size() >= 1) {
-            std::string pin = argsStr[0];
-
-            return "digitalWrite(" + pin + ", LOW);";
-        }
-
-        if (funcName == "toggle" && argsStr.size() >= 1) {
-            std::string pin = argsStr[0];
-            std::string stateVar = "_toggle_state_" + pin;
-
-            return "static uint8_t " + stateVar + " = LOW;\n" + stateVar + " = !" + stateVar + ";\n" + "digitalWrite(" + pin + ", " + stateVar + ");";
-        }
-
-        if (funcName == "write") {
-            std::string pin = argsStr[0];
-            std::string value = argsStr[1];
-
-            if (variablesValues.contains(pin)) {
-                std::string pinValue = variablesValues[pin];
-
-                if (!(value == "0" || value == "1" || value == "HIGH" || value == "LOW")) {
-                    return "analogWrite(" + pin + ", " + value + ");";
-                }
-            }
-
-            if (value == "0" || value == "1" || value == "HIGH" || value == "LOW") {
-                return "digitalWrite(" + pin + ", " + value + ");";
-            } else {
-                return "analogWrite(" + pin + ", " + value + ");";
-            }
-        }
-
-        if (funcName == "read") {
-            std::string pin = argsStr[0];
-
-            if (variablesValues.contains(pin)) {
-                std::string pinValue = variablesValues[pin];
-
-                if (pinValue.length() >= 2 && pinValue[0] == 'A' && isdigit(pinValue[1])) {
-                    return "analogRead(" + pin + ")";
-                }
-            }
-
-            if (pin.length() >= 2 && pin[0] == 'A' && isdigit(pin[1])) {
-                return "analogRead(" + pin + ")";
-            } else {
-                return "digitalRead(" + pin + ")";
-            }
-        }
-
-        if (funcName == "wait" && argsStr.size() >= 1) {
-            std::string fullArg = "";
-
-            for (const auto& arg : argsStr) {
-                fullArg += arg;
-            }
-
-            return "delay(" + parseTime(fullArg, currentLine, currentColumn, source) + ");";
-        }
-
-        if (funcName == "scale" && argsStr.size() >= 5) {
-            return "map(" + argsStr[0] + ", " + argsStr[1] + ", " + argsStr[2] + ", " + argsStr[3] + ", " + argsStr[4] + ")";
-        }
-
-        if (funcName == "sleep") {
-            if (argsStr.empty()) {
-                ErrorHandler::report("sleep() requires one argument:", "idle | adc | deep", currentLine, currentColumn, source);
-            }
-
-            if (!includedLibraries.contains("avr/sleep")) {
-                includedLibraries.insert("avr/sleep");
-            }
-
-            std::string sleepModeType;
-            std::string sleepMode = argsStr[0];
-
-            if (sleepMode == "idle") {
-                sleepModeType = "SLEEP_MODE_IDLE";
-            } else if (sleepMode == "adc") {
-                sleepModeType = "SLEEP_MODE_ADC";
-            } else if (sleepMode == "deep") {
-                sleepModeType = "SLEEP_MODE_PWR_DOWN";
-            } else {
-                ErrorHandler::report("Unknown sleep mode:", sleepMode, currentLine, currentColumn, source);
-            }
-
-            std::string result = "set_sleep_mode(" + sleepModeType + ");\n";
-
-            result += "sleep_enable();\n";
-            result += "sleep_mode();\n";
-            result += "sleep_disable();\n";
-
-            return result;
-        }
-
-        if (funcName == "save_memory") {
-            if (!includedLibraries.contains("EEPROM")) {
-                includedLibraries.insert("EEPROM");
-            }
-
-            std::string address = argsStr[0];
-            std::string value = argsStr[1];
-
-            return "EEPROM.put(" + address + ", " + value + ");\n";
-        }
-
-        if (funcName == "read_memory") {
-            if (!includedLibraries.contains("EEPROM")) {
-                includedLibraries.insert("EEPROM");
-            }
-
-            std::string address = argsStr[0];
-
-            return "({ float val; EEPROM.get(" + address + ", val); val; })";
-        }
-
-        if (funcName == "pulse_in") {
-            if (argsStr.size() < 2 || argsStr.size() > 4) {
-                ErrorHandler::report("pulse_in expects 2, 3, or 4 arguments:", funcName, currentLine, currentColumn, source);
-            }
-
-            if (argsStr.size() == 2) {
-                std::string pin = argsStr[0];
-                std::string value = argsStr[1];
-
-                return "pulseIn(" + pin + ", " + value + ")";
-            }
-
-            std::string timeInput = (argsStr.size() == 4) ? (argsStr[2] + argsStr[3]) : argsStr[2];
-            std::string timeout = parseTime(timeInput, currentLine, currentColumn, source);
-            
-            std::string pin = argsStr[0];
-            std::string value = argsStr[1];
-
-            return "pulseIn(" + pin + ", " + value + ", " + timeout + ")";
-        }
-
-        if (funcName == "wait_ms") {
-            if (argsStr.empty()) {
-                ErrorHandler::report("wait_ms() requires one argument:", funcName, currentLine, currentColumn, source);
-            }
-
-            return "delayMicroseconds(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "pin_mode") {
-            if (argsStr.size() < 2) {
-                ErrorHandler::report("pin_mode() requires two arguments:", funcName, currentLine, currentColumn, source);
-            }
-
-            std::string pin = argsStr[0];
-            std::string mode = argsStr[1];
-
-            if (std::ranges::none_of(std::array{"INPUT", "OUTPUT", "INPUT_PULLUP"}, [&](auto m) { return mode == m; })) {
-                ErrorHandler::report("pin_mode() expects the second argument to be one of: INPUT, OUTPUT, INPUT_PULLUP", funcName, currentLine, currentColumn, source);
-            }
-
-            return "pinMode(" + pin + ", " + mode + ");";
-        }
-
-        return "";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -682,115 +375,21 @@ public:
         return arguments;
     }
 
+    const std::string& getSource() const noexcept {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const noexcept {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const noexcept {
+        return currentColumn;
+    }
+
 public:
-    std::string toCpp() override {
-        if (!serialKeywordsList.contains(funcName)) {
-            ErrorHandler::report("'" + funcName + "' is not a known serial command", funcName, currentLine, currentColumn, source);
-        }
-
-        std::vector<std::string> argsStr;
-
-        for (const auto& arg : arguments) {
-            argsStr.push_back(arg->toCpp());
-        }
-
-        if (funcName == "start" && argsStr.size() >= 1) {
-            return "Serial.begin(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "print" && argsStr.size() >= 1) {
-            auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
-            bool isStringLiteral = literal && literal->getToken().type == TokenType::STRING;
-
-            if (isStringLiteral) {
-                return "Serial.print(F(" + argsStr[0] + "));";
-            }
-
-            return "Serial.print(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "println" && argsStr.size() >= 1) {
-            auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
-            bool isStringLiteral = literal && literal->getToken().type == TokenType::STRING;
-
-            if (isStringLiteral) {
-                return "Serial.println(F(" + argsStr[0] + "));";
-            }
-
-            return "Serial.println(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "read") {
-            return "Serial.read();";
-        }
-
-        if (funcName == "write" && argsStr.size() >= 1) {
-            return "Serial.write(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "available") {
-            return "Serial.available()";
-        }
-
-        if (funcName == "availableForWrite") {
-            return "Serial.availableForWrite()";
-        }
-
-        if (funcName == "end") {
-            return "Serial.end()";
-        }
-
-        if (funcName == "readStringUntil" && argsStr.size() >= 1) {
-            return "Serial.readStringUntil(" + argsStr[0] + ");";
-        }
-
-        if (funcName == "find" && argsStr.size() >= 2) {
-            std::string target = argsStr[0];
-            std::string length = argsStr[1];
-
-            return "Serial.find(" + target + ", " + length + ")";
-        }
-
-        if (funcName == "findUntil" && argsStr.size() >= 2) {
-            std::string target = argsStr[0];
-            std::string terminal = argsStr[1];
-
-            return "Serial.findUntil(" + target + ", " + terminal + ")";
-        }
-
-        if (funcName == "waitUntilSend") {
-            return "Serial.flush();";
-        }
-
-        if (funcName == "parseFloat") {
-            if (argsStr.size() >= 2) {
-                return "Serial.parseFloat(" + argsStr[0] + ", " + argsStr[1] + ");";
-            } else if (argsStr.size() == 1) {
-                return "Serial.parseFloat(" + argsStr[0] + ");";
-            } else {
-                return "Serial.parseFloat();";
-            }
-        }
-
-        if (funcName == "parseInt") {
-            if (argsStr.size() >= 2) {
-                return "Serial.parseInt(" + argsStr[0] + ", " + argsStr[1] + ");";
-            } else if (argsStr.size() == 1) {
-                return "Serial.parseInt(" + argsStr[0] + ");";
-            } else {
-                return "Serial.parseInt();";
-            }
-        }
-
-        if (funcName == "peek") {
-            return "Serial.peek();";
-        }
-
-        if (funcName == "millis") {
-            return "millis();";
-        }
-
-        return "";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -809,7 +408,7 @@ public:
         : objectName(std::move(object)), methodCall(std::move(method)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
-    std::string getObjectName() const noexcept {
+    const std::string& getObjectName() const noexcept {
         return objectName;
     }
 
@@ -830,22 +429,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string methodStr = methodCall->toCpp();
-
-        if (methodStr.find("Serial.") == 0) {
-            methodStr = methodStr.substr(7);
-        }
-
-        std::string finalObjectName = objectName;
-
-        if (objectName == "serial") {
-            finalObjectName = "Serial";
-        }
-
-        bool isModuleName = userDefinedModulesNames.contains(finalObjectName);
-
-        return finalObjectName + (isModuleName ? "::" : ".") + methodStr;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -863,59 +448,6 @@ private:
     int currentLine;
     int currentColumn;
     std::string source;
-
-private:
-    bool isNumeric(const std::string& str) const noexcept {
-        if (str.empty()) {
-            return false;
-        }
-        
-        size_t start = 0;
-        bool hasDecimal = false;
-        
-        if (str[0] == '-' || str[0] == '+') {
-            if (str.size() == 1) {
-                return false;
-            }
-
-            start = 1;
-        }
-
-        for (size_t i = start; i < str.size(); ++i) {
-            if (str[i] == '.') {
-                if (hasDecimal) {
-                    return false;
-                }
-                
-                hasDecimal = true;
-            } else if (!std::isdigit(str[i])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    std::string inferIntegerType(std::string value) const noexcept {
-        std::string type;
-        long long number = std::stoll(value);
-
-        if (number >= 0 && number <= 255) {
-            type = "uint8_t";
-        } else if (number >= -32768 && number <= 32767) {
-            type = "int16_t";
-        } else if (number >= 0 && number <= 65535) {
-            type = "uint16_t";
-        } else if (number >= -2147483648LL && number <= 2147483647LL) {
-            type = "int32_t";
-        } else if (number >= 0 && number <= 4294967295LL) {
-            type = "uint32_t";
-        } else {
-            type = "int32_t";
-        }
-
-        return type;
-    }
 
 public:
     VarAssignNode(std::string name, std::unique_ptr<ASTNode> value, std::string raw, TokenType val_type, bool isConstantVar, int currentLine, int currentColumn, std::string source) 
@@ -942,6 +474,14 @@ public:
         return isConstantVar;
     }
 
+    bool isDeclaration() const noexcept {
+        return declaration;
+    }
+
+    void setIsDeclaration(bool value) noexcept {
+        declaration = value;
+    }
+
     const std::string& getSource() const noexcept {
         return source;
     }
@@ -954,263 +494,9 @@ public:
         return currentColumn;
     }
 
-    bool isDeclaration() const noexcept {
-        return declaration;
-    }
-
-    void setIsDeclaration(bool value) noexcept {
-        declaration = value;
-    }
-
 public:
-    std::string toCpp() override {
-        type = "";
-        std::string final_value = value->toCpp();
-
-        while (!final_value.empty() && (final_value.back() == ';' || final_value.back() == '\n' || final_value.back() == ' ')) {
-            final_value.pop_back();
-        }
-
-        if (!declaration) {
-            bool wasString = stringVariables.contains(name);
-            bool wasFloat = floatVariables.contains(name);
-            bool wasInt = integerVariables.contains(name);
-
-            bool isNowString = (val_type == TokenType::STRING) || final_value.find("\"") != std::string::npos;
-            bool isNowFloat = !isNowString && final_value.find('.') != std::string::npos && isNumeric(final_value);
-            bool isNowInt = !isNowString && !isNowFloat && isNumeric(final_value);
-
-            bool mismatch = (wasString && !isNowString && (isNowInt || isNowFloat)) || ((wasFloat || wasInt) && isNowString);
-        
-            if (mismatch) {
-                ErrorHandler::report("Type mismatch: cannot reassign variable:", name, currentLine, currentColumn, source);
-            }
-
-            return name + " = " + final_value + ";";
-        }
-
-        auto containsWord = [&](const std::string expression, const std::string& word) -> bool {
-            auto isIdentCharacter = [](char c) -> bool {
-                return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
-            };
-
-            size_t position = expression.find(word);
-
-            while (position != std::string::npos) {
-                bool prevOk = (position == 0) || !isIdentCharacter(expression[position - 1]);
-
-                size_t nextPosition = position + word.length();
-                bool nextOk = (nextPosition == expression.length()) || !isIdentCharacter(expression[nextPosition]);
-
-                if (prevOk && nextOk) {
-                    return true;
-                }
-
-                position = expression.find(word, position + 1);
-            }
-
-            return false;
-        };
-
-        auto containsNonConstantVariable = [&]() -> bool {
-            for (const auto& var : nonConstantVariables) {
-                if (containsWord(final_value, var)) {
-                    return true;
-                }
-            }
-
-            for (const auto& param : currentFunctionParams) {
-                if (containsWord(final_value, param)) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        auto containsStringVariable = [&](const std::string& expression) -> bool {
-            for (const auto& stringVariable : stringVariables) {
-                if (containsWord(expression, stringVariable)) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        auto containsFloatVariable = [&](const std::string& expression) -> bool {
-            for (const auto& floatVariable : floatVariables) {
-                if (containsWord(expression, floatVariable)) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        MethodCallNode* methodNode = dynamic_cast<MethodCallNode*>(value.get());
-        bool isModuleCall = methodNode && userDefinedModulesNames.contains(methodNode->getObjectName());
-
-        SerialFunctionsCallNode* funcCall = dynamic_cast<SerialFunctionsCallNode*>(value.get());
-
-        if (!funcCall && methodNode) {
-            funcCall = dynamic_cast<SerialFunctionsCallNode*>(methodNode->getMethodCall());
-        }
-
-        if (funcCall) {
-            if (funcCall->getFunctionName() == "read") {
-                type = "char";
-                final_value = funcCall->toCpp();
-
-                while (!final_value.empty() && final_value.back() == ';') {
-                    final_value.pop_back();
-                }
-            } else if (funcCall->getFunctionName() == "readStringUntil") {
-                type = "String";
-                final_value = funcCall->toCpp();
-
-                while (!final_value.empty() && final_value.back() == ';') {
-                    final_value.pop_back();
-                }
-            } else if (funcCall->getVariableName() == "read_memory") {
-                type = "float";
-
-                floatVariables.insert(name);
-            } else if (funcCall->getFunctionName() == "millis") {
-                type = "long int";
-            }
-        } else if (final_value.find("atof(") != std::string::npos || final_value.find("(float)") != std::string::npos) {
-            type = "float";
-            floatVariables.insert(name);
-        } else if (final_value.find("atoi(") != std::string::npos || final_value.find("(int)") != std::string::npos) {
-            type = "int";
-            integerVariables.insert(name);
-        } else if (val_type == TokenType::IDENTIFIER && final_value.find("(") != std::string::npos && final_value.back() == ')' && !userDefinedFunctionsNames.contains(final_value.substr(0, final_value.find("("))) && !userDefinedModulesNames.contains(final_value.substr(0, final_value.find("::")))) {
-            std::string className = final_value.substr(0, final_value.find("("));
-
-            if (!includedLibraries.contains(className)) {
-                ErrorHandler::report("Must import this libarary first:", className, currentLine, currentColumn, source);
-            }
-
-            std::string args = final_value.substr(final_value.find("("));
-
-            declaredVariables.insert(name);
-
-            if (args == "()") {
-                return className + " " + name + ";\n";
-            } else {
-                return className + " " + name + args + ";\n";
-            }
-        } else if (val_type == TokenType::STRING || final_value.find("\"") != std::string::npos || containsStringVariable(final_value) || final_value.find("String(") != std::string::npos) {
-            if (final_value.find("String(") != std::string::npos) {
-                type = "String";
-            } else if (final_value.find("+") != std::string::npos) {
-                type = "String";
-                final_value = "String(\"\") + " + final_value; 
-            } else {
-                type = "const char*";
-            }
-
-            stringVariables.insert(name);
-        } else if (val_type == TokenType::BOOLEAN && (final_value == "true" || final_value == "false")) {
-            type = "bool";
-        } else if (val_type == TokenType::FLOAT && (final_value.find('.') != std::string::npos || containsFloatVariable(final_value)) && isNumeric(final_value)) {
-            type = "float";
-            floatVariables.insert(name);
-        } else if (val_type == TokenType::CHARACTER && final_value.length() == 1 && !isdigit(final_value[0])) {
-            type = "char";
-        } else if (val_type == TokenType::INTEGER && isNumeric(final_value)) {
-            type = inferIntegerType(final_value);
-            integerVariables.insert(name);
-        } else {
-            if (containsFloatVariable(final_value) || final_value.find("(float)") != std::string::npos || final_value.find("atof(") != std::string::npos) {
-                type = "float";
-
-                floatVariables.insert(name);
-            } else if (final_value.find("(int)") != std::string::npos || final_value.find("atoi(") != std::string::npos) {
-                type = "int";
-
-                integerVariables.insert(name);
-            } else {
-                type = "int";
-
-                integerVariables.insert(name);
-            }
-        }
-
-        declaredVariables.insert(name);
-
-        bool isReassigned = reassignedVariables.contains(name);
-        bool hasConst = type.find("constexpr") != std::string::npos;
-        bool isKeyword = keywordsList.contains(raw_value);
-        bool isArrayAccess = final_value.find('[') != std::string::npos;
-
-        bool isFunctionCall = dynamic_cast<FunctionCallNode*>(value.get()) != nullptr || dynamic_cast<BuiltInFunctionCallNode*>(value.get()) != nullptr || funcCall != nullptr || isModuleCall;
-
-        FunctionCallNode* userFunction = dynamic_cast<FunctionCallNode*>(value.get());
-
-        if (!userFunction && isModuleCall) {
-            userFunction = dynamic_cast<FunctionCallNode*>(methodNode->getMethodCall());
-        }
-
-        bool returnTypeKnown = false;
-
-        if (userFunction) {
-            auto it = userDefinedFunctionsReturnType.find(userFunction->getFunctionName());
-
-            if (it != userDefinedFunctionsReturnType.end()) {
-                type = it->second;
-                returnTypeKnown = true;
-
-                integerVariables.erase(name);
-                floatVariables.erase(name);
-                stringVariables.erase(name);
-
-                if (type == "float") {
-                    floatVariables.insert(name);
-                } else if (type == "String" || type == "const char*") {
-                    stringVariables.insert(name);
-                } else if (type.find("int") != std::string::npos) {
-                    integerVariables.insert(name);
-                }
-            }
-        }
-
-        if (isArrayAccess) {
-            return type + " " + name + " = " + final_value + ";\n";
-        }
-
-        if (((!isReassigned && !hasConst && !isKeyword) || isConstantVar) && !containsNonConstantVariable()) {
-            if (type == "String") {
-                if (isConstantVar) {
-                    return "const " + type + " " + name + " = " + final_value + ";\n";
-                } else {
-                    nonConstantVariables.insert(name);
-
-                    return type + " " + name + " = " + final_value + ";\n";
-                }
-            }
-
-            if (isFunctionCall) {
-                if (userFunction && !returnTypeKnown) {
-                    ErrorHandler::report("Unknown function return type for:", userFunction->getFunctionName(), currentLine, currentColumn, source);
-                }
-
-                if (isConstantVar) {
-                    return "const " + type + " " + name + " = " + final_value + ";\n";
-                } else {
-                    nonConstantVariables.insert(name);
-
-                    return type + " " + name + " = " + final_value + ";\n";
-                }
-            }
-
-            return "constexpr " + type + " " + name + " = " + final_value + ";\n";
-        }
-
-        nonConstantVariables.insert(name);
-
-        return type + " " + name + " = " + final_value + ";\n";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1233,16 +519,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string opStr = op.value;
-
-        if (opStr == "not") {
-            opStr = "!";
-        }
-
-        std::string result = opStr + right->toCpp();
-
-        return result;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1270,44 +548,8 @@ public:
     }
 
 public:
-    std::string getVariableName() override {
-        if (auto var = dynamic_cast<LiteralNode*>(left.get())) {
-            if (var->getToken().type == TokenType::IDENTIFIER) {
-                return var->getToken().value;
-            }
-        }
-        
-        if (auto var = dynamic_cast<LiteralNode*>(right.get())) {
-            if (var->getToken().type == TokenType::IDENTIFIER) {
-                return var->getToken().value;
-            }
-        }
-
-        return "";
-    }
-
-public:
-    std::string toCpp() override {
-        std::string opStr = op.value;
-
-        if (opStr == "and") {
-            opStr = "&&";
-        } else if (opStr == "or") {
-            opStr = "||";
-        }
-
-        std::string leftStr = left->toCpp();
-        std::string rightStr = right->toCpp();
-
-        if ((opStr == "==" || opStr == "!=")) {
-            if (leftStr == "Serial.read()" || leftStr.find("command") != std::string::npos) {
-                if (rightStr.size() == 3 && rightStr.front() == '"' && rightStr.back() == '"') {
-                    rightStr = "'" + rightStr.substr(1, 1) + "'";
-                }
-            }
-        }
-
-        return leftStr + " " + opStr + " " + rightStr;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1322,8 +564,21 @@ public:
         : left(std::move(left)), op(std::move(op)), right(std::move(right)) {}
 
 public:
-    std::string toCpp() override {
-        return left->toCpp() + " " + op + " " + right->toCpp();
+    const std::string& getOp() const noexcept { 
+        return op; 
+    }
+
+    ExpressionNode* getLeft() const noexcept { 
+        return left.get();
+    }
+
+    ExpressionNode* getRight() const noexcept { 
+        return right.get(); 
+    }
+
+public:
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1346,21 +601,13 @@ public:
         return name;
     }
 
-    const ExpressionNode* getValue() const noexcept {
+    ExpressionNode* getValue() const noexcept {
         return value.get();
     }
 
 public:
-    std::string toCpp() override {
-        if (op == "++") {
-            return name + "++;";
-        }
-
-        if (op == "--") {
-            return name + "--;";
-        }
-
-        return name + " " + op + " " + value->toCpp() + ";";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1380,15 +627,15 @@ public:
     }
 
 public:
-    const std::unique_ptr<ASTNode> &getCondition() const noexcept {
+    const std::unique_ptr<ASTNode>& getCondition() const noexcept {
         return condition;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>> &getThenBody() const noexcept {
+    const std::vector<std::unique_ptr<ASTNode>>& getThenBody() const noexcept {
         return thenBody;
     }
 
-    const std::vector<std::unique_ptr<ASTNode>> &getElseBody() const noexcept {
+    const std::vector<std::unique_ptr<ASTNode>>& getElseBody() const noexcept {
         return elseBody;
     }
 
@@ -1397,31 +644,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string code = "if (" + condition->toCpp() + ") {\n";
-        
-        for (const auto& node : thenBody) {
-            code += node->toCpp() + "\n";
-        }
-
-        code += "}";
-
-        if (!elseBody.empty()) {
-            if (elseBody.size() == 1 && dynamic_cast<IfNode*>(elseBody[0].get())) {
-                std::string inner = elseBody[0]->toCpp();
-                code += "else " + inner;
-            } else {
-                code += "else {\n";
-                
-                for (const auto& node : elseBody) {
-                    code += node->toCpp() + "\n";
-                }
-                
-                code += "}";
-            }
-        }
-
-        return code;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1439,12 +663,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string result = value->toCpp();
-
-        std::erase(result, ';');
-
-        return "return " + result + ";";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1494,40 +714,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string result;
-
-        if (!params.empty()) {
-            result = "template<";
-
-            for (size_t i = 0; i < params.size(); i++) {
-                result += "typename T" + std::to_string(i) + (i < params.size() - 1 ? ", " : "");
-            }
-
-            result += ">\n";
-        }
-
-        currentFunctionParams = params;
-
-        const std::string returnType = (userReturnType == "void" || userReturnType == "any") ? "auto" : mapReturnTypeToString(userReturnType, funcName, currentLine, currentColumn, source);
-
-        result += returnType + " " + funcName + "(";
-
-        for (size_t i = 0; i < params.size(); i++) {
-            result += "T" + std::to_string(i) + " " + params[i] + (i < params.size() - 1 ? ", " : "");
-        }
-
-        result += ") {\n";
-
-        for (const auto& node : body) {
-            result += node->toCpp() + "\n";
-        }
-
-        result += "}\n";
-
-        currentFunctionParams.clear();
-
-        return result;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1567,23 +755,21 @@ public:
         return { &body };
     }
 
+    std::string getSource() const noexcept {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const noexcept {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const noexcept {
+        return currentColumn;
+    }
+
 public:
-    std::string toCpp() override {
-        interval = parseTime(interval, currentLine, currentColumn, source);
-
-        std::string timerName = "_every_timer_" + std::to_string(id);
-        std::string code = "static unsigned long " + timerName + " = 0;\n";
-
-        code += "if (millis() - " + timerName + " >= " + interval + ") {\n";
-        code += timerName + " = millis();\n";
-
-        for (const auto& node : body) {
-            code += node->toCpp() + "\n";
-        }
-
-        code += "}";
-
-        return code;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1597,7 +783,7 @@ public:
         : condition(std::move(cond)), body(std::move(b)) {}
 
 public:
-    const std::unique_ptr<ExpressionNode> &getCondition() const noexcept {
+    const std::unique_ptr<ExpressionNode>& getCondition() const noexcept {
         return condition;
     }
 
@@ -1610,16 +796,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string result = "while (" + condition->toCpp() + ") {\n";
-
-        for (const auto& node : body) {
-            result += node->toCpp() + "\n";
-        }
-
-        result += "}\n";
-
-        return result;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1646,22 +824,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string condStr = condition->toCpp();
-        std::string varName = condition->getVariableName();
-
-        bool isDecrement = condStr.find(">") != std::string::npos;
-        std::string op = isDecrement ? "--" : "++"; 
-
-        std::string result = "for (; " + condStr + "; " + varName + op + ") {\n";
-
-        for (const auto& node : body) {
-            result += node->toCpp() + "\n";
-        }
-
-        result += "}\n";
-
-        return result;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1720,16 +884,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string result = "for (uint32_t " + varName + " = " + start->toCpp() + "; " + varName + " < " + stop->toCpp() + "; " + varName + " += " + step->toCpp() + ") {";
-
-        for (const auto& node : body) {
-            result += node->toCpp() + "\n";
-        }
-
-        result += "}\n";
-
-        return result;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1765,17 +921,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string iterVar = "_loop_i_" + std::to_string(id);
-        std::string code = "for (int " + iterVar + " = 0; " + iterVar + " < " + count + "; " + iterVar + "++) {\n";
-        
-        for (const auto& node : body) {
-            code += node->toCpp() + "\n";
-        }
-
-        code += "}";
-
-        return code;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1794,8 +941,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        return "(" + expression->toCpp() + ")";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1833,25 +980,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        std::string timerVar = "_btn_timer_" + std::to_string(id);
-        std::string lastVar = "_btn_last_" + std::to_string(id);
-        std::string currVar = "_btn_curr_" + std::to_string(id);
-        std::string code = "static unsigned long " + timerVar + " = 0;\n";
-
-        code += "static bool " + lastVar + " = HIGH;\n";
-        code += "bool " + currVar + " = digitalRead(" + pin + ");\n";
-        code += "if (" + currVar + " == LOW && " + lastVar + " == HIGH && (millis() - " + timerVar + " > 200)) {\n";
-        code += timerVar + " = millis();\n";
-
-        for (const auto& node : body) {
-            code += node->toCpp() + "\n";
-        }
-
-        code += "}\n";
-        code += lastVar + " = " + currVar + ";";
-
-        return code;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1869,14 +999,8 @@ public:
     }
 
 public:
-    std::string toCpp() override {
-        if (statement == "break") {
-            return "break;";
-        } else if (statement == "continue") {
-            return "continue;";
-        }
-
-        return "";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1903,40 +1027,21 @@ public:
         return arguments;
     }
 
+    std::string getSource() const noexcept {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const noexcept {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const noexcept {
+        return currentColumn;
+    }
+
 public:
-    std::string toCpp() override {
-        if (arguments.empty()) {
-            ErrorHandler::report("'" + funcName + "' requires exactly one argument", funcName, currentLine, currentColumn, source);
-        }
-
-        std::string value = arguments[0]->toCpp();
-
-        auto* literal = dynamic_cast<LiteralNode*>(arguments[0].get());
-        bool isStringArg = literal && literal->getToken().type == TokenType::STRING;
-
-        if (funcName == "int") {
-            if (isStringArg || stringVariables.contains(value)) {
-                return "atoi(" + value + ")";
-            }
-
-            return "(int)(" + value + ")";
-        }
-
-        if (funcName == "float") {
-            if (isStringArg || stringVariables.contains(value)) {
-                return "atof(" + value + ")";
-            }
-
-            return "(float)(" + value + ")";
-        }
-
-        if (funcName == "str") {
-            return "String(" + value + ")";
-        }
-
-        ErrorHandler::report("'" + funcName + "' is not a known type conversion", funcName, currentLine, currentColumn, source);
-
-        return "";
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };
 
@@ -1955,22 +1060,16 @@ public:
         : moduleName(std::move(moduleName)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
+    const std::string& getModuleName() const noexcept {
+        return moduleName;
+    }
+
     const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
     }
 
 public:
-    std::string toCpp() override {
-        std::string result;
-
-        result += "namespace " + moduleName + " {";
-
-        for (const auto& node : body) {
-            result += node->toCpp() + "\n";
-        }
-
-        result += "}";
-
-        return result;
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
     }
 };

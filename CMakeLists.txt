@@ -19,6 +19,8 @@ set(SOURCES
     src/semantic/symbol_table.cpp
     src/semantic/semantic_analyzer.cpp
     src/semantic/utils.cpp
+    src/backend/avr_backend.cpp
+    src/backend/esp32_backend.cpp
     stdlib/module_loader.cpp
 )
 
@@ -33,6 +35,7 @@ target_include_directories(mello PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/errors
     ${CMAKE_CURRENT_SOURCE_DIR}/include/compiler
     ${CMAKE_CURRENT_SOURCE_DIR}/include/semantic
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/backend
     ${CMAKE_CURRENT_SOURCE_DIR}/stdlib
 )
 
