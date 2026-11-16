@@ -9,6 +9,7 @@
  * prohibited without the express written permission of the author.
 """
 
+import platform
 import subprocess
 from pathlib import Path
 
@@ -16,7 +17,10 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 RESET = '\033[0m'
 
-COMPILER = Path(__file__).parent / "cmake/mello.exe"
+BUILD_PATH = "cmake"
+OS = platform.system()
+COMPILER = Path(__file__).parent / BUILD_PATH / ("mello.exe" if OS == "Windows" else "mello")
+
 FILE_EXTENSION = ".mello"
 TESTS_DIR = Path(__file__).parent / "tests"
 
