@@ -14,6 +14,7 @@
 #include "ast.hpp"
 
 #include <list>
+#include <algorithm>
 
 std::string ESP32Backend::evaluateExpression(ExpressionNode* expression) {
     if (!expression) {
