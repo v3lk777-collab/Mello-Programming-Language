@@ -1,3 +1,6 @@
+# Mello Standard Library - Math Library
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
 MELLO_PI = 3.14159265358979323846
 MELLO_TWO_PI = 6.28318530717958647692
 

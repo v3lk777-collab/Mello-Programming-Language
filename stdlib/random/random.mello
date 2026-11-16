@@ -1,3 +1,6 @@
+# Mello Standard Library - Random Library
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
 random_state = 4095
 
 fn seed_random(seed):
