@@ -58,3 +58,8 @@
 40	13268	8165304799619222	CMakeFiles/mello.dir/src/backend/esp32_backend.cpp.obj	c4fadbddad3ca73d
 17	7314	8165305895791713	CMakeFiles/mello.dir/src/parser/parser.cpp.obj	2e2e2f617553c9c4
 7315	8440	8165305968776447	mello.exe	8133e28669776c4d
+12	9234	8165314453897246	CMakeFiles/mello.dir/src/backend/esp32_backend.cpp.obj	c4fadbddad3ca73d
+9236	10154	8165314546136998	mello.exe	8133e28669776c4d
+55	4544	8165317550280609	CMakeFiles/mello.dir/src/lexer/lexer.cpp.obj	771a4a1ee11bfab5
+74	11873	8165317550470506	CMakeFiles/mello.dir/src/backend/esp32_backend.cpp.obj	c4fadbddad3ca73d
+11874	12656	8165317668468978	mello.exe	8133e28669776c4d

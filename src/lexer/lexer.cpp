@@ -450,7 +450,11 @@ std::vector<Token> Lexer::tokenize() {
             }
 
             if (keywordsList.contains(word) || serialKeywordsList.contains(word) || arrayBuiltInFunctions.contains(word)) {
-                tokens.emplace_back(TokenType::KEYWORD, word, line, column, source);
+                if (word == "true" || word == "false") {
+                    tokens.emplace_back(TokenType::BOOLEAN, word, line, column, source);
+                } else {
+                    tokens.emplace_back(TokenType::KEYWORD, word, line, column, source);
+                }
             } else {
                 tokens.emplace_back(TokenType::IDENTIFIER, word, line, column, source);
             }
