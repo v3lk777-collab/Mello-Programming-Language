@@ -100,7 +100,11 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
 
     bool hasReturn = false;
 
-    for (const auto& node : userFuncNode->getBody()) {
+    auto validateReturns = [&] (this auto&& self, const std::unique_ptr<ASTNode>& node) -> void {
+        if (!node) {
+            return;
+        }
+
         if (auto* returnNode = dynamic_cast<ReturnNode*>(node.get())) {
             hasReturn = true;
 
@@ -112,6 +116,16 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
                 }
             }
         }
+
+        for (const auto* child : node->getChildBodies()) {
+            for (const auto& node : *child) {
+                self(node);
+            }
+        }
+    };
+
+    for (const auto& node : userFuncNode->getBody()) {
+        validateReturns(node);
 
         analyzeNode(node.get());
     }
