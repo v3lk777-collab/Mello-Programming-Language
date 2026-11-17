@@ -111,7 +111,7 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
             if (auto literalNode = dynamic_cast<LiteralNode*>(returnNode->getValue())) {
                 DataType returnType = mapTokenTypeToDataType(literalNode->getToken().type);
 
-                if (returnType != userReturnType) {
+                if (userReturnType != DataType::ANY && returnType != userReturnType) {
                     ErrorHandler::report("Function return type doesn't match the return type", function.name, currentLine, currentColumn, source);
                 }
             }
