@@ -196,7 +196,7 @@ fn loop():
         i++
 
     for x in range(10):         # Equivalent to for x < 10, but with an explicit counter
-        serial.println(i)
+        serial.println(x)
 
     for y in range(2, 10, 2):   # start, stop, and step are all customizable
         serial.println(i)
