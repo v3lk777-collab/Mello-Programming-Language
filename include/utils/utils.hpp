@@ -21,7 +21,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-inline std::string currentModuleName = "";
+inline std::string currentScopeName = "";
 
 inline std::set<std::string> inputPins;
 inline std::set<std::string> outputPins;

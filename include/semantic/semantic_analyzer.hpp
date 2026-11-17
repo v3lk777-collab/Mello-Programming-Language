@@ -19,6 +19,7 @@ private:
     SymbolTable symbolTable;
 
 public:
+    DataType mapTokenTypeToDataType(TokenType type);
     DataType mapStringToDataType(const std::string& typeStr);
 
 private:

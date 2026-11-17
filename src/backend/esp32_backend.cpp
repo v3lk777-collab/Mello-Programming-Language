@@ -668,9 +668,7 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
     bool returnTypeKnown = false;
 
     if (userFunction) {
-        auto it = userDefinedFunctionsReturnType.find(userFunction->getFunctionName());
-
-        if (it != userDefinedFunctionsReturnType.end()) {
+        if (auto it = userDefinedFunctionsReturnType.find(userFunction->getFunctionName()); it != userDefinedFunctionsReturnType.end()) {
             type = it->second;
             returnTypeKnown = true;
 

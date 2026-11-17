@@ -706,9 +706,7 @@ void AVRBackend::visit(VarAssignNode* varAssignNode) {
     bool returnTypeKnown = false;
 
     if (userFunction) {
-        auto it = userDefinedFunctionsReturnType.find(userFunction->getFunctionName());
-
-        if (it != userDefinedFunctionsReturnType.end()) {
+        if (auto it = userDefinedFunctionsReturnType.find(userFunction->getFunctionName()); it != userDefinedFunctionsReturnType.end()) {
             type = it->second;
             returnTypeKnown = true;
 
@@ -1162,7 +1160,7 @@ std::string AVRBackend::generate(const std::vector<std::unique_ptr<ASTNode>>& st
 
             continue;
         }
-            
+
         if (code.find("void setup()") != std::string::npos) {
             hasSetup = true;
         }

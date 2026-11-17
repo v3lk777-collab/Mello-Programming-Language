@@ -67,10 +67,13 @@ void SemanticAnalyzer::analyzeIfStatment(IfNode* ifNode) {
 }
 
 void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
+    DataType userReturnType = mapStringToDataType(userFuncNode->getUserReturnType());
+
     FunctionSymbol function;
 
     function.name = userFuncNode->getFunctionName();
     function.paramNames = userFuncNode->getFuncParams();
+    function.returnType = userReturnType;
 
     std::string source = userFuncNode->getSource();
     int currentLine = userFuncNode->getCurrentDeclaredLine();
@@ -95,8 +98,26 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
         }
     }
 
+    bool hasReturn = false;
+
     for (const auto& node : userFuncNode->getBody()) {
+        if (auto* returnNode = dynamic_cast<ReturnNode*>(node.get())) {
+            hasReturn = true;
+
+            if (auto literalNode = dynamic_cast<LiteralNode*>(returnNode->getValue())) {
+                DataType returnType = mapTokenTypeToDataType(literalNode->getToken().type);
+
+                if (returnType != userReturnType) {
+                    ErrorHandler::report("Function return type doesn't match the return type", function.name, currentLine, currentColumn, source);
+                }
+            }
+        }
+
         analyzeNode(node.get());
+    }
+
+    if (!hasReturn && userReturnType != DataType::ANY && userReturnType != DataType::VOID) {
+        ErrorHandler::report("Function declares a return type but has no return statement:", function.name, currentLine, currentColumn, source);
     }
 
     symbolTable.exitScope();
@@ -284,11 +305,9 @@ void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
         ErrorHandler::report("Call to undeclared function:", funcName, currentLine, currentColumn, source);
     }
 
-    auto it = userDefinedFunctionsParamsNumber.find(functionCallNode->getFunctionName());
-
     int userFunctionParamsNumber = 0;
 
-    if (it != userDefinedFunctionsParamsNumber.end()) {
+    if (auto it = userDefinedFunctionsParamsNumber.find(functionCallNode->getFunctionName()); it != userDefinedFunctionsParamsNumber.end()) {
         userFunctionParamsNumber = it->second;
     }
 
@@ -385,7 +404,7 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
     }
 
     auto resolvePin = [&](const std::string& name) -> std::string {
-        if (name.empty() || currentModuleName.empty() || funcParams.contains(name)) {
+        if (name.empty() || currentScopeName.empty() || funcParams.contains(name)) {
             return name;
         }
 
@@ -393,7 +412,7 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
         bool isAnalog = (name.size() >= 2 && name[0] == 'A' && std::isdigit(static_cast<unsigned char>(name[1])));
             
         if (!isNumber && !isAnalog) {
-            return currentModuleName + "::" + name;
+            return currentScopeName + "::" + name;
         }
 
         return name;
@@ -458,8 +477,9 @@ void SemanticAnalyzer::analyzeReturnStatement(ReturnNode* returnNode) {
 }
 
 void SemanticAnalyzer::analyzeModule(ModuleNode* moduleNode) {
-    std::string previousModule = currentModuleName;
-    currentModuleName = moduleNode->getModuleName();
+    std::string previousModule = currentScopeName;
+
+    currentScopeName = moduleNode->getModuleName();
 
     symbolTable.enterScope();
 
@@ -469,7 +489,7 @@ void SemanticAnalyzer::analyzeModule(ModuleNode* moduleNode) {
 
     symbolTable.exitScope();
 
-    currentModuleName = previousModule;
+    currentScopeName = previousModule;
 }
 
 void SemanticAnalyzer::analyzeNode(ASTNode* node) {

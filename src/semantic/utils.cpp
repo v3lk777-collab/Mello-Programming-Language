@@ -11,25 +11,41 @@
 
 #include "semantic_analyzer.hpp"
 
+DataType SemanticAnalyzer::mapTokenTypeToDataType(TokenType type) {
+    switch (type) {
+        case TokenType::INTEGER:
+            return DataType::INTEGER;
+
+        case TokenType::FLOAT:
+            return DataType::FLOAT;
+
+        case TokenType::STRING:
+            return DataType::STRING;
+
+        case TokenType::CHARACTER:
+            return DataType::CHARACTER;
+
+        case TokenType::BOOLEAN:
+            return DataType::BOOLEAN;
+
+        default:
+            return DataType::ANY;
+    }
+}
+
 DataType SemanticAnalyzer::mapStringToDataType(const std::string& typeStr) {
     if (typeStr == "int") {
         return DataType::INTEGER;
-    }
-
-    if (typeStr == "float") {
+    } else if (typeStr == "float") {
         return DataType::FLOAT;
-    }
-
-    if (typeStr == "str") {
+    } else if (typeStr == "str") {
         return DataType::STRING;
-    }
-
-    if (typeStr == "char") {
+    } else if (typeStr == "char") {
         return DataType::CHARACTER;
-    }
-
-    if (typeStr == "bool") {
+    } else if (typeStr == "bool") {
         return DataType::BOOLEAN;
+    } else if (typeStr == "void") {
+        return DataType::ANY;
     }
 
     return DataType::ANY;

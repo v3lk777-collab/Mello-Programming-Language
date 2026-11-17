@@ -845,10 +845,12 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
     while (current.type != TokenType::RPAREN && current.type != TokenType::EndOfFile) {
         if (current.type == TokenType::COMMA) {
             advance();
+
             continue;
         }
 
         params.push_back(current.value);
+
         advance();
     }
 

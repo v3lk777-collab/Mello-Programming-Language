@@ -1047,7 +1047,7 @@ public:
 
 class ModuleNode : public ASTNode {
 private:
-    std::string moduleName;
+    std::string name;
     std::vector<std::unique_ptr<ASTNode>> body;
 
 private:
@@ -1056,12 +1056,12 @@ private:
     std::string source;
 
 public:
-    ModuleNode(std::string moduleName, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
-        : moduleName(std::move(moduleName)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+    ModuleNode(std::string name, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
+        : name(std::move(name)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     const std::string& getModuleName() const noexcept {
-        return moduleName;
+        return name;
     }
 
     const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
