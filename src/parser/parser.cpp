@@ -911,6 +911,10 @@ std::unique_ptr<ASTNode> Parser::parseUserFuncDefinition() {
 std::unique_ptr<ASTNode> Parser::parseReturnStatement() {
     advance();
 
+    if (current.type == TokenType::NEWLINE || current.type == TokenType::DEDENT || current.type == TokenType::EndOfFile || current.value.empty()) {
+        return std::make_unique<ReturnNode>(nullptr);
+    }
+
     auto value = parseExpression();
 
     return std::make_unique<ReturnNode>(std::move(value));

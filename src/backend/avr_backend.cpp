@@ -862,13 +862,13 @@ void AVRBackend::visit(IfNode* ifNode) {
 }
 
 void AVRBackend::visit(ReturnNode* returnNode) {
-    std::string value = evaluateNode(returnNode->getValue());
-
-    if (value.empty()) {
+    if (!returnNode->getValue()) {
         output << "return;";
 
         return;
     }
+
+    std::string value = evaluateNode(returnNode->getValue());
 
     std::erase(value, ';');
 
