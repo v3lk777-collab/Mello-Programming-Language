@@ -29,7 +29,7 @@ void SemanticAnalyzer::analyzeAssignment(VarAssignNode* varNode) {
     VariableSymbol symbol;
 
     symbol.name = varNode->name;
-    symbol.type = mapStringToDataType(varNode->type);
+    symbol.type = mapTokenTypeToDataType(varNode->val_type);
     symbol.isConstant = varNode->isConstantVar;
     symbol.declaredLine = varNode->getCurrentDeclaredLine();
 
@@ -100,6 +100,22 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
 
     bool hasReturn = false;
 
+    auto isTypeCompatible = [] (DataType expected, DataType actual) -> bool {
+        if (expected == DataType::ANY || actual == DataType::ANY) {
+            return true;
+        }
+
+        if (expected == actual) {
+            return true;
+        }
+
+        if (expected == DataType::FLOAT && actual == DataType::INTEGER) {
+            return true;
+        }
+
+        return false;
+    };
+
     auto validateReturns = [&] (this auto&& self, const std::unique_ptr<ASTNode>& node) -> void {
         if (!node) {
             return;
@@ -109,9 +125,17 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
             hasReturn = true;
 
             if (auto literalNode = dynamic_cast<LiteralNode*>(returnNode->getValue())) {
-                DataType returnType = mapTokenTypeToDataType(literalNode->getToken().type);
+                DataType returnType = DataType::ANY;
 
-                if (userReturnType != DataType::ANY && returnType != userReturnType) {
+                if (literalNode->getToken().type == TokenType::IDENTIFIER) {
+                    if (auto* variableSymbol = symbolTable.lookupVariable(literalNode->getToken().value)) {
+                        returnType = variableSymbol->type;
+                    }
+                } else {
+                    returnType = mapTokenTypeToDataType(literalNode->getToken().type);
+                }
+
+                if (userReturnType != DataType::ANY && !isTypeCompatible(userReturnType, returnType)) {
                     ErrorHandler::report("Function return type doesn't match the return type", function.name, currentLine, currentColumn, source);
                 }
             }
@@ -125,9 +149,9 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
     };
 
     for (const auto& node : userFuncNode->getBody()) {
-        validateReturns(node);
-
         analyzeNode(node.get());
+
+        validateReturns(node);
     }
 
     if (!hasReturn && userReturnType != DataType::ANY && userReturnType != DataType::VOID) {
