@@ -2,7 +2,7 @@
     <img src="./logo.png" width="20%" alt="Mello Programming Language Logo"/>
 </p>
 
-<h1 align="center">Mello Programmming Language</h1>
+<h1 align="center">Mello Programming Language</h1>
 
 <p align="center">A high-performance, indentation-based programming language and transpiler for streamlining embedded systems and IoT development.</p>
 
@@ -70,7 +70,7 @@ During AST traversal, Mello resolves variable scoping and detects auto-pin assig
 Every AST node (`OnPressNode`, `EveryNode`, `VarAssignNode`, ...) implements its own `toCpp()` method, recursively emitting optimized, static C++ — no dynamic allocation, no hidden runtime cost.
 
 ### Phase E: Automated Pipeline
-Mello runs `clang-format` (Google style) on the generated source, invokes `arduino-cli` against the `arduino:avr:uno` or `arduino:avr:nano` board profile with `-O3 -flto` optimization to produce a `.hex` / `.bin` binary, and can flash it directly to a connected board by passing `--upload`.
+Mello runs `clang-format` (Google style) on the generated source, invokes `arduino-cli` against the `arduino:avr:uno`, `arduino:avr:nano`, or `esp32:esp32:esp32` board profile with `-O3 -flto` optimization to produce a `.hex` / `.bin` binary, and can flash it directly to a connected board by passing `--upload`.
 
 ---
 
@@ -243,7 +243,7 @@ fn start():
         counter++
 ```
 
-### ERROM
+### EEPROM
 
 ```python
 fn start():
@@ -262,10 +262,10 @@ use math
 use random
 
 fn start():
-    seed_random(42)
+    random.seed_random(42)
 
-    c = clamp(15, 0, 10)
-    randomNumber = random_range(1, 6)
+    c = math.clamp(15, 0, 10)
+    randomNumber = random.random_range(1, 6)
 
     serial.println(c)              # 10
     serial.println(randomNumber)   # pseudo-random number from 1 to 6
@@ -299,6 +299,19 @@ A small, deterministic linear congruential generator (state in `0..4095`, light 
 | `random_next()` | Next raw value in `0..4095` |
 | `random_below(max_exclusive)` | Value in `0 .. max_exclusive-1` (returns `0` if `max_exclusive <= 0`) |
 | `random_range(low, high)` | Value in `low .. high` inclusive (returns `low` if `high < low`) |
+
+### Standard Protocols (`use`)
+
+#### `i2c` Protocol
+
+A software I2C (Bit-Banging) protocol written natively in Mello.
+
+| Function | Description |
+|---|---|
+| `begin(sda_pin, scl_pin)` | Sends the I2C Start condition (pulls SDA low while SCL is high) |
+| `stop()` | Sends the I2C Stop condition (releases SDA while SCL is high) |
+| `write_byte(byte_val)` | Transmits 8 bits MSB-first and returns `1` if ACK is received, or `0` if NACK |
+| `read_byte(send_ack)` | Reads 8 bits MSB-first and sends an ACK (`1`) or NACK (`0`) bit |
 
 ---
 
