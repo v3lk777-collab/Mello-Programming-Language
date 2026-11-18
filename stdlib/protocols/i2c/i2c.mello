@@ -21,7 +21,10 @@ fn release_scl():
 fn release_sda():
     pin_mode(sdaPin, INPUT)
 
-fn begin():
+fn begin(sda, scl):
+    sdaPin = sda
+    sclPin = scl
+
     release_sda()
     release_scl()
     delay_short()
