@@ -90,7 +90,7 @@ const std::unordered_set<std::string> stdLibs = {
 };
 
 const std::unordered_set<std::string> libs = {
-    "oled", "servo"
+    "servo"
 };
 
 inline auto parseTime = [](std::string timeVal, int line, int column, const std::string& source) -> std::string {
