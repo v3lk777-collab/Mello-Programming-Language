@@ -411,7 +411,7 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
     int currentLine = builtInCallNode->getCurrentDeclaredLine();
     int currentColumn = builtInCallNode->getCurrentDeclaredColumn();
 
-    auto getPinNameFromExpression = [](ExpressionNode* expression) -> std::string {
+    auto getPinNameFromExpression = [] (ExpressionNode* expression) -> std::string {
         if (!expression) {
             return "";
         }

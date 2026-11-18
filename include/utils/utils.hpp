@@ -73,7 +73,8 @@ inline const std::unordered_map<std::string, size_t> builtInFunctions = {
     {"scale", 5},
     {"save_memory", 2},
     {"read_memory", 1},
-    {"pin_mode", 2}
+    {"pin_mode", 2},
+    {"pulse_in", 3}
 };
 
 inline const std::unordered_set<std::string> arduinoLibraries = {
