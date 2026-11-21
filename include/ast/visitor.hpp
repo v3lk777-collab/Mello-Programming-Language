@@ -40,6 +40,10 @@ class RepeatNode;
 class OnPressNode;
 class ControlTransferStatementsNode;
 class ModuleNode;
+class ClassNode;
+class ObjectCreationNode;
+class MemberAccessNode;
+class MemberAssignNode;
 
 class UnaryOpNode;
 class BinaryOpNode;
@@ -76,6 +80,10 @@ public:
     virtual void visit(ControlTransferStatementsNode* controlTransferStatementsNode) = 0;
     virtual void visit(TypeConversionCallNode* typeConversionCallNode) = 0;
     virtual void visit(ModuleNode* moduleNode) = 0;
+    virtual void visit(ClassNode* classNode) = 0;
+    virtual void visit(ObjectCreationNode* objectCreationNode) = 0;
+    virtual void visit(MemberAccessNode* memberAccessNode) = 0;
+    virtual void visit(MemberAssignNode* memberAssignNode) = 0;
 
 public:
     virtual void visit(UnaryOpNode* unaryOpNode) = 0;

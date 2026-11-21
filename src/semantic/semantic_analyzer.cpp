@@ -18,6 +18,29 @@ void SemanticAnalyzer::analyzeAssignment(VarAssignNode* varNode) {
         analyzeNode(varNode->getValue());
     }
 
+    if (auto* objCreation = dynamic_cast<ObjectCreationNode*>(varNode->getValue())) {
+        const std::string& className = objCreation->getObjectName();
+        const std::string& instanceName = varNode->name;
+
+        if (classOutputMembers.contains(className)) {
+            for (const auto& member : classOutputMembers[className]) {
+                outputPins.insert(instanceName + "." + member);
+            }
+        }
+
+        if (classInputMembers.contains(className)) {
+            for (const auto& member : classInputMembers[className]) {
+                inputPins.insert(instanceName + "." + member);
+            }
+        }
+
+        if (classInputPullUpMembers.contains(className)) {
+            for (const auto& member : classInputPullUpMembers[className]) {
+                inputPullUpPins.insert(instanceName + "." + member);
+            }
+        }
+    }
+
     if (symbolTable.lookupVariable(varNode->name)) {
         varNode->setIsDeclaration(false);
 
@@ -262,6 +285,7 @@ void SemanticAnalyzer::analyzeOnPressStatement(OnPressNode* onPressNode) {
 
     if (!buttonPin.empty()) {
         inputPullUpPins.insert(buttonPin);
+        classInputPullUpMembers[currentScopeName].insert(buttonPin);
     }
 
     symbolTable.enterScope();
@@ -333,6 +357,15 @@ void SemanticAnalyzer::analyzeGroup(GroupNode* groupNode) {
 
 void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
     std::string funcName = functionCallNode->getFunctionName();
+
+    if (userDefinedClassesNames.contains(funcName)) {
+        for (const auto& arg : functionCallNode->getArguments()) {
+            analyzeExpression(arg.get());
+        }
+
+        return;
+    }
+
     const FunctionSymbol* func = symbolTable.lookupFunction(funcName);
 
     std::string source = functionCallNode->getSource();
@@ -418,6 +451,8 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
 
         if (auto* it = dynamic_cast<LiteralNode*>(expression)) {
             return it->getToken().value;
+        } else if (auto* it = dynamic_cast<MemberAccessNode*>(expression)) {
+            return it->getMemberName();
         }
 
         return "";
@@ -448,9 +483,9 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
 
         bool isNumber = std::isdigit(static_cast<unsigned char>(name[0]));
         bool isAnalog = (name.size() >= 2 && name[0] == 'A' && std::isdigit(static_cast<unsigned char>(name[1])));
-            
+
         if (!isNumber && !isAnalog) {
-            return currentScopeName + "::" + name;
+            return currentScopeName + (userDefinedModulesNames.contains(currentScopeName) ? "::" : ".") + name;
         }
 
         return name;
@@ -461,8 +496,10 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
             
         if (!currentParsingUserFunc.empty() && funcParams.contains(pinName)) {
             auto it = std::find(currentFuncParamNames.begin(), currentFuncParamNames.end(), pinName);
+
             if (it != currentFuncParamNames.end()) {
                 size_t idx = std::distance(currentFuncParamNames.begin(), it);
+
                 if (funcName == "read" || funcName == "pulse_in") {
                     userFuncInputParams[currentParsingUserFunc][idx] = true;
                 } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
@@ -483,6 +520,12 @@ void SemanticAnalyzer::analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNo
                         }
                     }
                 }
+            }
+        } else if (userDefinedClassesNames.contains(currentScopeName)) {
+            if (funcName == "read" || funcName == "pulse_in") {
+                classInputMembers[currentScopeName].insert(pinName);
+            } else if (funcName == "turn_on" || funcName == "turn_off" || funcName == "toggle" || funcName == "write") {
+                classOutputMembers[currentScopeName].insert(pinName);
             }
         } else if (funcName == "read" || funcName == "pulse_in") {
             inputPins.insert(resolvePin(pinName));
@@ -515,7 +558,7 @@ void SemanticAnalyzer::analyzeReturnStatement(ReturnNode* returnNode) {
 }
 
 void SemanticAnalyzer::analyzeModule(ModuleNode* moduleNode) {
-    std::string previousModule = currentScopeName;
+    const std::string previousScope = currentScopeName;
 
     currentScopeName = moduleNode->getModuleName();
 
@@ -527,7 +570,37 @@ void SemanticAnalyzer::analyzeModule(ModuleNode* moduleNode) {
 
     symbolTable.exitScope();
 
-    currentScopeName = previousModule;
+    currentScopeName = previousScope;
+}
+
+void SemanticAnalyzer::analyzeClass(ClassNode* classNode) {
+    const std::string previousScope = currentScopeName;
+
+    currentScopeName = classNode->getClassName();
+
+    userDefinedClassesNames.insert(currentScopeName);
+
+    symbolTable.enterScope();
+
+    for (const auto& node : classNode->getBody()) {
+        analyzeNode(node.get());
+    }
+
+    symbolTable.exitScope();
+
+    currentScopeName = previousScope;
+}
+
+void SemanticAnalyzer::analyzeObjectCreationNode(ObjectCreationNode* objectCreationNode) {
+    const std::string previousScope = currentScopeName;
+
+    currentScopeName = objectCreationNode->getObjectName();
+
+    for (const auto& argument : objectCreationNode->getArguments()) {
+        analyzeExpression(argument.get());
+    }
+
+    currentScopeName = previousScope;
 }
 
 void SemanticAnalyzer::analyzeNode(ASTNode* node) {
@@ -557,6 +630,8 @@ void SemanticAnalyzer::analyzeNode(ASTNode* node) {
         analyzeOnPressStatement(onPressNode);
     } else if (auto moduleNode = dynamic_cast<ModuleNode*>(node)) {
         analyzeModule(moduleNode);
+    } else if (auto classNode = dynamic_cast<ClassNode*>(node)) {
+        analyzeClass(classNode);
     } else if (auto expressionrNode = dynamic_cast<ExpressionNode*>(node)) {
         analyzeExpression(expressionrNode);
     }
@@ -581,5 +656,7 @@ void SemanticAnalyzer::analyzeExpression(ExpressionNode* node) {
         analyzeBuiltInCall(builtInCallNode);
     } else if (auto returnNode = dynamic_cast<ReturnNode*>(node)) {
         analyzeReturnStatement(returnNode);
+    } else if (auto objectCreationNode = dynamic_cast<ObjectCreationNode*>(node)) {
+        analyzeObjectCreationNode(objectCreationNode);
     }
 }

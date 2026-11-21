@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 inline std::string currentScopeName = "";
+inline std::string currentClassSelfName = "";
 
 inline std::set<std::string> inputPins;
 inline std::set<std::string> outputPins;
@@ -60,6 +61,11 @@ inline std::unordered_map<std::string, std::vector<bool>> userFuncInputParams;
 inline std::unordered_map<std::string, std::vector<bool>> userFuncOutputParams;
 
 inline std::set<std::string> userDefinedModulesNames;
+inline std::set<std::string> userDefinedClassesNames;
+
+inline std::unordered_map<std::string, std::unordered_set<std::string>> classOutputMembers;
+inline std::unordered_map<std::string, std::unordered_set<std::string>> classInputMembers;
+inline std::unordered_map<std::string, std::unordered_set<std::string>> classInputPullUpMembers;
 
 inline const std::unordered_map<std::string, size_t> builtInFunctions = {
     {"write", 2},

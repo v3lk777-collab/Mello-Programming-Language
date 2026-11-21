@@ -66,6 +66,47 @@ void ESP32Backend::visit(ArrayNode* arrayNode) {
         } else if (first.find('.') != std::string::npos) {
             return "float";
         } else {
+            long long minVal = 0;
+            long long maxVal = 0;
+            bool allNumeric = true;
+
+            for (const auto& member : arrayMembers) {
+                try {
+                    size_t pos = 0;
+                    long long val = std::stoll(member, &pos, 0);
+
+                    if (pos != member.size()) {
+                        allNumeric = false;
+
+                        break;
+                    }
+
+                    if (val < minVal) {
+                        minVal = val;
+                    }
+
+                    if (val > maxVal) {
+                        maxVal = val;
+                    }
+                } catch (...) {
+                    allNumeric = false;
+
+                    break;
+                }
+            }
+
+            if (allNumeric) {
+                if (minVal >= 0 && maxVal <= 255) {
+                    return "uint8_t";
+                } else if (minVal >= -32768 && maxVal <= 32767) {
+                    return "int16_t";
+                } else if (minVal >= 0 && maxVal <= 65535) {
+                    return "uint16_t";
+                } else {
+                    return "int32_t";
+                }
+            }
+
             return "int";
         }
     };
@@ -714,7 +755,11 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
                 output << type << " " << name << " = " << value << ";\n";
             }
         } else {
-            output << "constexpr " << type + " " << name << " = " << value << ";\n";
+            if (userDefinedClassesNames.contains(currentScopeName)) {
+                output << type << " " << name << " = " << value << ";\n";
+            } else {
+                output << "constexpr " << type << " " << name << " = " << value << ";\n";
+            }
         }
 
         return;
@@ -1082,6 +1127,122 @@ void ESP32Backend::visit(ModuleNode* moduleNode) {
     output << "}";
 }
 
+void ESP32Backend::visit(ClassNode* classNode) {
+    const std::string& name = classNode->getClassName();
+    const std::vector<std::unique_ptr<ASTNode>>& body = classNode->getBody();
+
+    const int currentLine = classNode->getCurrentDeclaredLine();
+    const int currentColumn = classNode->getCurrentDeclaredColumn();
+    const std::string& source = classNode->getSource();
+
+    const std::string previousScopeName = currentScopeName;
+
+    currentScopeName = name;
+
+    const std::string previousSelfName = currentClassSelfName;
+
+    output << "class " << name << "{\n";
+    output << "public:\n\t";
+
+    for (const auto& node : body) {
+        if (auto functionNode = dynamic_cast<UserFuncNode*>(node.get())) {
+            if (functionNode->getFunctionName() == "__init__") {
+                const std::vector<std::string>& functionParams = functionNode->getFuncParams();
+
+                output << "template<";
+
+                for (size_t i = 1; i < functionParams.size(); ++i) {
+                    output << "typename T" << std::to_string(i - 1) << (i < functionParams.size() - 1 ? ", " : "");
+                }
+
+                output << ">\n";
+
+                output << name << "(";
+
+                if (functionParams.empty()) {
+                    ErrorHandler::report("Constructor '__init__' has an invalid parameter list", functionNode->getFunctionName(), currentLine, currentColumn, source);
+
+                    continue;
+                }
+
+                currentClassSelfName = functionParams[0];
+
+                for (size_t i = 1; i < functionParams.size(); ++i) {
+                    output << "T" << std::to_string(i - 1) << " " << functionParams[i] << (i + 1 < functionParams.size() ? ", " : "");
+                }
+
+                output << ")" << (!functionNode->getBody().empty() ? "{" : ";") << "\n";
+
+                if (!functionNode->getBody().empty()) {
+                    for (const auto& node : functionNode->getBody()) {
+                        node->accept(*this);
+
+                        output << "\n";
+                    }
+
+                    output << "}\n";
+                }
+
+                continue;
+            } else {
+                if (std::ranges::contains(functionNode->params, currentClassSelfName)) {
+                    std::erase(functionNode->params, currentClassSelfName);
+                }
+            }
+        }
+
+        node->accept(*this);
+
+        output << "\n";
+    }
+
+    output << "};";
+
+    currentScopeName = previousScopeName;
+    currentClassSelfName = previousSelfName;
+}
+
+void ESP32Backend::visit(ObjectCreationNode* objectCreationNode) {
+    const std::string& object = objectCreationNode->getObjectName();
+
+    const auto& arguments = objectCreationNode->getArguments();
+
+    output << object << "(";
+
+    for (size_t i = 0; i < arguments.size(); ++i) {
+        if (i > 0) {
+            output << ", ";
+        }
+
+        output << evaluateExpression(arguments[i].get());
+    }
+
+    output << ")";
+}
+
+void ESP32Backend::visit(MemberAccessNode* memberAccessNode) {
+    const std::string& object = memberAccessNode->getObject();
+    const std::string& memberName = memberAccessNode->getMemberName();
+
+    if (object == currentClassSelfName) {
+        output << "this->" << memberName;
+    } else {
+        output << object << "." << memberName;
+    }
+}
+
+void ESP32Backend::visit(MemberAssignNode* memberAssignNode) {
+    const std::string& object = memberAssignNode->getObject();
+    const std::string& memberName = memberAssignNode->getMemberName();
+    const std::string& value = evaluateExpression(memberAssignNode->getValue());
+
+    if (object == currentClassSelfName) {
+        output << "this->" << memberName << " = " << value << ";\n";
+    } else {
+        output << object << "." << memberName << " = " << value << ";\n";
+    }
+}
+
 std::string ESP32Backend::generate(const std::vector<std::unique_ptr<ASTNode>>& stdLibProgram, const std::vector<std::unique_ptr<ASTNode>>& program) {
     bool hasSetup = false;
     bool hasLoop = false;
@@ -1122,7 +1283,13 @@ std::string ESP32Backend::generate(const std::vector<std::unique_ptr<ASTNode>>& 
 
             continue;
         }
-            
+
+        if (dynamic_cast<ClassNode*>(node.get())) {
+            globalVariablesCode += code;
+
+            continue;
+        }
+
         if (code.find("void setup()") != std::string::npos) {
             hasSetup = true;
         }

@@ -46,6 +46,10 @@ public:
     void visit(OnPressNode* onPressNode) override;
     void visit(ControlTransferStatementsNode* controlTransferStatementsNode) override;
     void visit(ModuleNode* moduleNode) override;
+    void visit(ClassNode* classNode) override;
+    void visit(ObjectCreationNode* objectCreationNode) override;
+    void visit(MemberAccessNode* memberAccessNode) override;
+    void visit(MemberAssignNode* memberAssignNode) override;
 
 public:
     void visit(UnaryOpNode* unaryOpNode) override;

@@ -672,8 +672,10 @@ class UserFuncNode : public ASTNode {
 private:
     std::string funcName;
     std::string userReturnType;
-    std::vector<std::string> params;
     std::vector<std::unique_ptr<ASTNode>> body;
+
+public:
+    std::vector<std::string> params;
 
 private:
     int currentLine;
@@ -1066,6 +1068,124 @@ public:
 
     const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
+    }
+
+public:
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
+    }
+};
+
+class ClassNode : public ASTNode {
+private:
+    std::string name;
+    std::vector<std::unique_ptr<ASTNode>> body;
+
+private:
+    int currentLine;
+    int currentColumn;
+    std::string source;
+
+public:
+    ClassNode(std::string name, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
+        : name(std::move(name)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+
+public:
+    const std::string& getClassName() const noexcept {
+        return name;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
+        return body;
+    }
+
+    std::string getSource() const noexcept {
+        return source;
+    }
+
+    int getCurrentDeclaredLine() const noexcept {
+        return currentLine;
+    }
+
+    int getCurrentDeclaredColumn() const noexcept {
+        return currentColumn;
+    }
+
+public:
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
+    }
+};
+
+class ObjectCreationNode : public ExpressionNode {
+private:
+    std::string objectName;
+    std::vector<std::unique_ptr<ExpressionNode>> arguments;
+
+public:
+    ObjectCreationNode(std::string objectName, std::vector<std::unique_ptr<ExpressionNode>> arguments)
+        : objectName(std::move(objectName)), arguments(std::move(arguments)) {}
+
+public:
+    const std::string& getObjectName() const noexcept {
+        return objectName;
+    }
+
+    const std::vector<std::unique_ptr<ExpressionNode>>& getArguments() const noexcept {
+        return arguments;
+    }
+
+public:
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
+    }
+};
+
+class MemberAccessNode : public ExpressionNode {
+private:
+    std::string object;
+    std::string memberName;
+
+public:
+    MemberAccessNode(std::string object, std::string memberName)
+        : object(std::move(object)), memberName(std::move(memberName)) {}
+
+public:
+    const std::string& getObject() const noexcept {
+        return object;
+    }
+
+    const std::string& getMemberName() const noexcept {
+        return memberName;
+    }
+
+public:
+    void accept(ASTVisitor& visitor) override {
+        visitor.visit(this);
+    }
+};
+
+class MemberAssignNode : public ExpressionNode {
+private:
+    std::string object;
+    std::string memberName;
+    std::unique_ptr<ExpressionNode> value;
+
+public:
+    MemberAssignNode(std::string object, std::string memberName, std::unique_ptr<ExpressionNode> value)
+        : object(std::move(object)), memberName(std::move(memberName)), value(std::move(value)) {}
+
+public:
+    const std::string& getObject() const noexcept {
+        return object;
+    }
+
+    const std::string& getMemberName() const noexcept {
+        return memberName;
+    }
+
+    ExpressionNode* getValue() const noexcept {
+        return value.get();
     }
 
 public:

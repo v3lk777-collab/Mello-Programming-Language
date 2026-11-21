@@ -233,7 +233,13 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
             advance();
 
-            if (current.type == TokenType::LPAREN) {
+            if (current.type == TokenType::EQUAL) {
+                advance();
+
+                std::unique_ptr<ExpressionNode> value = parseExpression();
+
+                return std::make_unique<MemberAssignNode>(std::move(name), std::move(methodName), std::move(value));
+            } else if (current.type == TokenType::LPAREN) {
                 advance();
 
                 std::vector<std::unique_ptr<ExpressionNode>> args;
@@ -264,9 +270,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
                 return std::make_unique<MethodCallNode>(std::move(name), std::move(methodCall), current.line, current.column, this->source);
             } else {
-                auto methodCall = std::make_unique<FunctionCallNode>(std::move(methodName), std::vector<std::unique_ptr<ExpressionNode>>(), false, current.line, current.column, this->source);
-
-                return std::make_unique<MethodCallNode>(std::move(name), std::move(methodCall), current.line, current.column, this->source);
+                return std::make_unique<MemberAccessNode>(std::move(name), std::move(methodName));
             }
         }
 
@@ -304,6 +308,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
                     ErrorHandler::report("Unexpected token inside function call:", current.value, current.line, current.column, this->source);
 
                     advance();
+
                     continue;
                 }
             }
@@ -316,6 +321,8 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
                 } else {
                     return std::make_unique<BuiltInFunctionCallNode>(name, std::move(args), current.line, current.column, this->source);
                 }
+            } else if (userDefinedClassesNames.contains(name)) {
+                return std::make_unique<ObjectCreationNode>(std::move(name), std::move(args));
             } else {
                 return std::make_unique<FunctionCallNode>(name, std::move(args), false, current.line, current.column, this->source);
             }
@@ -437,12 +444,30 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
                 body.push_back(std::make_unique<CompoundAssignNode>(name, "--"));
             } else if (current.type == TokenType::DOT) {
                 advance();
+
                 std::string methodName = current.value;
 
                 advance();
-                auto methodCall = parseFunctionCall(methodName);
 
-                body.push_back(std::make_unique<MethodCallNode>(name, std::move(methodCall), current.line, current.column, this->source));
+                if (current.type == TokenType::EQUAL) {
+                    advance();
+
+                    std::unique_ptr<ExpressionNode> value = parseExpression();
+
+                    body.push_back(std::make_unique<MemberAssignNode>(std::move(name), std::move(methodName), std::move(value)));
+                } else if (current.type == TokenType::LPAREN) {
+                    std::unique_ptr<ASTNode> methodCall;
+
+                    if (name == "serial") {
+                        methodCall = parseSerialFunctionsCall(methodName);
+                    } else {
+                        methodCall = parseFunctionCall(methodName);
+                    }
+                    
+                    body.push_back(std::make_unique<MethodCallNode>(name, std::move(methodCall), current.line, current.column, this->source));
+                } else {
+                    body.push_back(std::make_unique<MemberAccessNode>(std::move(name), std::move(methodName)));
+                }
             }
         } else if (current.type == TokenType::KEYWORD) {
             std::string keyword = current.value;
@@ -479,15 +504,25 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
 
                     advance();
 
-                    std::unique_ptr<ASTNode> methodCall;
+                    if (current.type == TokenType::EQUAL) {
+                        advance();
 
-                    if (keyword == "serial") {
-                        methodCall = parseSerialFunctionsCall(methodName);
+                        std::unique_ptr<ExpressionNode> value = parseExpression();
+
+                        body.push_back(std::make_unique<MemberAssignNode>(std::move(keyword), std::move(methodName), std::move(value)));
+                    } else if (current.type == TokenType::LPAREN) {
+                        std::unique_ptr<ASTNode> methodCall;
+
+                        if (keyword == "serial") {
+                            methodCall = parseSerialFunctionsCall(methodName);
+                        } else {
+                            methodCall = parseFunctionCall(methodName);
+                        }
+                        
+                        body.push_back(std::make_unique<MethodCallNode>(keyword, std::move(methodCall), current.line, current.column, this->source));
                     } else {
-                        methodCall = parseFunctionCall(methodName);
+                        body.push_back(std::make_unique<MemberAccessNode>(std::move(keyword), std::move(methodName)));
                     }
-                    
-                    body.push_back(std::make_unique<MethodCallNode>(keyword, std::move(methodCall), current.line, current.column, this->source));
                 } else if (current.type == TokenType::LPAREN) {
                     if (keywordsList.count(keyword)) {
                         body.push_back(parseBuiltInFunctionCall(keyword));
@@ -635,14 +670,14 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
     }
 
     std::string raw = current.value;
-    TokenType type_of_value = current.type;
+    TokenType typeOfValue = current.type;
 
     bool isConstantVar = false;
     bool isAllUpercase = std::all_of(varName.begin(), varName.end(), [] (unsigned char c) { return std::isupper(c) || c == '_'; });
 
-    auto expr_value = parseExpression();
+    auto value = parseExpression();
 
-    auto getValueFromExpression = [] (ExpressionNode* expression) -> std::string {
+    auto getValueFromExpression = [](ExpressionNode* expression) -> std::string {
         if (!expression) {
             return "";
         }
@@ -655,7 +690,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
     };
 
     if (!variablesValues.contains(varName)) {
-        variablesValues[varName] = getValueFromExpression(expr_value.get());
+        variablesValues[varName] = getValueFromExpression(value.get());
     }
 
     if (parsedVariables.contains(varName)) {
@@ -672,7 +707,7 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
         advance();
     }
 
-    return std::make_unique<VarAssignNode>(varName, std::move(expr_value), raw, type_of_value, isConstantVar, current.line, current.column, this->source);
+    return std::make_unique<VarAssignNode>(varName, std::move(value), raw, typeOfValue, isConstantVar, current.line, current.column, this->source);
 }
 
 std::unique_ptr<ASTNode> Parser::parseArrayLiteral(const std::string& name) {
@@ -1125,6 +1160,26 @@ std::unique_ptr<ASTNode> Parser::parseModule() {
     return std::make_unique<ModuleNode>(std::move(moduleName), std::move(body), current.line, current.column, this->source);
 }
 
+std::unique_ptr<ASTNode> Parser::parseClass() {
+    advance();
+
+    std::string className = current.value;
+
+    userDefinedClassesNames.insert(className);
+
+    advance();
+    consume(TokenType::COLON, "Expected ':' after 'class' signature");
+
+    match(TokenType::NEWLINE);
+    consume(TokenType::INDENT, "Expected indentation after 'class'");
+
+    auto body = parseBlock();
+
+    consume(TokenType::DEDENT, "Expected dedent at end of 'class' block");
+
+    return std::make_unique<ClassNode>(std::move(className), std::move(body), current.line, current.column, this->source);
+}
+
 std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
     std::vector<std::unique_ptr<ASTNode>> program;
 
@@ -1151,6 +1206,8 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parse() {
 
             if (keyword == "use") {
                 program.push_back(parseUseStatement());
+            } else if (keyword == "class") {
+                program.push_back(parseClass());
             } else if (keyword == "module") {
                 program.push_back(parseModule());
             } else if (keyword == "if") {

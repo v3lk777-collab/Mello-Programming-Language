@@ -37,6 +37,7 @@ private:
     void analyzeFunctionDefinition(FunctionNode* funcNode);
     void analyzeReturnStatement(ReturnNode* returnNode);
     void analyzeModule(ModuleNode* moduleNode);
+    void analyzeClass(ClassNode* classNode);
 
 private:
     void analyzeLiteral(LiteralNode* literalNode);
@@ -47,6 +48,7 @@ private:
     void analyzeMethodCall(MethodCallNode* methodCallNode);
     void analyzeSerialCall(SerialFunctionsCallNode* serialCallNode);
     void analyzeBuiltInCall(BuiltInFunctionCallNode* builtInCallNode);
+    void analyzeObjectCreationNode(ObjectCreationNode* objectCreationNode);
 
 public:
     void analyzeNode(ASTNode* node);
