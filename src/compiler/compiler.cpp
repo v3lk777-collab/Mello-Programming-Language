@@ -17,6 +17,7 @@
 #include "semantic_analyzer.hpp"
 
 #include "visitor.hpp"
+
 #include "avr_backend.hpp"
 #include "esp32_backend.hpp"
 
@@ -24,9 +25,14 @@
 #include <vector>
 #include <random>
 #include <format>
+#include <memory>
+#include <string>
 #include <iomanip>
 #include <fstream>
+#include <cstdlib>
 #include <iostream>
+#include <iterator>
+#include <filesystem>
 #include <unordered_set>
 
 #ifdef _WIN32
@@ -175,13 +181,14 @@ std::string Compiler::findArduinoBoard() {
         }
 
         portsFile.close();
+
         std::filesystem::remove(portsFilePath); 
     }
 
     if (detectedPort.empty()) {
         std::cerr << "No board detected! Please connect your Arduino." << "\n";
 
-        exit(EXIT_FAILURE);
+        return "";
     }
 
     return detectedPort;
@@ -191,7 +198,11 @@ bool Compiler::uploadCode() {
     std::cout << "Searching for connected Arduino boards...\n" << std::flush;
 
     std::string detectedPort = findArduinoBoard();
-    
+
+    if (detectedPort.empty()) {
+        return false;
+    }
+
     std::cout << "Found Arduino on port: " << detectedPort << "\n";
     std::cout << "Uploading code to the board..." << "\n";
 
@@ -403,7 +414,9 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
     bool compiledSuccessfully = isCompileCode ? compileCode() : false;
 
     if (compiledSuccessfully && isUpload) {
-        uploadCode();
+        if (!uploadCode()) {
+            return false;
+        }
     }
 
     if (!isSaveSketchCodeDir) {
@@ -422,7 +435,7 @@ bool Compiler::runMelloCompiler(int argc, char* argv[]) {
         std::filesystem::remove_all(sketchDir);
     }
 
-    return true;
+    return isCompileCode ? true : compiledSuccessfully;
 }
 
 bool Compiler::run(int argc, char* argv[]) {
