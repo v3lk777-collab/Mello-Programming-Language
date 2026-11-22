@@ -583,6 +583,10 @@ void SemanticAnalyzer::analyzeClass(ClassNode* classNode) {
     symbolTable.enterScope();
 
     for (const auto& node : classNode->getBody()) {
+        if (auto* functionNode = dynamic_cast<UserFuncNode*>(node.get()); functionNode && functionNode->getFunctionName() == "__init__") {
+            continue;
+        }
+
         analyzeNode(node.get());
     }
 

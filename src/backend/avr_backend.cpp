@@ -482,6 +482,12 @@ void AVRBackend::visit(MethodCallNode* methodCallNode) {
         methodStr = methodStr.substr(7);
     }
 
+    if (!currentClassSelfName.empty() && objectName == currentClassSelfName) {
+        output << "this->" << methodStr;
+
+        return;
+    }
+
     std::string finalObjectName = (objectName == "serial") ? "Serial" : objectName;
     bool isModuleName = userDefinedModulesNames.contains(finalObjectName);
 
@@ -858,19 +864,29 @@ void AVRBackend::visit(CompoundAssignNode* compoundAssignNode) {
     const std::string& name = compoundAssignNode->getName();
     std::string value = evaluateExpression(compoundAssignNode->getValue());
 
+    std::string target = name;
+
+    if (!currentClassSelfName.empty()) {
+        const std::string selfPrefix = currentClassSelfName + ".";
+
+        if (target.compare(0, selfPrefix.length(), selfPrefix) == 0) {
+            target = "this->" + target.substr(selfPrefix.length());
+        }
+    }
+
     if (op == "++") {
-        output << name << "++;";
+        output << target << "++;";
 
         return;
     }
 
     if (op == "--") {
-        output << name << "--;";
+        output << target << "--;";
 
         return;
     }
 
-    output << name << " " << op + " " << value << ";";
+    output << target << " " << op + " " << value << ";";
 }
 
 void AVRBackend::visit(IfNode* ifNode) {
@@ -1179,6 +1195,26 @@ void AVRBackend::visit(ClassNode* classNode) {
 
     const std::string previousSelfName = currentClassSelfName;
 
+    for (const auto& node : body) {
+        auto functionNode = dynamic_cast<UserFuncNode*>(node.get());
+
+        if (!functionNode || functionNode->getFunctionName() != "__init__") {
+            continue;
+        }
+
+        const std::vector<std::string>& functionParams = functionNode->getFuncParams();
+
+        if (functionParams.empty()) {
+            ErrorHandler::report("Constructor '__init__' has an invalid parameter list", functionNode->getFunctionName(), currentLine, currentColumn, source);
+
+            continue;
+        }
+
+        currentClassSelfName = functionParams[0];
+
+        break;
+    }
+
     output << "class " << name << "{\n";
     output << "public:\n\t";
 
@@ -1187,23 +1223,17 @@ void AVRBackend::visit(ClassNode* classNode) {
             if (functionNode->getFunctionName() == "__init__") {
                 const std::vector<std::string>& functionParams = functionNode->getFuncParams();
 
-                output << "template<";
+                if (functionParams.size() > 0) {
+                    output << "template<";
 
-                for (size_t i = 1; i < functionParams.size(); ++i) {
-                    output << "typename T" << std::to_string(i - 1) << (i < functionParams.size() - 1 ? ", " : "");
+                    for (size_t i = 1; i < functionParams.size(); ++i) {
+                        output << "typename T" << std::to_string(i - 1) << (i < functionParams.size() - 1 ? ", " : "");
+                    }
+
+                    output << ">\n";
                 }
-
-                output << ">\n";
 
                 output << name << "(";
-
-                if (functionParams.empty()) {
-                    ErrorHandler::report("Constructor '__init__' has an invalid parameter list", functionNode->getFunctionName(), currentLine, currentColumn, source);
-
-                    continue;
-                }
-
-                currentClassSelfName = functionParams[0];
 
                 for (size_t i = 1; i < functionParams.size(); ++i) {
                     output << "T" << std::to_string(i - 1) << " " << functionParams[i] << (i + 1 < functionParams.size() ? ", " : "");
