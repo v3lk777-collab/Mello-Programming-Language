@@ -3,38 +3,40 @@
 
 use math
 
-servoPin = 9
-currentAngle = 90
+class Servo:
+    pin = 9
+    angle = 90
 
-fn attach(pin) -> void:
-    servoPin = pin
-    pin_mode(servoPin, OUTPUT)
-    write(servoPin, LOW)
+    fn __init__(self, pin):
+        self.pin = pin
 
-fn write(angle) -> void:
-    safe_angle = int(math.clamp(float(angle), 0.0, 180.0))
-    currentAngle = safe_angle
+        pin_mode(self.pin, OUTPUT)
+        write(self.pin, LOW)
 
-    pulse_width = scale(safe_angle, 0, 180, 544, 2400)
-    off_time = 20000 - pulse_width
+    fn write(self, angle) -> void:
+        safe_angle = int(math.clamp(float(angle), 0.0, 180.0))
+        self.angle = safe_angle
 
-    repeat 15:
-        write(servoPin, HIGH)
+        pulse_width = scale(safe_angle, 0, 180, 544, 2400)
+        off_time = 20000 - pulse_width
+
+        repeat 15:
+            write(self.pin, HIGH)
+            wait_ms(pulse_width)
+            write(self.pin, LOW)
+            wait_ms(off_time)
+
+    fn refresh(self, angle) -> void:
+        safe_angle = int(math.clamp(float(angle), 0.0, 180.0))
+        self.angle = safe_angle
+
+        pulse_width = scale(safe_angle, 0, 180, 544, 2400)
+        off_time = 20000 - pulse_width
+
+        write(self.pin, HIGH)
         wait_ms(pulse_width)
-        write(servoPin, LOW)
+        write(self.pin, LOW)
         wait_ms(off_time)
 
-fn refresh(angle) -> void:
-    safe_angle = int(math.clamp(float(angle), 0.0, 180.0))
-    currentAngle = safe_angle
-
-    pulse_width = scale(safe_angle, 0, 180, 544, 2400)
-    off_time = 20000 - pulse_width
-
-    write(servoPin, HIGH)
-    wait_ms(pulse_width)
-    write(servoPin, LOW)
-    wait_ms(off_time)
-
-fn read_angle() -> int:
-    return currentAngle
+    fn read_angle(self) -> int:
+        return self.angle
