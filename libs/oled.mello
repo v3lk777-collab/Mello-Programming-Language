@@ -3,16 +3,6 @@
 
 use i2c
 
-screen_width = 128
-screen_height = 64
-screen_address = 0x78
-
-oled_sda = 13
-oled_scl = 12
-
-cursor_page = 0
-cursor_column = 0
-
 FONT = [
     0x00, 0x00, 0x00, 0x00, 0x00, # 32: (space)
     0x00, 0x00, 0x5F, 0x00, 0x00, # 33: !
@@ -111,129 +101,142 @@ FONT = [
     0x08, 0x08, 0x2A, 0x1C, 0x08  # 126: ~
 ]
 
-fn command(cmd) -> void:
-    i2c.begin(oled_sda, oled_scl)
-    i2c.write_byte(screen_address)
-    i2c.write_byte(0x00)
-    i2c.write_byte(cmd)
-    i2c.stop()
+class SSD1306:
+    screen_width = 128
+    screen_height = 64
+    screen_address = 0x78
 
-fn set_cursor(page, column) -> void:
-    cursor_page = page
-    cursor_column = column
+    oled_sda = 13
+    oled_scl = 12
 
-    command(0xB0 + page)
-    command(0x00 + (column & 0x0F))
-    command(0x10 + (column >> 4))
+    cursor_page = 0
+    cursor_column = 0
 
-fn invert(enabled) -> void:
-    if enabled == 1:
-        command(0xA7)
-    else:
-        command(0xA6)
-
-fn off() -> void:
-    command(0xAE)
-
-fn on() -> void:
-    command(0xAF)
-
-fn set_contrast(value) -> void:
-    command(0x81)
-    command(value)
-
-fn clear() -> void:
-    for page in range(8):
-        set_cursor(page, 0)
-
-        i2c.begin(oled_sda, oled_scl)
-        i2c.write_byte(screen_address)
-        i2c.write_byte(0x40)
-
-        for column in range(screen_width):
-            i2c.write_byte(0x00)
-
+    fn command(self, cmd) -> void:
+        i2c.begin(self.oled_sda, self.oled_scl)
+        i2c.write_byte(self.screen_address)
+        i2c.write_byte(0x00)
+        i2c.write_byte(cmd)
         i2c.stop()
 
-    set_cursor(0, 0)
+    fn set_cursor(self, page, column) -> void:
+        self.cursor_page = page
+        self.cursor_column = column
 
-fn init(sda, scl) -> void:
-    oled_sda = sda
-    oled_scl = scl
+        self.command(0xB0 + page)
+        self.command(0x00 + (column & 0x0F))
+        self.command(0x10 + (column >> 4))
 
-    command(0xAE)
-    command(0x20)
-    command(0x00)
-    command(0xA1)
-    command(0xC8)
-    command(0x8D)
-    command(0x14)
-    command(0xAF)
+    fn invert(self, enabled) -> void:
+        if enabled == 1:
+            self.command(0xA7)
+        else:
+            self.command(0xA6)
 
-    clear()
+    fn off(self) -> void:
+        self.command(0xAE)
 
-fn draw_char(c, column, page) -> void:
-    if c >= 32 and c <= 126:
-        if column >= 0 and column <= 122:
-            if page >= 0 and page <= 7:
-                set_cursor(page, column)
+    fn on(self) -> void:
+        self.command(0xAF)
 
-                font_index = (c - 32) * 5
+    fn set_contrast(self, value) -> void:
+        self.command(0x81)
+        self.command(value)
 
-                i2c.begin(oled_sda, oled_scl)
-                i2c.write_byte(screen_address)
-                i2c.write_byte(0x40)
+    fn clear(self) -> void:
+        for page in range(8):
+            self.set_cursor(page, 0)
 
-                for i in range(5):
-                    i2c.write_byte(FONT[font_index + i])
+            i2c.begin(self.oled_sda, self.oled_scl)
+            i2c.write_byte(self.screen_address)
+            i2c.write_byte(0x40)
 
+            for column in range(self.screen_width):
                 i2c.write_byte(0x00)
-                i2c.stop()
 
-fn print(text) -> void:
-    i = 0
+            i2c.stop()
 
-    while text[i] != 0:
-        ch = text[i]
+        self.set_cursor(0, 0)
 
-        if ch == 10:
-            cursor_column = 0
-            cursor_page += 1
+    fn __init__(self, sda, scl) -> void:
+        self.oled_sda = sda
+        self.oled_scl = scl
 
-            if cursor_page > 7:
-                cursor_page = 0
+        self.command(0xAE)
+        self.command(0x20)
+        self.command(0x00)
+        self.command(0xA1)
+        self.command(0xC8)
+        self.command(0x8D)
+        self.command(0x14)
+        self.command(0xAF)
+
+        self.clear()
+
+    fn draw_char(self, c, column, page) -> void:
+        if c >= 32 and c <= 126:
+            if column >= 0 and column <= 122:
+                if page >= 0 and page <= 7:
+                    self.set_cursor(page, column)
+
+                    font_index = (c - 32) * 5
+
+                    i2c.begin(self.oled_sda, self.oled_scl)
+                    i2c.write_byte(self.screen_address)
+                    i2c.write_byte(0x40)
+
+                    for i in range(5):
+                        i2c.write_byte(FONT[font_index + i])
+
+                    i2c.write_byte(0x00)
+                    i2c.stop()
+
+    fn print(self, text) -> void:
+        i = 0
+
+        while text[i] != 0:
+            ch = text[i]
+
+            if ch == 10:
+                self.cursor_column = 0
+                self.cursor_page += 1
+
+                if self.cursor_page > 7:
+                    self.cursor_page = 0
+
+                i += 1
+                continue
+
+            self.draw_char(ch, self.cursor_column, self.cursor_page)
+            self.set_cursor(self.cursor_page, self.cursor_column + 6)
 
             i += 1
-            continue
 
-        draw_char(ch, cursor_column, cursor_page)
-        set_cursor(cursor_page, cursor_column + 6)
-        i += 1
+            if self.cursor_column > 122:
+                self.cursor_column = 0
+                self.cursor_page += 1
 
-        if cursor_column > 122:
-            cursor_column = 0
-            cursor_page += 1
+                if self.cursor_page > 7:
+                    self.cursor_page = 0
 
-            if cursor_page > 7:
-                cursor_page = 0
+    fn println(self, text) -> void:
+        self.print(text)
 
-fn println(text) -> void:
-    print(text)
+        self.cursor_column = 0
+        self.cursor_page += 1
 
-    cursor_column = 0
-    cursor_page += 1
+        if self.cursor_page > 7:
+            self.cursor_page = 0
 
-    if cursor_page > 7:
-        cursor_page = 0
+    fn draw_line(self, page) -> void:
+        if page >= 0 and page <= 7:
+            self.set_cursor(page, 0)
 
-fn draw_line(page) -> void:
-    if page >= 0 and page <= 7:
-        set_cursor(page, 0)
-        i2c.begin(oled_sda, oled_scl)
-        i2c.write_byte(screen_address)
-        i2c.write_byte(0x40)
+            i2c.begin(self.oled_sda, self.oled_scl)
+            i2c.write_byte(self.screen_address)
+            i2c.write_byte(0x40)
 
-        for column in range(screen_width):
-            i2c.write_byte(0x08)
+            for column in range(self.screen_width):
+                i2c.write_byte(0x08)
 
-        i2c.stop()
+            i2c.stop()
