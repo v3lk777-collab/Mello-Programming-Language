@@ -420,6 +420,21 @@ std::vector<Token> Lexer::tokenize() {
             advance();
 
             while (current != '\0' && current != '\n' && current != quoteType) {
+                if (current == '\\') {
+                    advance();
+
+                    if (current == '\0' || current == '\n') {
+                        break;
+                    }
+
+                    word += '\\';
+                    word += current;
+
+                    advance();
+
+                    continue;
+                }
+
                 word += current;
 
                 advance();

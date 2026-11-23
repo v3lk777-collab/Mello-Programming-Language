@@ -582,7 +582,7 @@ public:
     }
 };
 
-class CompoundAssignNode : public ASTNode {
+class CompoundAssignNode : public ExpressionNode {
 private:
     std::string op;
     std::string name;

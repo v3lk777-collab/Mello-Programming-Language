@@ -608,6 +608,10 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
 
     SerialFunctionsCallNode* funcCall = dynamic_cast<SerialFunctionsCallNode*>(valueNode);
 
+    bool isMethodOrMemberCall = (methodNode != nullptr) || (value.find("->") != std::string::npos) || (value.find('.') != std::string::npos);
+
+    bool isFunctionCall = dynamic_cast<FunctionCallNode*>(valueNode) != nullptr || dynamic_cast<BuiltInFunctionCallNode*>(valueNode) != nullptr || dynamic_cast<MethodCallNode*>(valueNode) != nullptr || funcCall != nullptr || isModuleCall;
+
     if (!funcCall && methodNode) {
         funcCall = dynamic_cast<SerialFunctionsCallNode*>(methodNode->getMethodCall());
     }
@@ -640,7 +644,7 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
     } else if (value.find("atoi(") != std::string::npos || value.find("(int)") != std::string::npos) {
         type = "int";
         integerVariables.insert(name);
-    } else if (valueType == TokenType::IDENTIFIER && value.find("(") != std::string::npos && value.back() == ')' && !userDefinedFunctionsNames.contains(value.substr(0, value.find("("))) && !userDefinedModulesNames.contains(value.substr(0, value.find("::")))) {
+    } else if (!isMethodOrMemberCall && valueType == TokenType::IDENTIFIER && value.find("(") != std::string::npos && value.back() == ')' && !userDefinedFunctionsNames.contains(value.substr(0, value.find("("))) && !userDefinedModulesNames.contains(value.substr(0, value.find("::")))) {
         std::string className = value.substr(0, value.find("("));
 
         if (!includedLibraries.contains(className)) {
@@ -658,12 +662,14 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
         }
 
         return;
-    } else if (valueType == TokenType::STRING || value.find("\"") != std::string::npos || containsStringVariable(value) || value.find("String(") != std::string::npos) {
-        if (value.find("String(") != std::string::npos) {
+    } else if (!isFunctionCall && (valueType == TokenType::STRING || value.find("\"") != std::string::npos || containsStringVariable(value) || value.find("String(") != std::string::npos)) {
+        if (value.find("+") != std::string::npos) {
             type = "String";
-        } else if (value.find("+") != std::string::npos) {
+            if (!value.starts_with("String(")) {
+                value = "String(\"\") + " + value;
+            }
+        } else if (value.find("String(") != std::string::npos) {
             type = "String";
-            value = "String(\"\") + " + value; 
         } else {
             type = "const char*";
         }
@@ -703,8 +709,6 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
     bool hasConst = type.find("constexpr") != std::string::npos;
     bool isKeyword = keywordsList.contains(rawValue);
     bool isArrayAccess = value.find('[') != std::string::npos;
-
-    bool isFunctionCall = dynamic_cast<FunctionCallNode*>(valueNode) != nullptr || dynamic_cast<BuiltInFunctionCallNode*>(valueNode) != nullptr || funcCall != nullptr || isModuleCall;
 
     FunctionCallNode* userFunction = dynamic_cast<FunctionCallNode*>(valueNode);
 
@@ -749,8 +753,12 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
                 output << type << " " << name << " = " << value << ";\n";
             }
         } else if (isFunctionCall) {
-            if (userFunction && !returnTypeKnown) {
+            if (userFunction && !returnTypeKnown && !isMethodOrMemberCall) {
                 ErrorHandler::report("Unknown function return type for:", userFunction->getFunctionName(), currentLine, currentColumn, source);
+            }
+
+            if (isMethodOrMemberCall) {
+                type = "auto";
             }
 
             if (isConstantVar) {

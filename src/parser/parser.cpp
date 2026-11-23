@@ -233,12 +233,28 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
             advance();
 
+            std::string targetName = name + "." + methodName;
+
             if (current.type == TokenType::EQUAL) {
                 advance();
 
                 std::unique_ptr<ExpressionNode> value = parseExpression();
 
                 return std::make_unique<MemberAssignNode>(std::move(name), std::move(methodName), std::move(value));
+            } else if (current.type == TokenType::PLUS_EQUAL || current.type == TokenType::MINUS_EQUAL || current.type == TokenType::MULTIPLY_EQUAL || current.type == TokenType::DIVIDE_EQUAL ||  current.type == TokenType::MODULO_EQUAL) {
+                std::string op = current.value;
+
+                advance();
+
+                auto value = parseExpression();
+
+                return std::make_unique<CompoundAssignNode>(std::move(targetName), std::move(op), std::move(value));
+            } else if (current.type == TokenType::INCREMENT || current.type == TokenType::DECREMENT) {
+                std::string op = (current.type == TokenType::INCREMENT) ? "++" : "--";
+
+                advance();
+
+                return std::make_unique<CompoundAssignNode>(std::move(targetName), std::move(op));
             } else if (current.type == TokenType::LPAREN) {
                 advance();
 
