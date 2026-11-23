@@ -84,7 +84,7 @@ inline const std::unordered_map<std::string, size_t> builtInFunctions = {
 };
 
 inline const std::unordered_set<std::string> arduinoLibraries = {
-    "Servo"
+    "Servo", "WiFi"
 };
 
 const std::unordered_set<std::string> stdProtocol = {

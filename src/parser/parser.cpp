@@ -1216,6 +1216,21 @@ std::unique_ptr<ASTNode> Parser::parseClass() {
     userDefinedClassesNames.insert(className);
 
     advance();
+
+    std::string baseClassName = "";
+
+    if (match(TokenType::LPAREN)) {
+        baseClassName = current.value;
+
+        advance();
+
+        if (!userDefinedClassesNames.contains(baseClassName)) {
+            ErrorHandler::report("Undefined base class name", baseClassName, current.line, current.column, this->source);
+        }
+
+        consume(TokenType::RPAREN, "Expected ')' after base class name");
+    }
+
     consume(TokenType::COLON, "Expected ':' after 'class' signature");
 
     match(TokenType::NEWLINE);
@@ -1225,7 +1240,7 @@ std::unique_ptr<ASTNode> Parser::parseClass() {
 
     consume(TokenType::DEDENT, "Expected dedent at end of 'class' block");
 
-    return std::make_unique<ClassNode>(std::move(className), std::move(body), current.line, current.column, this->source);
+    return std::make_unique<ClassNode>(std::move(className), std::move(body), std::move(baseClassName), current.line, current.column, this->source);
 }
 
 std::vector<std::unique_ptr<ASTNode>> Parser::parse() {

@@ -1079,6 +1079,7 @@ public:
 class ClassNode : public ASTNode {
 private:
     std::string name;
+    std::string baseClassName;
     std::vector<std::unique_ptr<ASTNode>> body;
 
 private:
@@ -1087,8 +1088,8 @@ private:
     std::string source;
 
 public:
-    ClassNode(std::string name, std::vector<std::unique_ptr<ASTNode>> body, int currentLine, int currentColumn, std::string source)
-        : name(std::move(name)), body(std::move(body)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
+    ClassNode(std::string name, std::vector<std::unique_ptr<ASTNode>> body, std::string baseClassName, int currentLine, int currentColumn, std::string source)
+        : name(std::move(name)), body(std::move(body)), baseClassName(std::move(baseClassName)), currentLine(currentLine), currentColumn(currentColumn), source(std::move(source)) {}
 
 public:
     const std::string& getClassName() const noexcept {
@@ -1097,6 +1098,10 @@ public:
 
     const std::vector<std::unique_ptr<ASTNode>>& getBody() const noexcept {
         return body;
+    }
+
+    const std::string& getBaseClassName() const noexcept {
+        return baseClassName;
     }
 
     std::string getSource() const noexcept {

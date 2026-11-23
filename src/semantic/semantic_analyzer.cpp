@@ -94,7 +94,8 @@ void SemanticAnalyzer::analyzeUserFuncDefinition(UserFuncNode* userFuncNode) {
 
     FunctionSymbol function;
 
-    function.name = userFuncNode->getFunctionName();
+    function.name = currentScopeName.empty() ? userFuncNode->getFunctionName() : (currentScopeName + "::" + userFuncNode->getFunctionName());
+
     function.paramNames = userFuncNode->getFuncParams();
     function.returnType = userReturnType;
 
@@ -366,7 +367,15 @@ void SemanticAnalyzer::analyzeFunctionCall(FunctionCallNode* functionCallNode) {
         return;
     }
 
-    const FunctionSymbol* func = symbolTable.lookupFunction(funcName);
+    const FunctionSymbol* func = nullptr;
+
+    if (!currentScopeName.empty()) {
+        func = symbolTable.lookupFunction(currentScopeName + "::" + funcName);
+    }
+
+    if (!func) {
+        func = symbolTable.lookupFunction(funcName);
+    }
 
     std::string source = functionCallNode->getSource();
     int currentLine = functionCallNode->getCurrentDeclaredLine();
@@ -398,7 +407,7 @@ void SemanticAnalyzer::analyzeMethodCall(MethodCallNode* methodCallNode) {
     ASTNode* inner = methodCallNode->getMethodCall();
 
     if (!objectName.empty()) {
-        if (objectName != "serial" && !arraysNamesList.contains(objectName) && !stdLibs.contains(objectName) && !userDefinedModulesNames.contains(objectName) && !userIncludedFiles.contains(objectName)) {
+        if (objectName != "serial" && !arraysNamesList.contains(objectName) && !stdLibs.contains(objectName) && !arduinoLibraries.contains(objectName) && !userDefinedModulesNames.contains(objectName) && !userIncludedFiles.contains(objectName)) {
             const VariableSymbol* objVar = symbolTable.lookupVariable(objectName);
 
             if (!objVar) {

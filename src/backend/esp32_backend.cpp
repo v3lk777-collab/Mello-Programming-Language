@@ -1153,6 +1153,7 @@ void ESP32Backend::visit(ModuleNode* moduleNode) {
 
 void ESP32Backend::visit(ClassNode* classNode) {
     const std::string& name = classNode->getClassName();
+    const std::string& baseClass = classNode->getBaseClassName();
     const std::vector<std::unique_ptr<ASTNode>>& body = classNode->getBody();
 
     const int currentLine = classNode->getCurrentDeclaredLine();
@@ -1168,14 +1169,14 @@ void ESP32Backend::visit(ClassNode* classNode) {
     for (const auto& node : body) {
         auto functionNode = dynamic_cast<UserFuncNode*>(node.get());
 
-        if (!functionNode || functionNode->getFunctionName() != "__init__") {
+        if (!functionNode) {
             continue;
         }
 
         const std::vector<std::string>& functionParams = functionNode->getFuncParams();
 
         if (functionParams.empty()) {
-            ErrorHandler::report("Constructor '__init__' has an invalid parameter list", functionNode->getFunctionName(), currentLine, currentColumn, source);
+            ErrorHandler::report("Class method or constructor must have at least one parameter (e.g., 'self')", functionNode->getFunctionName(), currentLine, currentColumn, source);
 
             continue;
         }
@@ -1185,7 +1186,9 @@ void ESP32Backend::visit(ClassNode* classNode) {
         break;
     }
 
-    output << "class " << name << "{\n";
+    bool hasBaseClass = !baseClass.empty();
+
+    output << "class " << name << (hasBaseClass ? " : public " + baseClass + "" : " ") << "{\n";
     output << "public:\n\t";
 
     for (const auto& node : body) {
@@ -1193,7 +1196,7 @@ void ESP32Backend::visit(ClassNode* classNode) {
             if (functionNode->getFunctionName() == "__init__") {
                 const std::vector<std::string>& functionParams = functionNode->getFuncParams();
 
-                if (functionParams.size() > 0) {
+                if (functionParams.size() > 1) {
                     output << "template<";
 
                     for (size_t i = 1; i < functionParams.size(); ++i) {
@@ -1209,7 +1212,7 @@ void ESP32Backend::visit(ClassNode* classNode) {
                     output << "T" << std::to_string(i - 1) << " " << functionParams[i] << (i + 1 < functionParams.size() ? ", " : "");
                 }
 
-                output << ")" << (!functionNode->getBody().empty() ? "{" : ";") << "\n";
+                output << ")" << (!functionNode->getBody().empty() ? " {\n" : " {}\n");
 
                 if (!functionNode->getBody().empty()) {
                     for (const auto& node : functionNode->getBody()) {

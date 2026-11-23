@@ -186,7 +186,7 @@ std::string Compiler::findArduinoBoard() {
     }
 
     if (detectedPort.empty()) {
-        std::cerr << "No board detected! Please connect your Arduino." << "\n";
+        std::cerr << "No board detected! Please connect your board." << "\n";
 
         return "";
     }
@@ -195,7 +195,7 @@ std::string Compiler::findArduinoBoard() {
 }
 
 bool Compiler::uploadCode() {
-    std::cout << "Searching for connected Arduino boards...\n" << std::flush;
+    std::cout << "Searching for connected boards...\n" << std::flush;
 
     std::string detectedPort = findArduinoBoard();
 
