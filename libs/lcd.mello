@@ -1,0 +1,167 @@
+# Mello Standard Library - I2C LCD Driver (16x2 / 20x4 via PCF8574)
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
+use i2c
+
+class LCD:
+    lcd_address = 0x4E
+    lcd_sda = 13
+    lcd_scl = 12
+
+    lcd_cols = 16
+    lcd_rows = 2
+
+    lcd_cursor_col = 0
+    lcd_cursor_row = 0
+
+    lcd_backlight = 0x08
+
+    LCD_ENABLE = 0x04
+    LCD_RS = 0x01
+
+    fn pulse_enable(self, data) -> void:
+        i2c.begin(self.lcd_sda, self.lcd_scl)
+        i2c.write_byte(self.lcd_address)
+        i2c.write_byte(data | self.LCD_ENABLE)
+        i2c.stop()
+        wait_ms(1)
+
+        i2c.begin(self.lcd_sda, self.lcd_scl)
+        i2c.write_byte(self.lcd_address)
+        i2c.write_byte(data & (~self.LCD_ENABLE))
+        i2c.stop()
+        wait_ms(1)
+
+    fn write_four_bits(self, value) -> void:
+        i2c.begin(self.lcd_sda, self.lcd_scl)
+        i2c.write_byte(self.lcd_address)
+        i2c.write_byte(value)
+        i2c.stop()
+
+        self.pulse_enable(value)
+
+    fn send(self, value, mode) -> void:
+        high_nibble = value & 0xF0
+        low_nibble = (value << 4) & 0xF0
+
+        self.write_four_bits(high_nibble | mode | self.lcd_backlight)
+        self.write_four_bits(low_nibble | mode | self.lcd_backlight)
+
+    fn command(self, cmd) -> void:
+        self.send(cmd, 0)
+
+    fn write_char(self, ch) -> void:
+        self.send(ch, self.LCD_RS)
+
+    fn clear(self) -> void:
+        self.command(0x01)
+        wait(2)
+
+        self.lcd_cursor_col = 0
+        self.lcd_cursor_row = 0
+
+    fn home(self) -> void:
+        self.command(0x02)
+        wait(2)
+
+        self.lcd_cursor_col = 0
+        self.lcd_cursor_row = 0
+
+    fn set_cursor(self, col, row) -> void:
+        r = row
+
+        if r >= self.lcd_rows:
+            r = self.lcd_rows - 1
+
+        c = col
+
+        if c >= self.lcd_cols:
+            c = self.lcd_cols - 1
+
+        self.lcd_cursor_col = c
+        self.lcd_cursor_row = r
+
+        row_offsets = [0x00, 0x40, 0x14, 0x54]
+        self.command(0x80 | (c + row_offsets[r]))
+
+    fn backlight_on(self) -> void:
+        self.lcd_backlight = 0x08
+
+        i2c.begin(self.lcd_sda, self.lcd_scl)
+        i2c.write_byte(self.lcd_address)
+        i2c.write_byte(self.lcd_backlight)
+        i2c.stop()
+
+    fn backlight_off(self) -> void:
+        self.lcd_backlight = 0x00
+
+        i2c.begin(self.lcd_sda, self.lcd_scl)
+        i2c.write_byte(self.lcd_address)
+        i2c.write_byte(self.lcd_backlight)
+        i2c.stop()
+
+    fn __init__(self, sda, scl, lcd_rows, lcd_columns) -> void:
+        self.lcd_sda = sda
+        self.lcd_scl = scl
+        self.lcd_rows = lcd_rows
+        self.lcd_cols = lcd_columns
+
+        wait(50)
+
+        self.write_four_bits(0x30)
+        wait(5)
+
+        self.write_four_bits(0x30)
+        wait_ms(150)
+
+        self.write_four_bits(0x30)
+        self.write_four_bits(0x20)
+
+        self.command(0x28)
+        self.command(0x0C)
+        self.command(0x06)
+
+        self.clear()
+
+    fn print(self, text) -> void:
+        i = 0
+
+        while text[i] != 0:
+            ch = text[i]
+
+            if ch == 10:
+                self.lcd_cursor_col = 0
+                self.lcd_cursor_row += 1
+
+                if self.lcd_cursor_row >= self.lcd_rows:
+                    self.lcd_cursor_row = 0
+
+                self.set_cursor(self.lcd_cursor_col, self.lcd_cursor_row)
+
+                i += 1
+                continue
+
+            self.write_char(ch)
+
+            self.lcd_cursor_col += 1
+            i += 1
+
+            if self.lcd_cursor_col >= self.lcd_cols:
+                self.lcd_cursor_col = 0
+                self.lcd_cursor_row += 1
+
+                if self.lcd_cursor_row >= self.lcd_rows:
+                    self.lcd_cursor_row = 0
+
+                self.set_cursor(self.lcd_cursor_col, self.lcd_cursor_row)
+
+    fn println(self, text) -> void:
+        self.print(text)
+
+        self.lcd_cursor_col = 0
+        self.lcd_cursor_row += 1
+
+        if self.lcd_cursor_row >= self.lcd_rows:
+            self.lcd_cursor_row = 0
+
+        self.set_cursor(self.lcd_cursor_col, self.lcd_cursor_row)
