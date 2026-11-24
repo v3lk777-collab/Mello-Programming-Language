@@ -644,7 +644,7 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
     } else if (value.find("atoi(") != std::string::npos || value.find("(int)") != std::string::npos) {
         type = "int";
         integerVariables.insert(name);
-    } else if (!isMethodOrMemberCall && valueType == TokenType::IDENTIFIER && value.find("(") != std::string::npos && value.back() == ')' && !userDefinedFunctionsNames.contains(value.substr(0, value.find("("))) && !userDefinedModulesNames.contains(value.substr(0, value.find("::")))) {
+    } else if (!isMethodOrMemberCall && value.find(' ') == std::string::npos && valueType == TokenType::IDENTIFIER && value.find("(") != std::string::npos && value.back() == ')' && !userDefinedFunctionsNames.contains(value.substr(0, value.find("("))) && !userDefinedModulesNames.contains(value.substr(0, value.find("::")))) {
         std::string className = value.substr(0, value.find("("));
 
         if (!includedLibraries.contains(className)) {
@@ -1267,6 +1267,8 @@ void ESP32Backend::visit(MemberAccessNode* memberAccessNode) {
 
     if (object == currentClassSelfName) {
         output << "this->" << memberName;
+    } else if (userDefinedModulesNames.contains(object)) {
+        output << object << "::" << memberName;
     } else {
         output << object << "." << memberName;
     }

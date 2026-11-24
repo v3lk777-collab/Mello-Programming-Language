@@ -88,11 +88,11 @@ inline const std::unordered_set<std::string> arduinoLibraries = {
 };
 
 const std::unordered_set<std::string> stdProtocol = {
-    "i2c"
+    "i2c", "spi"
 };
 
 const std::unordered_set<std::string> stdLibs = {
-    "math", "random", "i2c"
+    "math", "random", "i2c", "spi"
 };
 
 const std::unordered_set<std::string> libs = {
