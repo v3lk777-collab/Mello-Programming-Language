@@ -4,7 +4,7 @@
 
 <h1 align="center">Mello Programming Language</h1>
 
-<p align="center">A high-performance, indentation-based programming language and transpiler for streamlining embedded systems and IoT development.</p>
+<p align="center">An OOP, high-performance, and indentation-based programming language and transpiler for streamlining embedded systems and IoT development.</p>
 
 <p align="center">Mello compiles directly to native C++ — no runtime interpreter, no virtual machine. Write readable, Python-like code and get the exact binary footprint of hand-written Arduino C++.</p>
 
@@ -58,7 +58,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 The Mello compiler, built from scratch in C++23 and CMake 3.25, operates in five sophisticated phases:
 
 ### Phase A: Lexical Analysis (Lexer)
-The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 31 core keywords: `start`, `loop`, `use`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `fn`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `save_memory`, `read_memory`, `millis`, `wait_ms`, `pin_mode`, `module`, `serial.*` family.
+The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 36 core keywords: `start`, `loop`, `use`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `fn`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `save_memory`, `read_memory`, `millis`, `wait_ms`, `pin_mode`, `module`, `class`, `pulse_in`, `serial.*` family.
 
 ### Phase B: Syntax Analysis (Parser)
 The `Parser` consumes the token stream and validates it against Mello's grammar using recursive-descent parsing, constructing a full Abstract Syntax Tree (AST) with properly nested logical blocks.
@@ -199,7 +199,7 @@ fn loop():
         serial.println(x)
 
     for y in range(2, 10, 2):   # start, stop, and step are all customizable
-        serial.println(i)
+        serial.println(y)
 ```
 
 ### Custom Functions
@@ -251,6 +251,29 @@ fn start():
     number = read_memory("number")
 
     serial.println(number)
+```
+
+### OOP (Classes)
+
+```python
+class Animal:
+    fn sound(self, foo):
+        serial.print(foo)
+
+class Dog(Animal):
+    fn sound(self, boo):
+        serial.print(boo)
+
+class Cat(Animal):
+    fn sound(self, meow):
+        serial.print(meow)
+
+myDog = Dog()
+myCat = Cat()
+
+fn start():
+    myDog.sound("Haw Haw Haw")
+    myCat.sound("Meow Meow Meow")
 ```
 
 ### Standard Library (`use`)
@@ -313,6 +336,55 @@ A software I2C (Bit-Banging) protocol written natively in Mello.
 | `write_byte(byte_val)` | Transmits 8 bits MSB-first and returns `1` if ACK is received, or `0` if NACK |
 | `read_byte(send_ack)` | Reads 8 bits MSB-first and sends an ACK (`1`) or NACK (`0`) bit |
 
+### Libraries (`use`)
+
+#### `lcd`
+
+An I2C character LCD driver (`LCD(sda, scl, lcd_rows, lcd_columns)`) for 16×2 and 20×4 displays via PCF8574.
+
+| Method | Description |
+|---|---|
+| `print(text)` | Prints text at the current cursor position with automatic line wrapping |
+| `println(text)` | Prints text and moves the cursor to the beginning of the next row |
+| `set_cursor(col, row)` | Moves the cursor to a specific column and row |
+| `clear()` / `home()` | Clears the display or resets the cursor to `(0, 0)` |
+| `backlight_on()` / `backlight_off()` | Turns the LCD backlight on or off |
+
+#### `oled`
+
+A 128×64 I2C OLED display driver (`SSD1306(sda, scl)`) with a built-in 5×7 ASCII font.
+
+| Method | Description |
+|---|---|
+| `print(text)` / `println(text)` | Prints text with automatic cursor tracking and page wrapping |
+| `draw_char(c, column, page)` | Draws a single ASCII character at a specific column (`0..122`) and page (`0..7`) |
+| `draw_line(page)` | Draws a horizontal divider line across the specified page (`0..7`) |
+| `set_cursor(page, column)` | Sets the active page (`0..7`) and column (`0..127`) |
+| `clear()` | Clears the entire display buffer and resets the cursor to `(0, 0)` |
+| `on()` / `off()` | Turns the OLED panel on or off |
+| `invert(enabled)` | Inverts display colors (`1` for inverted, `0` for normal) |
+| `set_contrast(value)` | Adjusts screen brightness/contrast (`0..255`) |
+
+#### `servo`
+
+A software PWM servo motor driver (`Servo(pin)`).
+
+| Method | Description |
+|---|---|
+| `write(angle)` | Clamps `angle` to `0..180` degrees and drives the servo to that position |
+| `refresh(angle)` | Sends a single PWM refresh pulse for the given `angle` (`0..180`) |
+| `read_angle()` | Returns the last written servo angle (`int`) |
+
+#### `ultrasonic`
+
+An HC-SR04 ultrasonic distance sensor driver (`Ultrasonic(trig, echo)`).
+
+| Method | Description |
+|---|---|
+| `distance_cm()` | Measures distance in centimeters (`float`), or returns `-1.0` on timeout |
+| `distance_inch()` | Measures distance in inches (`float`), or returns `-1.0` on timeout |
+| `is_closer_than(limit_cm)` | Returns `true` if an object is detected within `limit_cm` centimeters |
+
 ---
 
 ## 5. Code Example
@@ -354,11 +426,11 @@ fn loop():
 
 ### Option A — Prebuilt Windows Binary
 
-A prebuilt `mello.exe` is committed directly to the repository at `build/mello.exe`, so Windows users can skip building entirely:
+A prebuilt `mello.exe` is committed directly to the repository at `cmake/mello.exe`, so Windows users can skip building entirely:
 
 ```bash
 git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
-cd Mello-Programming-Language/build
+cd Mello-Programming-Language/cmake
 ```
 
 ### Option B — Build from Source
@@ -369,7 +441,7 @@ The compiler is built with CMake 3.25 or later and requires a C++23 toolchain (L
 git clone https://github.com/v3lk777-collab/Mello-Programming-Language.git
 cd Mello-Programming-Language
 
-mkdir build && cd build
+mkdir cmake && cd cmake
 cmake ..
 cmake --build .
 ```
@@ -388,6 +460,20 @@ To compile and upload it to the board
 
 ```bash
 mello.exe path\to\main.mello --upload
+```
+
+Supported board targets: `uno` (default), `nano`, and `esp32`
+
+```bash
+mello.exe path\to\main.mello nano --upload
+```
+
+```bash
+mello.exe path\to\main.mello uno --upload
+```
+
+```bash
+mello.exe path\to\main.mello esp32 --upload
 ```
 
 If you only want to transpile without running the compiler backend
