@@ -1,0 +1,45 @@
+# Mello Standard Library - Ultrasonic Distance Sensor Driver (HC-SR04)
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
+class Ultrasonic:
+    trig_pin = 9
+    echo_pin = 10
+
+    fn __init__(self, trig, echo):
+        self.trig_pin = trig
+        self.echo_pin = echo
+
+        pin_mode(self.trig_pin, OUTPUT)
+        pin_mode(self.echo_pin, INPUT)
+        write(self.trig_pin, LOW)
+
+    fn distance_cm(self) -> float:
+        write(self.trig_pin, LOW)
+        wait_ms(2)
+
+        write(self.trig_pin, HIGH)
+        wait_ms(10)
+        write(self.trig_pin, LOW)
+
+        duration = pulse_in(self.echo_pin, HIGH, 30000)
+
+        if duration == 0:
+            return -1.0
+
+        return (float(duration) * 0.0343) / 2.0
+
+    fn distance_inch(self) -> float:
+        distance = self.distance_cm()
+
+        if distance < 0.0:
+            return -1.0
+
+        return distance / 2.54
+
+    fn is_closer_than(self, limit_cm) -> bool:
+        distance = self.distance_cm()
+
+        if distance < 0.0:
+            return false
+
+        return distance <= float(limit_cm)
