@@ -686,7 +686,7 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
         type = inferIntegerType(value);
         integerVariables.insert(name);
     } else {
-        if (isModuleCall) {
+        if (isMethodOrMemberCall) {
             type = "auto";
         } else if (containsFloatVariable(value) || value.find("(float)") != std::string::npos || value.find("atof(") != std::string::npos) {
             type = "float";

@@ -734,6 +734,16 @@ std::unique_ptr<ASTNode> Parser::parseAssignment(const std::string& varName) {
             return it->getToken().value;
         }
 
+        if (auto* it = dynamic_cast<UserFuncNode*>(expression)) {
+            const std::string& returnValue = it->getUserReturnType();
+
+            return returnValue.empty() ? "auto" : returnValue;
+        }
+
+        if (auto* it = dynamic_cast<MethodCallNode*>(expression)) {
+            return "auto";
+        }
+
         return "";
     };
 
