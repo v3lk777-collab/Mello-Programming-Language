@@ -1,0 +1,102 @@
+# Mello Standard Library - MPU6050 Accelerometer & Gyroscope Library
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
+use i2c
+use math
+
+class MPU6050:
+    sda = 20
+    scl = 21
+    addr = 104
+    accel_x = 0.0
+    accel_y = 0.0
+    accel_z = 0.0
+    gyro_x = 0.0
+    gyro_y = 0.0
+    gyro_z = 0.0
+
+    fn __init__(self, sda, scl):
+        self.sda = sda
+        self.scl = scl
+        self.addr = 104
+
+    fn _write_reg(self, reg, val):
+        i2c.begin(self.sda, self.scl)
+        i2c.write_byte(self.addr << 1)
+        i2c.write_byte(reg)
+        i2c.write_byte(val)
+        i2c.stop()
+
+    fn _to_signed_16(self, high_byte, low_byte):
+        if (high_byte & 128) != 0:
+            inv_h = 255 - high_byte
+            inv_l = 255 - low_byte
+
+            return -(((inv_h << 8) | inv_l) + 1)
+
+        return (high_byte << 8) | low_byte
+
+    fn wake_up(self):
+        self._write_reg(107, 0)
+        wait(50)
+
+    fn update(self):
+        i2c.begin(self.sda, self.scl)
+        i2c.write_byte(self.addr << 1)
+        i2c.write_byte(59)
+        i2c.stop()
+
+        i2c.begin(self.sda, self.scl)
+        i2c.write_byte((self.addr << 1) | 1)
+
+        ax_h = i2c.read_byte(1)
+        ax_l = i2c.read_byte(1)
+        ay_h = i2c.read_byte(1)
+        ay_l = i2c.read_byte(1)
+        az_h = i2c.read_byte(1)
+        az_l = i2c.read_byte(1)
+
+        t_h = i2c.read_byte(1)
+        t_l = i2c.read_byte(1)
+
+        gx_h = i2c.read_byte(1)
+        gx_l = i2c.read_byte(1)
+        gy_h = i2c.read_byte(1)
+        gy_l = i2c.read_byte(1)
+        gz_h = i2c.read_byte(1)
+        gz_l = i2c.read_byte(0)
+        i2c.stop()
+
+        self.accel_x = self._to_signed_16(ax_h, ax_l) / 16384.0
+        self.accel_y = self._to_signed_16(ay_h, ay_l) / 16384.0
+        self.accel_z = self._to_signed_16(az_h, az_l) / 16384.0
+
+        self.gyro_x = self._to_signed_16(gx_h, gx_l) / 131.0
+        self.gyro_y = self._to_signed_16(gy_h, gy_l) / 131.0
+        self.gyro_z = self._to_signed_16(gz_h, gz_l) / 131.0
+
+    fn get_accel_x(self):
+        return self.accel_x
+
+    fn get_accel_y(self):
+        return self.accel_y
+
+    fn get_accel_z(self):
+        return self.accel_z
+
+    fn get_gyro_x(self):
+        return self.gyro_x
+
+    fn get_gyro_y(self):
+        return self.gyro_y
+
+    fn get_gyro_z(self):
+        return self.gyro_z
+
+    fn get_tilt_x(self) -> float:
+        clamped = math.clamp(self.accel_x, -1.0, 1.0)
+        return clamped * 90.0
+
+    fn get_tilt_y(self) -> float:
+        clamped = math.clamp(self.accel_y, -1.0, 1.0)
+        return clamped * 90.0
