@@ -385,6 +385,42 @@ An HC-SR04 ultrasonic distance sensor driver (`Ultrasonic(trig, echo)`).
 | `distance_inch()` | Measures distance in inches (`float`), or returns `-1.0` on timeout |
 | `is_closer_than(limit_cm)` | Returns `true` if an object is detected within `limit_cm` centimeters |
 
+#### `dht`
+
+A temperature and humidity sensor driver (`DHT(pin, sensor_type)`) supporting both **DHT11** (`11`) and **DHT22** (`22`) single-wire protocols.
+
+| Method | Description |
+| :--- | :--- |
+| `read_sensor()` | Polls the sensor, verifies the 40-bit checksum, and returns `true` on success or `false` on timeout/error |
+| `get_temperature()` | Returns the last measured temperature in degrees Celsius (`float`) |
+| `get_humidity()` | Returns the last measured relative humidity percentage (`float`) |
+
+#### `motor`
+
+A dual-driver motor control library providing `DCMotor(in1, in2, en)` for H-bridge drivers (L298N/L293D) and `StepperMotor(p1, p2, p3, p4)` for 4-wire stepper motors.
+
+| Method | Description |
+| :--- | :--- |
+| `forward(speed)` | *(DCMotor)* Drives the motor forward at a clamped PWM speed (`0..255`) |
+| `backward(speed)` | *(DCMotor)* Drives the motor in reverse at a clamped PWM speed (`0..255`) |
+| `stop()` | *(DCMotor)* Coasts the motor to a stop by cutting power to all pins |
+| `brake()` | *(DCMotor)* Actively brakes the motor by shorting both motor terminals |
+| `set_speed_delay(delay_ms)` | *(StepperMotor)* Sets the inter-step delay in milliseconds (`> 1`) |
+| `step(steps)` | *(StepperMotor)* Rotates the motor by a signed number of steps (positive for CW, negative for CCW) |
+| `release()` | *(StepperMotor)* De-energizes all coils to prevent idle heating |
+
+#### `mpu6050`
+
+A 6-axis accelerometer and gyroscope driver (`MPU6050(sda, scl)`) built natively on top of Mello's `i2c` and `math` modules.
+
+| Method | Description |
+| :--- | :--- |
+| `wake_up()` | Wakes the MPU6050 from sleep mode by clearing the `PWR_MGMT_1` register |
+| `update()` | Reads and scales all 14 accelerometer and gyroscope bytes in a single I2C burst |
+| `get_accel_x()` / `get_accel_y()` / `get_accel_z()` | Returns linear acceleration in **g** (`±2g` default range) |
+| `get_gyro_x()` / `get_gyro_y()` / `get_gyro_z()` | Returns angular velocity in **degrees/sec** (`±250°/s` default range) |
+| `get_tilt_x()` / `get_tilt_y()` | Returns approximate pitch and roll tilt angles in degrees (`-90.0` to `+90.0`) |
+
 ---
 
 ## 5. Code Example
