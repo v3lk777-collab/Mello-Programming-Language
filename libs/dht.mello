@@ -1,0 +1,69 @@
+# Mello Standard Library - DHT Library
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
+class DHT:
+    pin = 9
+    sensor_type = 11
+    temperature = 0.0
+    humidity = 0.0
+
+    fn __init__(self, pin, sensor_type):
+        self.pin = pin
+        self.sensor_type = sensor_type
+        self.temperature = 0.0
+        self.humidity = 0.0
+
+    fn read_sensor(self):
+        data = [0, 0, 0, 0, 0]
+
+        pin_mode(self.pin, OUTPUT)
+        write(self.pin, LOW)
+
+        if self.sensor_type == 11:
+            wait(18)
+        else:
+            wait(2)
+            
+        write(self.pin, HIGH)
+        pin_mode(self.pin, INPUT_PULLUP)
+
+        if pulse_in(self.pin, HIGH, 1000) == 0:
+            return false
+
+        for i in range(40):
+            duration = pulse_in(self.pin, HIGH, 1000)
+
+            if duration == 0:
+                return false
+            
+            byte_idx = i / 8
+            data[byte_idx] = data[byte_idx] << 1
+
+            if duration > 45:
+                data[byte_idx] = data[byte_idx] | 1
+
+        checksum = (data[0] + data[1] + data[2] + data[3]) & 255
+
+        if data[4] != checksum:
+            return false
+
+        if self.sensor_type == 11:
+            self.humidity = data[0] + (data[1] * 0.1)
+            self.temperature = data[2] + (data[3] * 0.1)
+        else:
+            raw_hum = (data[0] << 8) | data[1]
+            self.humidity = raw_hum * 0.1
+            
+            raw_temp = ((data[2] & 127) << 8) | data[3]
+            self.temperature = raw_temp * 0.1
+
+            if (data[2] & 128) != 0:
+                self.temperature = self.temperature * -1.0
+
+        return true
+
+    fn get_temperature(self):
+        return self.temperature
+
+    fn get_humidity(self):
+        return self.humidity
