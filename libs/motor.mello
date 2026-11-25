@@ -1,0 +1,112 @@
+# Mello Standard Library - Motor Library (DC & Stepper)
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
+use math
+
+class DCMotor:
+    in1 = 0
+    in2 = 0
+    en = 0
+    current_speed = 0
+
+    fn __init__(self, in1, in2, en):
+        self.in1 = in1
+        self.in2 = in2
+        self.en = en
+        self.current_speed = 0
+        pin_mode(self.in1, OUTPUT)
+        pin_mode(self.in2, OUTPUT)
+        pin_mode(self.en, OUTPUT)
+
+    fn forward(self, speed):
+        safe_speed = math.clamp(speed, 0, 255)
+        self.current_speed = safe_speed
+        write(self.in1, HIGH)
+        write(self.in2, LOW)
+        write(self.en, safe_speed)
+
+    fn backward(self, speed):
+        safe_speed = math.clamp(speed, 0, 255)
+        self.current_speed = safe_speed
+        write(self.in1, LOW)
+        write(self.in2, HIGH)
+        write(self.en, safe_speed)
+
+    fn stop(self):
+        self.current_speed = 0
+        write(self.in1, LOW)
+        write(self.in2, LOW)
+        write(self.en, 0)
+
+    fn brake(self):
+        self.current_speed = 0
+        write(self.in1, HIGH)
+        write(self.in2, HIGH)
+        write(self.en, 255)
+
+
+class StepperMotor:
+    p1 = 0
+    p2 = 0
+    p3 = 0
+    p4 = 0
+    step_delay = 5
+    current_step = 0
+
+    fn __init__(self, p1, p2, p3, p4):
+        self.p1 = p1
+        self.p2 = p2
+        self.p3 = p3
+        self.p4 = p4
+        self.step_delay = 5
+        self.current_step = 0
+        pin_mode(self.p1, OUTPUT)
+        pin_mode(self.p2, OUTPUT)
+        pin_mode(self.p3, OUTPUT)
+        pin_mode(self.p4, OUTPUT)
+
+    fn set_speed_delay(self, delay_ms):
+        if delay_ms > 1:
+            self.step_delay = delay_ms
+
+    fn _apply_step(self, step_idx):
+        if step_idx == 0:
+            write(self.p1, HIGH)
+            write(self.p2, LOW)
+            write(self.p3, LOW)
+            write(self.p4, LOW)
+        elif step_idx == 1:
+            write(self.p1, LOW)
+            write(self.p2, HIGH)
+            write(self.p3, LOW)
+            write(self.p4, LOW)
+        elif step_idx == 2:
+            write(self.p1, LOW)
+            write(self.p2, LOW)
+            write(self.p3, HIGH)
+            write(self.p4, LOW)
+        else:
+            write(self.p1, LOW)
+            write(self.p2, LOW)
+            write(self.p3, LOW)
+            write(self.p4, HIGH)
+
+    fn step(self, steps):
+        if steps > 0:
+            for i in range(steps):
+                self._apply_step(self.current_step)
+                self.current_step = (self.current_step + 1) % 4
+                wait(self.step_delay)
+        elif steps < 0:
+            count = steps * -1
+
+            for i in range(count):
+                self.current_step = (self.current_step + 3) % 4
+                self._apply_step(self.current_step)
+                wait(self.step_delay)
+
+    fn release(self):
+        write(self.p1, LOW)
+        write(self.p2, LOW)
+        write(self.p3, LOW)
+        write(self.p4, LOW)
