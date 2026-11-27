@@ -1,0 +1,76 @@
+# Mello Standard Library - Dual-Axis Analog Joystick Driver (KY-023)
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
+use math
+use platform
+
+class Joystick:
+    vrx_pin = A0
+    vry_pin = A1
+    sw_pin = 2
+
+    center_x = 512
+    center_y = 512
+    deadzone = 40
+
+    fn __init__(self, vrx, vry, sw):
+        self.vrx_pin = vrx
+        self.vry_pin = vry
+        self.sw_pin = sw
+
+        pin_mode(self.vrx_pin, INPUT)
+        pin_mode(self.vry_pin, INPUT)
+        pin_mode(self.sw_pin, INPUT_PULLUP)
+
+    fn calibrate(self) -> void:
+        self.center_x = read(self.vrx_pin)
+        self.center_y = read(self.vry_pin)
+
+    fn set_deadzone(self, dz) -> void:
+        if dz >= 0:
+            self.deadzone = dz
+
+    fn read_raw_x(self) -> int:
+        return read(self.vrx_pin)
+
+    fn read_raw_y(self) -> int:
+        return read(self.vry_pin)
+
+    fn get_x(self) -> int:
+        raw = read(self.vrx_pin)
+        diff = raw - self.center_x
+
+        if math.absolute(float(diff)) <= float(self.deadzone):
+            return 0
+
+        if diff > 0:
+            return scale(raw, self.center_x + self.deadzone, platform.get_adc_max(), 0, 100)
+        else:
+            return scale(raw, 0, self.center_x - self.deadzone, -100, 0)
+
+    fn get_y(self) -> int:
+        raw = read(self.vry_pin)
+        diff = raw - self.center_y
+
+        if math.absolute(float(diff)) <= float(self.deadzone):
+            return 0
+
+        if diff > 0:
+            return scale(raw, self.center_y + self.deadzone, platform.get_adc_max(), 0, 100)
+        else:
+            return scale(raw, 0, self.center_y - self.deadzone, -100, 0)
+
+    fn is_right(self) -> bool:
+        return self.get_x() > 50
+
+    fn is_left(self) -> bool:
+        return self.get_x() < -50
+
+    fn is_up(self) -> bool:
+        return self.get_y() > 50
+
+    fn is_down(self) -> bool:
+        return self.get_y() < -50
+
+    fn is_pressed(self) -> bool:
+        return read(self.sw_pin) == LOW
