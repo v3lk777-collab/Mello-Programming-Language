@@ -1,0 +1,23 @@
+# Mello Standard Library - Hardware Platform Detection
+# Copyright (C) 2026 Mohammed Tamer Mohammed Ahmed El-Azab
+
+fn is_esp32() -> bool:
+    x = 1
+    y = x << 20
+
+    return y > 0
+
+fn is_avr() -> bool:
+    return not is_esp32()
+
+fn get_name() -> str:
+    if is_esp32():
+        return "ESP32"
+
+    return "AVR"
+
+fn get_adc_max() -> int:
+    if is_esp32():
+        return 4095
+
+    return 1023
