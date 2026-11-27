@@ -247,8 +247,8 @@ fn start():
 
 ```python
 fn start():
-    save_memory("number", 5)
-    number = read_memory("number")
+    save_memory(0, 5)
+    number = read_memory(0)
 
     serial.println(number)
 ```
@@ -257,16 +257,16 @@ fn start():
 
 ```python
 class Animal:
-    fn sound(self, foo):
-        serial.print(foo)
+    fn sound(self, sound):
+        serial.print(sound)
 
 class Dog(Animal):
-    fn sound(self, boo):
-        serial.print(boo)
+    fn sound(self, sound):
+        serial.print(sound)
 
 class Cat(Animal):
-    fn sound(self, meow):
-        serial.print(meow)
+    fn sound(self, sound):
+        serial.print(sound)
 
 myDog = Dog()
 myCat = Cat()
@@ -420,6 +420,30 @@ A 6-axis accelerometer and gyroscope driver (`MPU6050(sda, scl)`) built natively
 | `get_accel_x()` / `get_accel_y()` / `get_accel_z()` | Returns linear acceleration in **g** (`±2g` default range) |
 | `get_gyro_x()` / `get_gyro_y()` / `get_gyro_z()` | Returns angular velocity in **degrees/sec** (`±250°/s` default range) |
 | `get_tilt_x()` / `get_tilt_y()` | Returns approximate pitch and roll tilt angles in degrees (`-90.0` to `+90.0`) |
+
+#### `platform`
+
+A runtime hardware architecture detection library written natively in Mello, allowing drivers to adapt automatically between 16-bit AVR and 32-bit ESP32 microcontrollers.
+
+| Function | Description |
+|---|---|
+| `is_esp32()` | Returns `true` if running on a 32-bit ESP32 target |
+| `is_avr()` | Returns `true` if running on a 16-bit AVR (Arduino Uno/Nano) target |
+| `get_name()` | Returns `"ESP32"` or `"AVR"` as a string |
+| `get_adc_max()` | Returns the board's maximum ADC resolution (`4095` for ESP32, `1023` for AVR) |
+
+#### `joystick`
+
+A dual-axis analog joystick driver (`Joystick(vrx, vry, sw)`) with automatic center calibration, deadzone filtering, and cross-platform ADC scaling via `platform`.
+
+| Method | Description |
+|---|---|
+| `calibrate()` | Captures the resting center values for both X and Y axes |
+| `set_deadzone(dz)` | Sets the neutral deadzone threshold around the center position |
+| `get_x()` / `get_y()` | Returns calibrated, deadzone-filtered axis positions scaled from `-100` to `+100` |
+| `read_raw_x()` / `read_raw_y()` | Returns raw ADC readings (`0..1023` on AVR, `0..4095` on ESP32) |
+| `is_up()` / `is_down()` / `is_left()` / `is_right()` | Directional helper methods returning `true` when pushed past 50% |
+| `is_pressed()` | Returns `true` when the built-in push button (`SW`) is pressed |
 
 ---
 
