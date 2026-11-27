@@ -55,7 +55,7 @@ Programming microcontrollers typically forces a choice between two extremes:
 
 ## 3. Under the Hood: Compiler Architecture
 
-The Mello compiler, built from scratch in C++23 and CMake 3.25, operates in five sophisticated phases:
+The Mello compiler, built from scratch in C++23 and CMake 3.25, operates in five main phases:
 
 ### Phase A: Lexical Analysis (Lexer)
 The `Lexer` scans the `.mello` file character by character, handling Python-like indent/dedent tracking via a stack-based algorithm, and tokenizes all 36 core keywords: `start`, `loop`, `use`, `wait`, `turn_on`, `turn_off`, `if`, `elif`, `else`, `write`, `read`, `scale`, `fn`, `return`, `and`, `or`, `not`, `every`, `while`, `for`, `repeat`, `on_press`, `toggle`, `break`, `continue`, `range`, `in`, `pass`, `save_memory`, `read_memory`, `millis`, `wait_ms`, `pin_mode`, `module`, `class`, `pulse_in`, `serial.*` family.
@@ -66,11 +66,15 @@ The `Parser` consumes the token stream and validates it against Mello's grammar 
 ### Phase C: Semantic Analysis & Auto-Routing
 During AST traversal, Mello resolves variable scoping and detects auto-pin assignments. A pin referenced by `turn_on()`, `turn_off()`, or `toggle()` is added to the `outputPins` set; a pin referenced by `on_press` is added to `inputPins` — both are used to auto-generate the correct `pinMode()` calls in `setup()`.
 
-### Phase D: Code Generation (Transpiler)
-Every AST node (`OnPressNode`, `EveryNode`, `VarAssignNode`, ...) implements its own `toCpp()` method, recursively emitting optimized, static C++ — no dynamic allocation, no hidden runtime cost.
+### Phase D: Target-Specific Code Generation (Backends)
+The compiler selects a backend according to the requested target:
+- **`AVRBackend`** generates C++ code for AVR-based boards such as the Arduino Uno and Nano.
+- **`ESP32Backend`** generates C++ code for ESP32-based boards.
 
-### Phase E: Automated Pipeline
-Mello runs `clang-format` (Google style) on the generated source, invokes `arduino-cli` against the `arduino:avr:uno`, `arduino:avr:nano`, or `esp32:esp32:esp32` board profile with `-O3 -flto` optimization to produce a `.hex` / `.bin` binary, and can flash it directly to a connected board by passing `--upload`.
+Each backend handles target-specific code generation directly from the compiler's AST, keeping hardware-specific generation logic separate from the language's frontend and making it easier to support additional embedded platforms.
+
+### Phase E: Automated Build Pipeline
+Mello formats the generated source with `clang-format` (Google style), then invokes `arduino-cli` with the selected board profile (`arduino:avr:uno`, `arduino:avr:nano`, or `esp32:esp32:esp32`) and the configured optimization flags to produce a `.hex` / `.bin` binary. It can also flash the compiled program to a connected board by passing `--upload`.
 
 ---
 
