@@ -286,9 +286,14 @@ void AVRBackend::visit(BuiltInFunctionCallNode* builtInFunctionCallNode) {
         }
     } else if (functionName == "read") {
         std::string pin = argsStr[0];
+        std::string lookupName = pin;
 
-        if (variablesValues.contains(pin)) {
-            std::string pinValue = variablesValues[pin];
+        if (lookupName.starts_with("this->")) {
+            lookupName = lookupName.substr(6);
+        }
+
+        if (variablesValues.contains(lookupName)) {
+            std::string pinValue = variablesValues[lookupName];
 
             if (pinValue.length() >= 2 && pinValue[0] == 'A' && isdigit(pinValue[1])) {
                 output << "analogRead(" << pin << ")";
@@ -654,29 +659,7 @@ void AVRBackend::visit(VarAssignNode* varAssignNode) {
         funcCall = dynamic_cast<SerialFunctionsCallNode*>(methodNode->getMethodCall());
     }
 
-    if (funcCall) {
-        if (funcCall->getFunctionName() == "read") {
-            type = "char";
-            value = evaluateNode(funcCall);
-
-            while (!value.empty() && value.back() == ';') {
-                value.pop_back();
-            }
-        } else if (funcCall->getFunctionName() == "readStringUntil") {
-            type = "String";
-            value = evaluateNode(funcCall);
-
-            while (!value.empty() && value.back() == ';') {
-                value.pop_back();
-            }
-        } else if (funcCall->getVariableName() == "read_memory") {
-            type = "float";
-
-            floatVariables.insert(name);
-        } else if (funcCall->getFunctionName() == "millis") {
-            type = "long int";
-        }
-    } else if (value.find("atof(") != std::string::npos || value.find("(float)") != std::string::npos) {
+    if (value.find("atof(") != std::string::npos || value.find("(float)") != std::string::npos) {
         type = "float";
         floatVariables.insert(name);
     } else if (value.find("atoi(") != std::string::npos || value.find("(int)") != std::string::npos) {

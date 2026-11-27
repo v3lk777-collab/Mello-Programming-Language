@@ -290,7 +290,8 @@ void ESP32Backend::visit(BuiltInFunctionCallNode* builtInFunctionCallNode) {
         }
     } else if (functionName == "read") {
         std::string pin = argsStr[0];
-        std::string checkPin = variablesValues.contains(pin) ? variablesValues[pin] : pin;
+        std::string lookupName = pin.starts_with("this->") ? pin.substr(6) : pin;
+        std::string checkPin = variablesValues.contains(lookupName) ? variablesValues[lookupName] : lookupName;
 
         bool isEsp32Analog = (checkPin == "32" || checkPin == "33" || checkPin == "34" || checkPin == "35" || checkPin == "36" || checkPin == "39");
 
@@ -616,29 +617,7 @@ void ESP32Backend::visit(VarAssignNode* varAssignNode) {
         funcCall = dynamic_cast<SerialFunctionsCallNode*>(methodNode->getMethodCall());
     }
 
-    if (funcCall) {
-        if (funcCall->getFunctionName() == "read") {
-            type = "char";
-            value = evaluateNode(funcCall);
-
-            while (!value.empty() && value.back() == ';') {
-                value.pop_back();
-            }
-        } else if (funcCall->getFunctionName() == "readStringUntil") {
-            type = "String";
-            value = evaluateNode(funcCall);
-
-            while (!value.empty() && value.back() == ';') {
-                value.pop_back();
-            }
-        } else if (funcCall->getVariableName() == "read_memory") {
-            type = "float";
-
-            floatVariables.insert(name);
-        } else if (funcCall->getFunctionName() == "millis") {
-            type = "long int";
-        }
-    } else if (value.find("atof(") != std::string::npos || value.find("(float)") != std::string::npos) {
+    if (value.find("atof(") != std::string::npos || value.find("(float)") != std::string::npos) {
         type = "float";
         floatVariables.insert(name);
     } else if (value.find("atoi(") != std::string::npos || value.find("(int)") != std::string::npos) {
